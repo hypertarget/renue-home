@@ -1,18 +1,21 @@
 # Renue Home — renuehome.com
 
-Branded home-improvement lead-generation site. Clean white theme, Renue Home brand (logo, green→teal gradient `#14B8A6`→`#7ED957`, navy `#0F1A23`, Montserrat). Config-driven multi-step funnel (service → ZIP → timeline → homeowner → address → contact) with consent, trust scaffolding, value props, and a thank-you/pay-per-call screen.
+Multi-page home-services brand + conversion site. **Homepage = brand/legitimacy showpiece. Vertical pages = direct-response quiz funnels.** Clean white theme, Renue Home brand (green→teal `#14B8A6`→`#7ED957`, navy `#0F1A23`, Montserrat).
 
 ## Structure
-- `index.html` — the whole site + funnel (static, edit `CONFIG` and `STEPS` at the bottom of the file).
-- `functions/api/submit.js` — Cloudflare Pages Function: the lead endpoint (validates + ping-post stub + returns call number).
+- `index.html` — brand homepage (hero, category grid → funnels, how-it-works, why-choose, disclaimer). Not a hard funnel.
+- `styles.css` — shared design system.
+- `funnel.js` — shared engine: injects header/footer/sticky-mobile-CTA on every page; renders the config-driven quiz on vertical pages (progress, easy-questions-first, contact-last, TCPA consent, double-submit guard, tel/email/numeric inputs, validation, success-hidden-until-submit, friendly error on failure).
+- `verticals.js` — all vertical funnel content (headlines, step flows, FAQs). Edit here to change any funnel.
+- Vertical pages (thin shells loading the engine): `windows, bathroom, roofing, hvac, kitchen, flooring, solar, gutters, painting, other` `.html` → served at `/windows`, `/bathroom`, etc.
+- Legal: `privacy.html`, `terms.html`, `ccpa.html`, `do-not-sell.html`.
+- `functions/api/submit.js` — Cloudflare Pages Function: lead endpoint (validate + ping-post stub + returns pay-per-call number).
 
-## Deploy (Cloudflare Pages)
-Connected to this GitHub repo → every push to `main` auto-deploys. No build step (static + Pages Functions). Build command: *(none)*; Output directory: `/`.
+## Configure (no build step; static + Pages Functions)
+- **Phone / pay-per-call:** set `window.RENUE_PHONE` and `window.RENUE_NONCONSENT_PHONE` in each page's inline `<script>` (or globally) to show real "Call Now" + non-consent line. Empty = placeholder UI.
+- **Backend / pixels:** Cloudflare Pages → Settings → Environment variables: `CALL_NUMBER`, `LEAD_POST_URL`, `LEAD_POST_API_KEY`, `LEAD_BUYER_IDS`, `LEAD_MAX_BUYERS`. Add Google Ads / Meta pixel IDs in the page heads when ready.
 
-## Environment variables (Pages → Settings → Environment variables)
-`CALL_NUMBER` (Ringba/Retreaver), `LEAD_POST_URL`, `LEAD_POST_API_KEY`, `LEAD_BUYER_IDS`, `LEAD_MAX_BUYERS`, plus pixel IDs when ready.
-
-## Editing live
-Change copy/questions/services in `index.html` (`STEPS`, `SERVICES`, `CONFIG`), commit, push — Cloudflare rebuilds in ~30s.
+## Edit live
+Change copy/questions/FAQs in `verticals.js`, or homepage in `index.html`, commit to `main` → Cloudflare Pages auto-deploys in ~30s.
 
 Fresh Starts. Better Homes.
