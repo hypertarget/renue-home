@@ -13,14 +13,28 @@ export async function onRequestPost({ request, env }) {
 
   // basic server-side validation
   const phoneDigits = (lead.phone || "").replace(/\D/g, "");
-  if (!lead.email || phoneDigits.length < 10 || !lead.zip) {
-    return json({ ok: false, message: "Missing required fields" }, 400);
+  const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(lead.email || "");
+  if (!emailOk || phoneDigits.length < 10 || !/^\d{5}$/.test(lead.zip || "")) {
+    return json({ ok: false, message: "Missing or invalid required fields" }, 400);
   }
 
-  // INTEGRATE: fraud score (Anura/eHawk), phone/email verification, TrustedForm + Jornaya capture.
-  // INTEGRATE: ping-post to LEAD_POST_URL with LEAD_BUYER_IDS (Boberdoo/LeadProsper/Phonexa).
+  // Normalized lead record (includes consent proof for TCPA + buyer transmission).
+  const record = {
+    first: lead.first, last: lead.last, email: lead.email, phone: phoneDigits,
+    zip: lead.zip, address: lead.address || "", vertical: lead.vertical || "",
+    city: lead.city || "", answers: lead,                       // full quiz answers
+    consent: lead.consent === true, consentText: lead.consentText || "",
+    trustedFormCertUrl: lead.xxTrustedFormCertUrl || "",        // tamper-proof consent cert
+    trustedFormPingUrl: lead.xxTrustedFormPingUrl || "",
+    pageUrl: lead.pageUrl || "", ip: request.headers.get("CF-Connecting-IP") || "",
+    userAgent: request.headers.get("User-Agent") || "", ts: Date.now(),
+  };
+
+  // INTEGRATE: fraud score (Anura/eHawk), phone/email verification.
+  // INTEGRATE: ping-post to LEAD_POST_URL with LEAD_BUYER_IDS (Boberdoo/LeadProsper/Phonexa),
+  //            forwarding record.trustedFormCertUrl so buyers can claim the consent cert.
   if (env && env.LEAD_POST_URL && env.LEAD_POST_API_KEY) {
-    // await fetch(env.LEAD_POST_URL, { method:"POST", headers:{Authorization:`Bearer ${env.LEAD_POST_API_KEY}`}, body: JSON.stringify(lead) });
+    // await fetch(env.LEAD_POST_URL, { method:"POST", headers:{Authorization:`Bearer ${env.LEAD_POST_API_KEY}`}, body: JSON.stringify(record) });
   }
 
   const callNumber = (env && env.CALL_NUMBER) || "";
