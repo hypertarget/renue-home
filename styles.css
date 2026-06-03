@@ -161,6 +161,9 @@ h1.head{font-size:clamp(30px,5vw,50px);line-height:1.07;font-weight:800;margin:1
 .legal p,.legal li{color:#3a444e;font-size:15px}
 .legal a{color:var(--teal);font-weight:600}
 .disclaimer-box{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:18px 20px;font-size:13.5px;color:var(--muted)}
+.partners-list{columns:3 210px;column-gap:26px;margin:18px 0;padding:0;list-style:none}
+.partners-list li{break-inside:avoid;font-size:13px;color:#3a444e;padding:4px 0;border-bottom:1px solid #f0f2f5}
+@media(max-width:600px){ .partners-list{columns:2 140px} }
 
 /* Footer */
 footer.site{background:var(--navy);color:#cdd6df;padding:34px 0 26px;margin-top:10px}

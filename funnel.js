@@ -43,7 +43,7 @@
       : 'To request information without consenting to automated calls or texts, call (XXX) XXX-XXXX.';
     f.innerHTML='<div class="wrap"><div class="ftop">'+
       '<div class="fbrand">'+LOGO+'<span><span class="r">RENUE</span> <span class="h">HOME</span></span></div>'+
-      '<nav><a href="/privacy">Privacy Policy</a><a href="/terms">Terms</a><a href="/ccpa">CCPA</a><a href="/do-not-sell">Do Not Sell or Share My Personal Information</a></nav>'+
+      '<nav><a href="/privacy">Privacy Policy</a><a href="/terms">Terms</a><a href="/ccpa">CCPA</a><a href="/partners">Marketing Partners</a><a href="/do-not-sell">Do Not Sell or Share My Personal Information</a></nav>'+
       '</div>'+
       '<p class="disc">Renue Home is an advertising marketplace and matching service for homeowners seeking home improvement services. Renue Home is not a provider, manufacturer, installer, or contractor. Information submitted may be shared with independent home improvement professionals or companies in your area. Renue Home does not endorse, warrant, or guarantee the services or products of any individual company. '+nonconsent+'</p>'+
       '<div class="copy">&copy; '+new Date().getFullYear()+' Renue Home &middot; Fresh Starts. Better Homes. &middot; <span class="dom">RENUEHOME.COM</span></div>'+
@@ -142,7 +142,7 @@
          '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" value="'+(data.email||'')+'"></div>'+
          '<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" value="'+(data.phone||'')+'"></div>'+
          '<button class="btn btn-grad btn-lg" type="button" data-submit="1">Get My Free Quote &rsaquo;</button>'+
-         '<p class="consent">By submitting, I consent to receive calls, texts, and emails from Renue Home and/or its home improvement partners (up to '+BUYER_CAP+' companies) at the number/email provided, including by automated technology or prerecorded/artificial voice, even if I am on a Do Not Call list. Consent is not a condition of purchase. Message/data rates may apply. I can revoke consent at any time. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms</a>.</p>';
+         '<p class="consent">By submitting, I consent to receive calls, texts, and emails from Renue Home and/or its <a href="/partners">home improvement partners</a> (up to '+BUYER_CAP+' companies) at the number/email provided, including by automated technology or prerecorded/artificial voice, even if I am on a Do Not Call list. Consent is not a condition of purchase. Message/data rates may apply. I can revoke consent at any time. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms</a>.</p>';
     }
 
     h += '<div class="err" id="err"></div>'+
