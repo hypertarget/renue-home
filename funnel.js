@@ -17,9 +17,13 @@
   // so its SDK can populate it. These live on <body> and survive step re-renders).
   function ensureTFFields(){
     if(!TRUSTEDFORM || document.getElementById("xxTrustedFormCertUrl")) return;
+    // TrustedForm's SDK only writes the cert URL into fields that live inside a <form>.
+    var f=document.createElement("form"); f.id="tf-cert-form"; f.style.display="none";
+    f.setAttribute("aria-hidden","true"); f.onsubmit=function(){return false;};
     ["xxTrustedFormCertUrl","xxTrustedFormPingUrl"].forEach(function(n){
-      var i=document.createElement("input"); i.type="hidden"; i.name=n; i.id=n; document.body.appendChild(i);
+      var i=document.createElement("input"); i.type="hidden"; i.name=n; i.id=n; f.appendChild(i);
     });
+    document.body.appendChild(f);
   }
 
   function injectTrustedForm(){
