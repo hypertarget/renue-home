@@ -44,7 +44,14 @@ header.site{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);ba
 .site nav a.navlink:hover{color:var(--ink)}
 .site .phone{font-weight:800;color:var(--navy);font-size:15px;white-space:nowrap}
 .site .phone small{display:block;font-weight:600;font-size:10px;color:var(--muted);letter-spacing:.5px}
-@media(max-width:780px){ .site nav .navlink{display:none} .site .phone{font-size:14px} }
+@media(max-width:880px){
+  /* On phones the bottom sticky bar carries Call + Quote, so keep the header to just the logo (prevents the top-right overflow). */
+  .site nav .navlink{display:none}
+  .site nav .phone{display:none}
+  .site nav .btn-grad{display:none}
+  .site .bar{height:60px}
+  .logo svg{width:38px;height:38px}
+}
 
 /* Hero */
 .hero{position:relative;overflow:hidden;padding:54px 0 34px}
@@ -172,6 +179,9 @@ footer .dom{color:var(--green);font-weight:800;letter-spacing:1px}
 .sticky{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;gap:10px;padding:10px 12px;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(15,26,35,.08)}
 .sticky .btn{flex:1;padding:14px 10px;font-size:15px}
 .sticky .btn-call{background:#fff;border:1.5px solid var(--teal);color:var(--teal)}
+/* Once the user engages with the quiz, hide the hovering CTA bar so it doesn't block the form */
+body.quiz-engaged .sticky{display:none!important}
+body.quiz-engaged{padding-bottom:0!important}
 @media(max-width:780px){ .sticky{display:flex} body{padding-bottom:74px} section{padding:40px 0} .sec-h{font-size:24px} .hero .eyebrow{font-size:11px} }
 
 /* utilities */

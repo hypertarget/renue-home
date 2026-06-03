@@ -85,6 +85,8 @@
     RF.active = true; RF.cfg = cfg;
     try{ history.replaceState({rf:0}, ""); }catch(e){}
     renderStep(cfg, 0, {});
+    var qc = document.getElementById("quiz");
+    if(qc) qc.addEventListener("focusin", function(){ document.body.classList.add("quiz-engaged"); });
     wireFaq();
   }
 
@@ -150,7 +152,7 @@
     // wire
     var back = card.querySelector("[data-back]"); if(back) back.onclick=function(){ if(history.state && typeof history.state.rf==="number" && history.state.rf>0){ history.back(); } else { renderStep(cfg, idx-1, data); } };
     var errEl = function(m){ var e=document.getElementById("err"); if(e) e.textContent=m||""; };
-    var next = function(nd){ var d=Object.assign({}, data, nd||{}); if(idx<total-1){ try{ history.pushState({rf:idx+1}, ""); }catch(e){} renderStep(cfg, idx+1, d); } else doSubmit(cfg, d); };
+    var next = function(nd){ document.body.classList.add("quiz-engaged"); var d=Object.assign({}, data, nd||{}); if(idx<total-1){ try{ history.pushState({rf:idx+1}, ""); }catch(e){} renderStep(cfg, idx+1, d); } else doSubmit(cfg, d); };
 
     if(step.type==="single"){
       Array.prototype.forEach.call(card.querySelectorAll("[data-pick]"), function(b){

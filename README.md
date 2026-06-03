@@ -18,4 +18,16 @@ Multi-page home-services brand + conversion site. **Homepage = brand/legitimacy 
 ## Edit live
 Change copy/questions/FAQs in `verticals.js`, or homepage in `index.html`, commit to `main` → Cloudflare Pages auto-deploys in ~30s.
 
+## Mobile testing (catch phone-only layout bugs)
+`mobile-test.mjs` renders every page + every funnel step at real iPhone/Pixel viewports with headless Chromium, screenshots them, and fails on horizontal overflow, off-screen elements, or the sticky CTA overlapping the form.
+
+```bash
+npm i -D playwright && npx playwright install chromium
+# against the live site:
+node mobile-test.mjs https://renuehome.com
+# or a local copy:
+python3 -m http.server 8080 &  node mobile-test.mjs http://localhost:8080
+```
+Screenshots land in `./mobile-shots/`. Run it before each deploy (or wire into CI) — it would have caught the header overflow and the sticky-bar-over-form issues automatically.
+
 Fresh Starts. Better Homes.
