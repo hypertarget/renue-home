@@ -9,16 +9,20 @@ import { readdirSync, writeFileSync } from "fs";
 const ORIGIN = "https://renuehome.com";
 const today = new Date().toISOString().slice(0, 10);
 
+// Old legal slugs are now redirect stubs — keep them out of the sitemap.
+const EXCLUDE = new Set(["/privacy", "/terms", "/ccpa", "/do-not-sell"]);
 const files = readdirSync(".").filter((f) => f.endsWith(".html"));
-const routes = files.map((f) => {
-  const r = f.replace(/\.html$/, "");
-  return r === "index" ? "/" : "/" + r;
-});
+const routes = files
+  .map((f) => {
+    const r = f.replace(/\.html$/, "");
+    return r === "index" ? "/" : "/" + r;
+  })
+  .filter((r) => !EXCLUDE.has(r));
 
 // Priority: home highest, core verticals high, city/legal lower.
 const CORE = new Set(["/", "/bathroom", "/windows", "/roofing", "/hvac", "/kitchen",
   "/flooring", "/solar", "/gutters", "/painting", "/siding", "/plumbing", "/water-damage", "/other", "/locations"]);
-const LEGAL = new Set(["/privacy", "/terms", "/ccpa", "/do-not-sell", "/partners"]);
+const LEGAL = new Set(["/privacy-policy", "/terms-and-conditions", "/california-privacy-notice", "/do-not-sell-or-share", "/partners"]);
 
 function priority(r) {
   if (r === "/") return "1.0";

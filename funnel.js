@@ -88,7 +88,7 @@
       : 'To request information without consenting to automated calls or texts, call (XXX) XXX-XXXX.';
     f.innerHTML='<div class="wrap"><div class="ftop">'+
       '<div class="fbrand">'+LOGO+'<span><span class="r">RENUE</span> <span class="h">HOME</span></span></div>'+
-      '<nav><a href="/locations">Service Areas</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms</a><a href="/ccpa">CCPA</a><a href="/partners">Marketing Partners</a><a href="/do-not-sell">Do Not Sell or Share My Personal Information</a></nav>'+
+      '<nav><a href="/locations">Service Areas</a><a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a><a href="/california-privacy-notice">California Privacy Notice</a><a href="/partners">Marketing Partners</a><a href="/do-not-sell-or-share">Do Not Sell or Share My Personal Information</a></nav>'+
       '</div>'+
       '<p class="disc">Renue Home is an advertising marketplace and matching service for homeowners seeking home improvement services. Renue Home is not a provider, manufacturer, installer, or contractor. Information submitted may be shared with independent home improvement professionals or companies in your area. Renue Home does not endorse, warrant, or guarantee the services or products of any individual company. '+nonconsent+'</p>'+
       '<div class="copy">&copy; '+new Date().getFullYear()+' Renue Home &middot; Fresh Starts. Better Homes. &middot; <span class="dom">RENUEHOME.COM</span></div>'+
@@ -115,10 +115,10 @@
     var city = window.RENUE_CITY || null; // {name:"Austin, TX", metro:"Austin", state:"TX"}
 
     var headline = cfg.headline, sub = cfg.sub, title = cfg.title;
-    var eyebrow = SHIELD+' Trusted • Local • Renue';
+    var eyebrow = SHIELD+' Local Pros • Free • No Obligation';
     if(city){
       headline = cfg.name+' Pros in '+city.metro+', '+city.state;
-      sub = 'Compare free, no-obligation '+cfg.word+' quotes from vetted '+city.metro+'-area professionals. Takes under a minute.';
+      sub = 'Compare free, no-obligation '+cfg.word+' quotes from '+city.metro+'-area professionals serving your area. Takes under a minute.';
       title = cfg.name+' Quotes in '+city.metro+', '+city.state+' — Renue Home';
       eyebrow = SHIELD+' Serving '+city.metro+' & nearby areas';
     }
@@ -152,14 +152,14 @@
     var faqs = (cfg.faqs||[]).map(function(f){
       return '<details><summary>'+f.q+'</summary><div class="a">'+f.a+'</div></details>';
     }).join('');
-    var benefits = (cfg.benefits||["Free, no-obligation quotes","Vetted local professionals","Fast matching","Compare multiple options","Simple, transparent process","Multiple project types"]).map(function(b){
+    var benefits = (cfg.benefits||["Free, no-obligation quotes","Local professionals serving your area","Fast matching","Compare multiple options","Simple, transparent process","Multiple project types"]).map(function(b){
       return '<div class="benefit">'+CK+'<span>'+b+'</span></div>';
     }).join('');
     return '<section><div class="wrap center"><div class="seclabel">How it works</div>'+
         '<h2 class="sec-h">Three simple steps</h2>'+
         '<div class="steps" style="margin-top:24px">'+
           '<div class="step"><div class="num">1</div><h3>Tell us about your project</h3><p>Answer a few quick questions about your '+cfg.word+' project.</p></div>'+
-          '<div class="step"><div class="num">2</div><h3>Get matched with local pros</h3><p>We connect you with vetted professionals serving '+area+'.</p></div>'+
+          '<div class="step"><div class="num">2</div><h3>Get matched with local pros</h3><p>We connect you with local professionals serving '+area+'.</p></div>'+
           '<div class="step"><div class="num">3</div><h3>Compare &amp; choose</h3><p>Review your options and pick what works for you. No obligation.</p></div>'+
         '</div></div></section>'+
       seoHtml(cfg, city)+
@@ -248,7 +248,8 @@
          '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" data-tf-element-role="consent-grantor-email" value="'+(data.email||'')+'"></div>'+
          '<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
          '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit">Get My Free Quote &rsaquo;</button>'+
-         '<p class="consent" data-tf-element-role="consent-language">By submitting, I consent to receive <span data-tf-element-role="contact-method">calls, texts, and emails</span> from <span data-tf-element-role="consent-advertiser-name">Renue Home and/or its <a href="/partners">home improvement partners</a></span> (up to '+BUYER_CAP+' companies) at the number/email provided, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including by automated technology or prerecorded/artificial voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if I am on a Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message/data rates may apply. I can revoke consent at any time. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms</a>.</p>';
+         '<p class="consent" data-tf-element-role="consent-language">By clicking &ldquo;Get My Free Quote,&rdquo; I consent to receive <span data-tf-element-role="contact-method">calls, text messages, and emails</span> from <span data-tf-element-role="consent-advertiser-name">Renue Home and its matched service providers, contractors, dealers, or <a href="/partners">marketing partners</a></span> about my home improvement project at the phone number and email address I provide, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including through automated technology, prerecorded messages, and artificial or AI-generated voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if my number is on a federal, state, or internal Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message and data rates may apply. Message frequency may vary. Reply STOP to opt out of texts. See our <a href="/privacy-policy">Privacy Policy</a> and <a href="/terms-and-conditions">Terms &amp; Conditions</a>.</p>'+
+         '<p class="consent disclaim">Renue Home is a free matching service, not a contractor. Renue Home does not perform home improvement services, provide estimates, guarantee pricing, guarantee availability, or warrant the work of any contractor or service provider. Any agreement for services is solely between you and the independent provider you choose. You are responsible for verifying licensing, insurance, references, permits, pricing, scope of work, and contract terms before hiring any provider.</p>';
     }
 
     h += '<div class="err" id="err"></div>'+
@@ -318,7 +319,7 @@
         '<div class="q">You’re all set'+(lead.first?', '+esc(lead.first):'')+'!</div>'+
         '<p class="qsub">Your request has been received. A trusted local pro will reach out shortly to discuss your '+cfg.word+' project.</p>'+
         (callNumber?'<div class="callrow"><a class="btn btn-grad btn-lg" href="'+telHref(callNumber)+'">📞 Call now to speak to a specialist</a></div>':'')+
-        '<div class="trustcues" style="margin-top:16px"><span>Trusted. Local. Renue.</span></div></div></div>';
+        '<div class="trustcues" style="margin-top:16px"><span>Local pros. Free. No obligation.</span></div></div></div>';
       try{ if(window.gtag) gtag('event','generate_lead',{items:[{item_category:window.RENUE_VERTICAL}]}); }catch(e){}
       try{ if(window.fbq) fbq('track','Lead'); }catch(e){}
       window.scrollTo({top:0,behavior:"smooth"});

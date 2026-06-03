@@ -1,58 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Do Not Sell or Share My Personal Information — Renue Home</title>
-<meta name="description" content="Submit a request to opt out of the sale or sharing of your personal information." />
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/styles.css">
-<script>window.RENUE_PAGE="legal";window.RENUE_PHONE="";window.RENUE_NONCONSENT_PHONE="";</script>
-<script defer src="/funnel.js"></script>
+<meta charset="utf-8">
+<title>Redirecting…</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://renuehome.com/do-not-sell-or-share">
+<meta http-equiv="refresh" content="0; url=/do-not-sell-or-share">
+<script>location.replace("/do-not-sell-or-share"+location.search+location.hash);</script>
 </head>
-<body>
-<div class="wrap"><div class="legal">
-  <h1>Do Not Sell or Share My Personal Information</h1>
-  <p class="upd">For California residents and others where applicable.</p>
-  <p>You have the right to opt out of the “sale” or “sharing” of your personal information. Submit the form below and we will process your request. You may also email <a href="mailto:privacy@renuehome.com">privacy@renuehome.com</a>.</p>
-  <p style="font-size:14px">You can also opt out automatically by enabling the <strong>Global Privacy Control (GPC)</strong> in a supported browser or extension. Where required, we treat a valid GPC signal as a request to opt out of the sale/sharing of personal information for the browser and device on which it is enabled.</p>
-
-  <p style="font-size:14px"><strong>Prefer to call?</strong> To request information or opt out without consenting to automated calls or texts, call <strong>(XXX) XXX-XXXX</strong>. <em>(Phone line to be configured.)</em></p>
-
-  <div class="card" style="max-width:520px;margin:18px 0">
-    <div id="optform">
-      <div class="field"><label>Full name</label><input id="o_name" placeholder="Your name"></div>
-      <div class="field"><label>Email used on Renue Home</label><input id="o_email" type="email" inputmode="email" placeholder="you@email.com"></div>
-      <div class="field"><label>Phone (optional)</label><input id="o_phone" type="tel" inputmode="tel" placeholder="(optional)"></div>
-      <button class="btn btn-grad btn-lg" type="button" id="o_btn">Submit opt-out request</button>
-      <div class="err" id="o_err"></div>
-    </div>
-    <div id="optdone" class="thanks">
-      <div class="big"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-      <div class="q">Request received</div>
-      <p class="qsub">We’ve recorded your opt-out request. If you have questions, email privacy@renuehome.com.</p>
-    </div>
-  </div>
-
-  <div class="disclaimer-box">Renue Home is an advertising marketplace and matching service. Information submitted may be shared with independent home-improvement professionals or companies in your area. This opt-out applies to the sale/sharing of personal information as defined under applicable law.</div>
-</div></div>
-
-<script>
-(function(){
-  function $(id){return document.getElementById(id);}
-  var b=$("o_btn"); if(!b) return;
-  b.onclick=function(){
-    var name=($("o_name").value||"").trim(), email=($("o_email").value||"").trim();
-    if(!name){ $("o_err").textContent="Please enter your name."; return; }
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $("o_err").textContent="Please enter a valid email."; return; }
-    if(b.dataset.busy==="1") return; b.dataset.busy="1"; b.disabled=true; b.textContent="Submitting…";
-    var payload={type:"optout",name:name,email:email,phone:($("o_phone").value||"").trim(),ts:Date.now()};
-    fetch("/api/submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)})
-      .then(function(){}).catch(function(){}).then(function(){
-        $("optform").style.display="none"; $("optdone").classList.add("show");
-      });
-  };
-})();
-</script>
-</body>
+<body>This page has moved to <a href="/do-not-sell-or-share">/do-not-sell-or-share</a>.</body>
 </html>

@@ -103,6 +103,7 @@ h1.head{font-size:clamp(30px,5vw,50px);line-height:1.07;font-weight:800;margin:1
 .trustcues span{display:inline-flex;align-items:center;gap:6px}
 .consent{font-size:11px;line-height:1.55;color:#9aa3ac;margin-top:14px}
 .consent a{color:var(--teal)}
+.consent.disclaim{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 @media(max-width:520px){ .two{grid-template-columns:1fr} }
 
 /* Thank-you (hidden until submit) */

@@ -63,7 +63,7 @@ for (const [vKey, v] of Object.entries(VERTICALS)) {
     const slug = `${vKey}-${c.slug}`;
     const cityName = `${c.metro}, ${c.state}`;
     const title = `${v.label} in ${c.metro}, ${c.state} — Free Quotes | Renue Home`;
-    const desc = `Compare free, no-obligation ${v.word} quotes from vetted ${c.metro}, ${c.state} pros. Renue Home matches local homeowners with trusted professionals.`;
+    const desc = `Compare free, no-obligation ${v.word} quotes from ${c.metro}, ${c.state} pros serving your area. Renue Home connects local homeowners with independent home-improvement professionals.`;
     const html = `${HEAD(title, desc).replace("{CANON}", slug)}
 <script>
 window.RENUE_PAGE="vertical";
@@ -99,7 +99,7 @@ const locations = `${HEAD("Service Areas — Renue Home", "Renue Home connects h
 <main class="wrap" style="padding:46px 0 10px">
   <div class="seclabel">Service areas</div>
   <h1 class="sec-h" style="font-size:34px">Find local pros in your area</h1>
-  <p class="lead" style="max-width:720px">Renue Home matches homeowners with vetted local professionals across the country. Choose your project and city to get started with a free, no-obligation quote.</p>
+  <p class="lead" style="max-width:720px">Renue Home connects homeowners with independent local home-improvement professionals across the country. Choose your project and city to get started with a free, no-obligation quote.</p>
   ${groups}
 </main>
 </body>

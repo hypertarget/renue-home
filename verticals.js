@@ -35,7 +35,7 @@
         label:"Window replacement guide", heading:"Replacement windows: what to know before you buy",
         lead:[
           "Replacing old windows is one of the highest-impact upgrades a homeowner can make. New energy-efficient windows can cut drafts, reduce outside noise, lower heating and cooling bills, and refresh the look of your home inside and out. The right choice depends on your climate, your home's style, and how long you plan to stay.",
-          "Because prices in {area} vary by frame material, glass package, and installer, the smartest move is to compare a few local quotes side by side. Renue Home makes that quick — answer a few questions and we'll match you with vetted pros who serve your area, with no obligation to hire."
+          "Because prices in {area} vary by frame material, glass package, and installer, the smartest move is to compare a few local quotes side by side. Renue Home makes that quick — answer a few questions and we'll match you with local pros who serve your area, with no obligation to hire."
         ],
         factors:[
           {h:"Number & size of windows", p:"The biggest driver of total cost. Whole-home projects cost more up front but often unlock per-window savings."},
@@ -73,7 +73,7 @@
         label:"Bathroom remodel guide", heading:"Bathroom remodeling: options, costs & timelines",
         lead:[
           "A bathroom remodel can range from a fast, one-to-two-day tub-to-shower conversion to a full gut renovation with new layout, tile, vanity, and fixtures. Knowing which type of project fits your needs — and your budget — is the first step to getting accurate quotes.",
-          "Local pricing in {area} depends on materials, the size of the space, and how much plumbing changes. Comparing a few vetted local quotes through Renue Home helps you see realistic numbers and timelines before you commit — with zero obligation."
+          "Local pricing in {area} depends on materials, the size of the space, and how much plumbing changes. Comparing a few local quotes through Renue Home helps you see realistic numbers and timelines before you commit — with zero obligation."
         ],
         factors:[
           {h:"Scope of work", p:"A surface refresh costs far less than a full remodel that moves plumbing or changes the layout."},
@@ -187,7 +187,7 @@
         label:"Kitchen remodel guide", heading:"Kitchen remodeling: from refresh to full renovation",
         lead:[
           "The kitchen is the heart of most homes and one of the best investments for daily enjoyment and resale value. Projects range from a budget-friendly cabinet-and-counter refresh to a full layout change with new cabinetry, appliances, and lighting.",
-          "Because kitchen costs in {area} swing widely with materials and scope, comparing a few local quotes is the clearest way to plan your budget. Renue Home connects you with vetted local remodelers — free, with no obligation."
+          "Because kitchen costs in {area} swing widely with materials and scope, comparing a few local quotes is the clearest way to plan your budget. Renue Home connects you with local remodelers — free, with no obligation."
         ],
         factors:[
           {h:"Scope & layout", p:"Keeping the existing layout saves money; moving plumbing or walls adds cost."},
@@ -372,7 +372,7 @@
         label:"Siding guide", heading:"Siding replacement & repair options",
         lead:[
           "Siding is your home's first line of defense against the weather — and a major factor in curb appeal and energy efficiency. Whether you're repairing storm damage or replacing tired siding altogether, the material you choose affects looks, maintenance, and longevity.",
-          "Siding costs in {area} depend on your home's square footage, the material, trim details, and whether old siding needs removal. Renue Home connects you with vetted local siding pros so you can compare free quotes without obligation."
+          "Siding costs in {area} depend on your home's square footage, the material, trim details, and whether old siding needs removal. Renue Home connects you with local siding pros so you can compare free quotes without obligation."
         ],
         factors:[
           {h:"Home size & stories", p:"More exterior area and added height raise material and labor costs."},
@@ -409,7 +409,7 @@
         label:"Plumbing guide", heading:"Plumbing repairs, water heaters & installs",
         lead:[
           "Plumbing problems rarely wait for a convenient time. From a dripping fixture to a failing water heater or a slab leak, getting the right pro quickly can prevent a small issue from becoming costly water damage.",
-          "Plumbing pricing in {area} depends on the job, parts, and how accessible the work is. Renue Home matches you with local, vetted plumbers so you can compare quotes — and find someone fast when it's an emergency."
+          "Plumbing pricing in {area} depends on the job, parts, and how accessible the work is. Renue Home matches you with local plumbers so you can compare quotes — and find someone fast when it's an emergency."
         ],
         factors:[
           {h:"Type of job", p:"A simple repair costs far less than a repipe or sewer line."},
@@ -479,12 +479,12 @@
         label:"Home improvement guide", heading:"Start any home project with confidence",
         lead:[
           "Not every project fits neatly into one category — and that's fine. Whether you're planning a renovation, tackling a repair, or just exploring ideas, the first step is connecting with the right local professional for the job.",
-          "Renue Home matches homeowners in {area} with vetted local pros across dozens of project types. Answer a few quick questions and compare free, no-obligation quotes."
+          "Renue Home matches homeowners in {area} with local pros across dozens of project types. Answer a few quick questions and compare free, no-obligation quotes."
         ],
         factors:[],
         types:[]
       },
-      gallery:["Home renovation projects","Trusted local pros","Free project quotes","Compare your options","Indoor & outdoor work","Fresh starts at home"]
+      gallery:["Home renovation projects","Local pros near you","Free project quotes","Compare your options","Indoor & outdoor work","Fresh starts at home"]
     }
   };
 })();

@@ -82,11 +82,22 @@ async function audit(page) {
   return await page.evaluate(() => {
     const iw = window.innerWidth, ih = window.innerHeight;
     const offenders = [];
+    // Content intentionally placed inside a horizontal scroller (overflow-x:auto/scroll)
+    // is allowed to be wider than the viewport — it scrolls internally, not the page.
+    const inScroller = (el) => {
+      let p = el.parentElement;
+      while (p && p !== document.body) {
+        const o = getComputedStyle(p);
+        if (/(auto|scroll)/.test(o.overflowX) || /(auto|scroll)/.test(o.overflow)) return true;
+        p = p.parentElement;
+      }
+      return false;
+    };
     document.querySelectorAll("body *").forEach((el) => {
       const r = el.getBoundingClientRect();
       const cs = getComputedStyle(el);
       if (cs.position === "fixed" || r.width < 2 || cs.visibility === "hidden") return;
-      if (r.right > iw + 1 || r.left < -1) {
+      if ((r.right > iw + 1 || r.left < -1) && !inScroller(el)) {
         offenders.push(el.tagName.toLowerCase() + (el.className && typeof el.className === "string" ? "." + el.className.split(" ")[0] : "") + " right=" + Math.round(r.right));
       }
     });

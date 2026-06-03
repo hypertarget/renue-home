@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Do Not Sell or Share My Personal Information — Renue Home</title>
+<meta name="description" content="Submit a request to opt out of the sale or sharing of your personal information, or to access, delete, correct, or limit it. Renue Home privacy requests." />
+<link rel="canonical" href="https://renuehome.com/do-not-sell-or-share" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<style>
+  .dns-form{max-width:560px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0;box-shadow:var(--shadow)}
+  .dns-form label{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14px 0 6px}
+  .dns-form input[type=text],.dns-form input[type=email],.dns-form input[type=tel],.dns-form select{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:11px;font-size:16px;font-family:inherit}
+  .dns-form input:focus,.dns-form select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(20,184,166,.13)}
+  .dns-check{display:flex;align-items:flex-start;gap:9px;margin:16px 0;font-size:14px;color:#3a444e}
+  .dns-check input{margin-top:3px}
+  .dns-note{font-size:13px;color:var(--muted);margin-top:12px}
+</style>
+<script>window.RENUE_PAGE="legal";window.RENUE_PHONE="";window.RENUE_NONCONSENT_PHONE="";</script>
+<script defer src="/funnel.js"></script>
+</head>
+<body>
+<div class="wrap"><div class="legal">
+  <h1>Do Not Sell or Share My Personal Information</h1>
+  <p class="upd">Effective date: June 3, 2026</p>
+
+  <p>You can ask us to stop selling or sharing your personal information, and you can ask to access, delete, or correct it, or to limit the use of sensitive personal information where applicable. Submit the form below, or email <a href="mailto:privacy@renuehome.com?subject=Do%20Not%20Sell%20or%20Share%20Request">privacy@renuehome.com</a> with the subject line <strong>“Privacy Request”</strong> or <strong>“Do Not Sell or Share Request.”</strong> See our <a href="/california-privacy-notice">California Privacy Notice</a> and <a href="/privacy-policy">Privacy Policy</a> for details.</p>
+
+  <p><strong>Global Privacy Control:</strong> where required by law, we treat a recognized GPC browser signal as a valid request to opt out of the sale or sharing of personal information for that browser or device.</p>
+
+  <form class="dns-form" id="dnsForm" novalidate>
+    <label for="dns_name">Full name</label>
+    <input type="text" id="dns_name" autocomplete="name">
+
+    <label for="dns_email">Email address</label>
+    <input type="email" id="dns_email" autocomplete="email">
+
+    <label for="dns_phone">Phone number</label>
+    <input type="tel" id="dns_phone" autocomplete="tel">
+
+    <label for="dns_state">State of residence</label>
+    <input type="text" id="dns_state" placeholder="e.g., California">
+
+    <label for="dns_type">Request type</label>
+    <select id="dns_type">
+      <option value="Do Not Sell or Share">Do Not Sell or Share my personal information</option>
+      <option value="Access / Know">Access / Know what you have collected</option>
+      <option value="Delete">Delete my personal information</option>
+      <option value="Correct">Correct my personal information</option>
+      <option value="Limit Sensitive PI">Limit use of my sensitive personal information</option>
+    </select>
+
+    <div class="dns-check"><input type="checkbox" id="dns_agent"><label for="dns_agent" style="margin:0;font-weight:600;color:#3a444e">I am an authorized agent submitting this request on behalf of a consumer (proof of authorization may be requested).</label></div>
+
+    <button class="btn btn-grad btn-lg" type="button" id="dns_submit" style="margin-top:6px">Submit Privacy Request</button>
+    <p class="dns-note" id="dns_msg"></p>
+    <p class="dns-note">Submitting opens your email app with the details pre-filled so you can send your request to privacy@renuehome.com. We will verify your identity before completing your request, and we will not discriminate against you for exercising your rights.</p>
+  </form>
+</div></div>
+<script>
+(function(){
+  var b=document.getElementById("dns_submit"); if(!b) return;
+  b.addEventListener("click",function(){
+    var g=function(id){var e=document.getElementById(id);return e?(e.value||"").trim():"";};
+    var name=g("dns_name"),email=g("dns_email"),phone=g("dns_phone"),state=g("dns_state"),type=g("dns_type");
+    var agent=document.getElementById("dns_agent").checked?"Yes":"No";
+    var msg=document.getElementById("dns_msg");
+    if(!name||!email){ msg.style.color="#e23b3b"; msg.textContent="Please enter at least your name and email so we can verify your request."; return; }
+    var subject="Do Not Sell or Share Request";
+    var body=
+      "Privacy request type: "+type+"\n"+
+      "Name: "+name+"\n"+
+      "Email: "+email+"\n"+
+      "Phone: "+phone+"\n"+
+      "State: "+state+"\n"+
+      "Authorized agent: "+agent+"\n\n"+
+      "I am submitting this request under applicable privacy law. Please confirm receipt and process accordingly.";
+    msg.style.color="";
+    msg.textContent="Opening your email app… if nothing happens, email privacy@renuehome.com with the subject “Do Not Sell or Share Request.”";
+    window.location.href="mailto:privacy@renuehome.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  });
+})();
+</script>
+</body>
+</html>
