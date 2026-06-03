@@ -59,7 +59,16 @@ h1.head{font-size:clamp(30px,5vw,50px);line-height:1.07;font-weight:800;margin:1
 .trustline{display:flex;gap:16px 22px;flex-wrap:wrap;margin-top:22px;color:var(--muted);font-size:13.5px;font-weight:600}
 .trustline span{display:inline-flex;align-items:center;gap:7px}
 .ck{width:18px;height:18px;flex:none}
-@media(max-width:880px){ .hero-grid{grid-template-columns:1fr;gap:24px} .hero{padding:30px 0 20px} }
+@media(max-width:880px){
+  .hero-grid{display:flex;flex-direction:column;gap:18px}
+  .hero-grid #quiz{order:-1}            /* quiz first / above the fold on mobile */
+  .hero-grid>div:not(#quiz){order:2}    /* hero copy moves below the quiz */
+  .hero{padding:14px 0 6px}
+  h1.head{font-size:26px;line-height:1.14}
+  .lead{font-size:16px}
+  .card{padding:20px 18px}
+  .q{font-size:20px}
+}
 
 /* Card / quiz */
 .card{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:26px}
@@ -163,7 +172,7 @@ footer .dom{color:var(--green);font-weight:800;letter-spacing:1px}
 .sticky{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;gap:10px;padding:10px 12px;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(15,26,35,.08)}
 .sticky .btn{flex:1;padding:14px 10px;font-size:15px}
 .sticky .btn-call{background:#fff;border:1.5px solid var(--teal);color:var(--teal)}
-@media(max-width:780px){ .sticky{display:flex} body{padding-bottom:74px} }
+@media(max-width:780px){ .sticky{display:flex} body{padding-bottom:74px} section{padding:40px 0} .sec-h{font-size:24px} .hero .eyebrow{font-size:11px} }
 
 /* utilities */
 .hide{display:none!important}
