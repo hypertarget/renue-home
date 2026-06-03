@@ -7,6 +7,7 @@
   var NON_CONSENT_PHONE = window.RENUE_NONCONSENT_PHONE || ""; // line for info without consenting to automated calls.
   var SUBMIT_ENDPOINT = "/api/submit";
   var BUYER_CAP = 4;
+  var RF = { active:false, idx:0, data:{}, cfg:null }; // quiz state for browser-back support
 
   var telHref = function(n){ return "tel:+1" + (n||"").replace(/\D/g,""); };
 
@@ -81,6 +82,8 @@
       '</div></section>'+
       supportHtml(cfg);
 
+    RF.active = true; RF.cfg = cfg;
+    try{ history.replaceState({rf:0}, ""); }catch(e){}
     renderStep(cfg, 0, {});
     wireFaq();
   }
@@ -112,6 +115,7 @@
     var steps = cfg.steps;
     var card = document.getElementById("quizcard");
     if(!card) return;
+    RF.idx = idx; RF.data = data; RF.cfg = cfg;
     var total = steps.length;
     var pctNum = Math.round((idx/total)*100);
     var step = steps[idx];
@@ -144,9 +148,9 @@
     card.innerHTML = h;
 
     // wire
-    var back = card.querySelector("[data-back]"); if(back) back.onclick=function(){ renderStep(cfg, idx-1, data); };
+    var back = card.querySelector("[data-back]"); if(back) back.onclick=function(){ if(history.state && typeof history.state.rf==="number" && history.state.rf>0){ history.back(); } else { renderStep(cfg, idx-1, data); } };
     var errEl = function(m){ var e=document.getElementById("err"); if(e) e.textContent=m||""; };
-    var next = function(nd){ var d=Object.assign({}, data, nd||{}); if(idx<total-1) renderStep(cfg, idx+1, d); else doSubmit(cfg, d); };
+    var next = function(nd){ var d=Object.assign({}, data, nd||{}); if(idx<total-1){ try{ history.pushState({rf:idx+1}, ""); }catch(e){} renderStep(cfg, idx+1, d); } else doSubmit(cfg, d); };
 
     if(step.type==="single"){
       Array.prototype.forEach.call(card.querySelectorAll("[data-pick]"), function(b){
@@ -187,6 +191,7 @@
 
   function doSubmit(cfg, lead, btn){
     var finish=function(callNumber){
+      RF.active=false;
       var quiz=document.getElementById("quiz");
       quiz.innerHTML='<div class="card"><div class="thanks show"><div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'+
         '<div class="q">You’re all set'+(lead.first?', '+esc(lead.first):'')+'!</div>'+
@@ -218,6 +223,12 @@
     if(window.RENUE_PAGE==="vertical") buildVertical();
     document.body.appendChild(footer());
     document.body.appendChild(sticky());
+    window.addEventListener("popstate", function(e){
+      if(!RF.active || !RF.cfg) return;
+      var t = (e.state && typeof e.state.rf === "number") ? e.state.rf : null;
+      if(t === null) return;
+      renderStep(RF.cfg, t, RF.data);
+    });
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot); else boot();
 })();
