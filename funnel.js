@@ -202,8 +202,11 @@
   function galleryHtml(cfg){
     var g = cfg.gallery; if(!g || !g.length) return "";
     var v = window.RENUE_VERTICAL;
+    var imgs = (window.RENUE_IMAGES||{})[v] || [];
     var tiles = g.map(function(cap, i){
-      var src = "/assets/"+v+"/"+(i+1)+".jpg";
+      // Free, commercially-licensed Unsplash photos (Unsplash License). A local
+      // /assets/<vertical>/<n>.jpg overrides if present; gradient placeholder is the final fallback.
+      var src = imgs[i] ? (imgs[i]+"?auto=format&fit=crop&w=800&h=600&q=72") : ("/assets/"+v+"/"+(i+1)+".jpg");
       return '<figure class="gtile g'+((i%5)+1)+'">'+
         '<img src="'+src+'" alt="'+esc(cap)+'" loading="lazy" '+
           'onerror="this.style.display=\'none\';this.parentNode.classList.add(\'noimg\')">'+
