@@ -1,8 +1,9 @@
 /* Renue Home — shared design system. Premium, clean, white, mobile-first. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
 :root{
   --navy:#0F1A23; --teal:#14B8A6; --green:#7ED957; --tan:#F4CDA1; --gray:#E6E8EC;
   --ink:#0F1A23; --muted:#5b6670; --line:#e7eaef; --bg:#ffffff; --soft:#f6f8fa;
-  --grad:linear-gradient(135deg,#14B8A6 0%,#7ED957 100%);
+  --brand:#0E9C8C; --grad:#0E9C8C; /* flattened from teal→green gradient — flat brand fill reads less templated */
   --shadow:0 18px 50px rgba(15,26,35,.10);
   --maxw:1120px;
 }
@@ -14,12 +15,13 @@ body{font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-s
 a{color:inherit;text-decoration:none}
 img{max-width:100%}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
-.grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.grad-text{color:var(--teal)}
 .center{text-align:center}
 .seclabel{font-weight:700;letter-spacing:2px;font-size:12px;color:var(--teal);text-transform:uppercase}
-h1,h2,h3{letter-spacing:-.4px}
+/* Display serif for headlines — type contrast against the Montserrat UI/body, the way a designed brand reads */
+h1,h2,h3,.head,.sec-h,.q{font-family:"Fraunces",Georgia,"Times New Roman",serif;letter-spacing:-.2px}
 section{padding:60px 0}
-.sec-h{font-size:clamp(24px,3.4vw,34px);font-weight:800;margin:8px 0 10px}
+.sec-h{font-size:clamp(25px,3.5vw,36px);font-weight:600;margin:8px 0 10px}
 .sec-sub{color:var(--muted);max-width:640px;margin:0 auto 30px}
 
 /* Buttons */
@@ -59,22 +61,36 @@ header.site{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);ba
   radial-gradient(1100px 360px at 88% -10%, rgba(126,217,87,.13), transparent 60%),
   radial-gradient(880px 320px at -5% 0%, rgba(20,184,166,.11), transparent 55%);pointer-events:none}
 .hero .wrap{position:relative}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:12px;letter-spacing:1.5px;color:var(--teal);text-transform:uppercase;background:#eafaf5;border:1px solid #cdeee6;padding:7px 13px;border-radius:99px}
-h1.head{font-size:clamp(30px,5vw,50px);line-height:1.07;font-weight:800;margin:16px 0 12px;max-width:780px}
+/* Editorial small-caps label — no pill, no star (those read as "AI template") */
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:12.5px;letter-spacing:2.5px;color:var(--teal);text-transform:uppercase}
+.eyebrow svg{display:none}
+h1.head{font-size:clamp(32px,5.2vw,54px);line-height:1.04;font-weight:600;margin:16px 0 12px;max-width:780px}
 .lead{font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:560px;margin:0 0 6px}
 .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:42px;align-items:start}
 .trustline{display:flex;gap:16px 22px;flex-wrap:wrap;margin-top:22px;color:var(--muted);font-size:13.5px;font-weight:600}
 .trustline span{display:inline-flex;align-items:center;gap:7px}
 .ck{width:18px;height:18px;flex:none}
+/* Asymmetric homepage hero: copy left, framed photo + floating chips right */
+.hero-home{align-items:center}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.hero-visual{position:relative}
+.hero-photo{border-radius:22px;overflow:hidden;box-shadow:var(--shadow);aspect-ratio:4/5;background:var(--soft);border:1px solid var(--line)}
+.hero-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-chip{position:absolute;background:rgba(255,255,255,.96);backdrop-filter:blur(4px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:14px;padding:9px 13px;font-weight:700;font-size:13px;color:var(--navy);display:inline-flex;align-items:center;gap:8px;font-family:Montserrat,system-ui,sans-serif}
+.hero-chip svg{width:18px;height:18px;flex:none;stroke:var(--teal)}
+.hero-chip.c1{top:16px;left:16px}
+.hero-chip.c2{bottom:18px;right:16px}
 @media(max-width:880px){
   .hero-grid{display:flex;flex-direction:column;gap:18px}
   .hero-grid #quiz{order:-1}            /* quiz first / above the fold on mobile */
   .hero-grid>div:not(#quiz){order:2}    /* hero copy moves below the quiz */
   .hero{padding:14px 0 6px}
-  h1.head{font-size:26px;line-height:1.14}
+  h1.head{font-size:30px;line-height:1.08}
   .lead{font-size:16px}
   .card{padding:20px 18px}
   .q{font-size:20px}
+  .hero-photo{aspect-ratio:16/11}
+  .hero-chip{display:none}
 }
 
 /* Card / quiz */

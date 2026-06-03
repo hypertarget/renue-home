@@ -115,12 +115,12 @@
     var city = window.RENUE_CITY || null; // {name:"Austin, TX", metro:"Austin", state:"TX"}
 
     var headline = cfg.headline, sub = cfg.sub, title = cfg.title;
-    var eyebrow = SHIELD+' Local Pros • Free • No Obligation';
+    var eyebrow = 'Local Pros · Free · No Obligation';
     if(city){
       headline = cfg.name+' Pros in '+city.metro+', '+city.state;
       sub = 'Compare free, no-obligation '+cfg.word+' quotes from '+city.metro+'-area professionals serving your area. Takes under a minute.';
       title = cfg.name+' Quotes in '+city.metro+', '+city.state+' — Renue Home';
-      eyebrow = SHIELD+' Serving '+city.metro+' & nearby areas';
+      eyebrow = 'Serving '+city.metro+' & nearby areas';
     }
     document.title = title || ("Renue Home — "+cfg.name);
 
