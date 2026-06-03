@@ -1,0 +1,7 @@
+node_modules/
+mobile-shots/
+mobile-test.log
+_verify_shots/
+.DS_Store
+.env
+.env.local
