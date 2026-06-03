@@ -18,7 +18,7 @@
       var tf = document.createElement("script");
       tf.async = true;
       tf.src = (("https:"===document.location.protocol)?"https":"http") +
-        "://api.trustedform.com/trustedform.js?field=xxTrustedFormCertUrl&ping_field=xxTrustedFormPingUrl&l=" +
+        "://api.trustedform.com/trustedform.js?field=xxTrustedFormCertUrl&use_tagged_consent=true&l=" +
         (new Date().getTime()) + Math.random();
       var s = document.getElementsByTagName("script")[0];
       s.parentNode.insertBefore(tf, s);
@@ -227,14 +227,15 @@
       h+='<div class="field"><input id="f_addr" placeholder="Street address" value="'+(data.address||'')+'"></div>'+
          '<button class="btn btn-grad btn-lg" type="button" data-addr="1">Continue &rsaquo;</button>';
     } else if(step.type==="contact"){
-      h+='<div class="two"><div class="field"><input id="f_first" placeholder="First name" value="'+(data.first||'')+'"></div>'+
+      // TrustedForm tagged consent (use_tagged_consent=true): roles let lead buyers run Verify checks.
+      h+='<div class="two"><div class="field"><input id="f_first" placeholder="First name" data-tf-element-role="consent-grantor-name" value="'+(data.first||'')+'"></div>'+
          '<div class="field"><input id="f_last" placeholder="Last name" value="'+(data.last||'')+'"></div></div>'+
-         '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" value="'+(data.email||'')+'"></div>'+
-         '<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" value="'+(data.phone||'')+'"></div>'+
+         '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" data-tf-element-role="consent-grantor-email" value="'+(data.email||'')+'"></div>'+
+         '<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
          '<input type="hidden" name="xxTrustedFormCertUrl" id="xxTrustedFormCertUrl">'+
          '<input type="hidden" name="xxTrustedFormPingUrl" id="xxTrustedFormPingUrl">'+
-         '<button class="btn btn-grad btn-lg" type="button" data-submit="1">Get My Free Quote &rsaquo;</button>'+
-         '<p class="consent">By submitting, I consent to receive calls, texts, and emails from Renue Home and/or its <a href="/partners">home improvement partners</a> (up to '+BUYER_CAP+' companies) at the number/email provided, including by automated technology or prerecorded/artificial voice, even if I am on a Do Not Call list. Consent is not a condition of purchase. Message/data rates may apply. I can revoke consent at any time. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms</a>.</p>';
+         '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit">Get My Free Quote &rsaquo;</button>'+
+         '<p class="consent" data-tf-element-role="consent-language">By submitting, I consent to receive <span data-tf-element-role="contact-method">calls, texts, and emails</span> from <span data-tf-element-role="consent-advertiser-name">Renue Home and/or its <a href="/partners">home improvement partners</a></span> (up to '+BUYER_CAP+' companies) at the number/email provided, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including by automated technology or prerecorded/artificial voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if I am on a Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message/data rates may apply. I can revoke consent at any time. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms</a>.</p>';
     }
 
     h += '<div class="err" id="err"></div>'+
@@ -245,6 +246,9 @@
         (TRUSTEDFORM?'<span>'+CK+' TrustedForm&reg; verified</span>':'')+
       '</div>';
     card.innerHTML = h;
+    // TrustedForm "offer" wraps the consent area + submit — only on the contact step.
+    if(step.type==="contact"){ card.setAttribute("data-tf-element-role","offer"); }
+    else { card.removeAttribute("data-tf-element-role"); }
 
     // wire
     var back = card.querySelector("[data-back]"); if(back) back.onclick=function(){ if(history.state && typeof history.state.rf==="number" && history.state.rf>0){ history.back(); } else { renderStep(cfg, idx-1, data); } };
