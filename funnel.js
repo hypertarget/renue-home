@@ -12,6 +12,16 @@
   var TRUSTEDFORM = (window.RENUE_TRUSTEDFORM !== false);
   var RF = { active:false, idx:0, data:{}, cfg:null }; // quiz state for browser-back support
 
+  // Persistent hidden cert fields, present from page load (the quiz is an SPA and the
+  // contact step only renders at the end — TrustedForm needs the field to exist early
+  // so its SDK can populate it. These live on <body> and survive step re-renders).
+  function ensureTFFields(){
+    if(!TRUSTEDFORM || document.getElementById("xxTrustedFormCertUrl")) return;
+    ["xxTrustedFormCertUrl","xxTrustedFormPingUrl"].forEach(function(n){
+      var i=document.createElement("input"); i.type="hidden"; i.name=n; i.id=n; document.body.appendChild(i);
+    });
+  }
+
   function injectTrustedForm(){
     if(!TRUSTEDFORM || window.__rf_tf) return; window.__rf_tf = true;
     try{
@@ -125,6 +135,7 @@
 
     RF.active = true; RF.cfg = cfg;
     injectTrustedForm();
+    ensureTFFields();
     try{ history.replaceState({rf:0}, ""); }catch(e){}
     renderStep(cfg, 0, {});
     var qc = document.getElementById("quiz");
@@ -232,8 +243,6 @@
          '<div class="field"><input id="f_last" placeholder="Last name" value="'+(data.last||'')+'"></div></div>'+
          '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" data-tf-element-role="consent-grantor-email" value="'+(data.email||'')+'"></div>'+
          '<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
-         '<input type="hidden" name="xxTrustedFormCertUrl" id="xxTrustedFormCertUrl">'+
-         '<input type="hidden" name="xxTrustedFormPingUrl" id="xxTrustedFormPingUrl">'+
          '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit">Get My Free Quote &rsaquo;</button>'+
          '<p class="consent" data-tf-element-role="consent-language">By submitting, I consent to receive <span data-tf-element-role="contact-method">calls, texts, and emails</span> from <span data-tf-element-role="consent-advertiser-name">Renue Home and/or its <a href="/partners">home improvement partners</a></span> (up to '+BUYER_CAP+' companies) at the number/email provided, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including by automated technology or prerecorded/artificial voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if I am on a Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message/data rates may apply. I can revoke consent at any time. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms</a>.</p>';
     }
