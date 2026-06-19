@@ -20,7 +20,8 @@
   // their gclid (call attribution). Campaign 01a27245 (Bathroom Remodel Zip IVR) / pool 5583,
   // host api.routingapi.com. The static phone stays as the fallback; this swaps it live.
   // Set window.RENUE_RETREAVER_CAMPAIGN="" to disable.
-  var RTVR_CAMPAIGN = (typeof window.RENUE_RETREAVER_CAMPAIGN!=="undefined") ? window.RENUE_RETREAVER_CAMPAIGN : "01a27245";
+  // NOTE: this is the campaign KEY (Retreaver.js API), NOT the campaign ID 01a27245.
+  var RTVR_CAMPAIGN = (typeof window.RENUE_RETREAVER_CAMPAIGN!=="undefined") ? window.RENUE_RETREAVER_CAMPAIGN : "4d684d693a1cb8039a70c9937f0c5ccc";
   var RTVR_HOST = "api.routingapi.com";
   var _dni = null, _dniObs = null;
   var PHONE_RE = /\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/;
@@ -220,6 +221,12 @@
       sub = 'Compare free, no-obligation '+cfg.word+' quotes from '+city.metro+'-area professionals serving your area. Takes under a minute.';
       title = cfg.name+' Quotes in '+city.metro+', '+city.state+' — Renue Home';
       eyebrow = 'Serving '+city.metro+' & nearby areas';
+    }
+    // Edge geo (Cloudflare): prepend the visitor's state to the hero for relevance lift.
+    // Set by functions/_middleware.js only for confident US geo; falls back silently otherwise.
+    // Relevance only — never a fabricated "{State} program/rebate" claim.
+    if(!city && window.RENUE_GEO_REGION){
+      headline = window.RENUE_GEO_REGION + " Homeowners: " + headline;
     }
     document.title = title || ("Renue Home — "+cfg.name);
 
