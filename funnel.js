@@ -16,6 +16,14 @@
   var GA4_ID     = window.RENUE_GA4 || "G-7YCT9CPCVN";  // Renue Home GA4 (account Erio); override via window.RENUE_GA4
   var ADS_ID     = window.RENUE_ADS_ID || "";      // "AW-XXXXXXXXX" (optional; loads gtag for Ads too)
   var META_PIXEL = window.RENUE_META_PIXEL || "";  // Meta/Facebook pixel id (optional)
+  // Retreaver Dynamic Number Insertion: each visitor gets a unique tracking number that carries
+  // their gclid (call attribution). Campaign 01a27245 (Bathroom Remodel Zip IVR) / pool 5583,
+  // host api.routingapi.com. The static phone stays as the fallback; this swaps it live.
+  // Set window.RENUE_RETREAVER_CAMPAIGN="" to disable.
+  var RTVR_CAMPAIGN = (typeof window.RENUE_RETREAVER_CAMPAIGN!=="undefined") ? window.RENUE_RETREAVER_CAMPAIGN : "01a27245";
+  var RTVR_HOST = "api.routingapi.com";
+  var _dni = null, _dniObs = null;
+  var PHONE_RE = /\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/;
   var RF = { active:false, idx:0, data:{}, cfg:null }; // quiz state for browser-back support
 
   // Persistent hidden cert fields, present from page load (the quiz is an SPA and the
@@ -77,6 +85,57 @@
       try{ if(window.gtag) gtag('event','call_click',{vertical:(window.RENUE_VERTICAL||""),page:location.pathname}); }catch(_){}
       try{ if(window.fbq) fbq('track','Contact'); }catch(_){}
     }, true);
+  }
+
+  // Swap every tel: link + visible number to the Retreaver-assigned number. Idempotent
+  // (only writes when different) so it's safe to call repeatedly as the engine re-renders CTAs.
+  function applyDNI(root){
+    if(!_dni) return;
+    var n=_dni.n, f=_dni.f, scope=root||document;
+    scope.querySelectorAll('a[href^="tel:"]').forEach(function(a){
+      if(a.getAttribute("href")!=="tel:"+n) a.setAttribute("href","tel:"+n);
+      Array.prototype.forEach.call(a.childNodes, function(node){
+        if(node.nodeType===3 && PHONE_RE.test(node.nodeValue) && node.nodeValue.indexOf(f)===-1){
+          node.nodeValue = node.nodeValue.replace(PHONE_RE, f);
+        }
+      });
+    });
+    scope.querySelectorAll(".rtvr-number,[data-rtvr]").forEach(function(el){ if(el.textContent!==f) el.textContent=f; });
+  }
+
+  function injectRetreaver(){
+    if(!RTVR_CAMPAIGN || window.__rtvr_init) return; window.__rtvr_init=true;
+    var s=document.createElement("script"); s.type="text/javascript"; s.async=true; s.defer=true;
+    s.src=document.location.protocol+"//dist.routingapi.com/jsapi/v1/retreaver.min.js";
+    s.onload=s.onreadystatechange=function(){
+      try{
+        if(window.__rtvrDone) return; window.__rtvrDone=true;
+        Retreaver.configure({ host:RTVR_HOST, prefix: document.location.protocol==="https:"?"https":"http" });
+        function qp(k){ try{ return new URLSearchParams(window.location.search).get(k)||""; }catch(e){ return ""; } }
+        var tags={};
+        ["gclid","gbraid","wbraid","msclkid","utm_source","utm_medium","utm_campaign","subid"].forEach(function(k){
+          var v=qp(k); if(v) tags[k]=v;
+        });
+        if(!tags.subid) tags.subid="renuehome";
+        var campaign=new Retreaver.Campaign({ campaign_key:RTVR_CAMPAIGN });
+        campaign.request_number(tags, function(number){
+          _dni={ n:number.get("number"), f:number.get("formatted_number") };
+          window.retreaver_number=number;
+          applyDNI(document);
+          // Re-apply to CTAs the engine injects later (quiz "Call now" buttons, results screen).
+          // Disconnect during our own writes so we don't loop on them.
+          try{
+            _dniObs=new MutationObserver(function(){
+              if(_dniObs) _dniObs.disconnect();
+              applyDNI(document);
+              if(_dniObs) _dniObs.observe(document.body,{childList:true,subtree:true});
+            });
+            _dniObs.observe(document.body,{childList:true,subtree:true});
+          }catch(e){}
+        });
+      }catch(e){ /* leave the static (877) number as fallback */ }
+    };
+    (document.getElementsByTagName("head")[0]||document.getElementsByTagName("body")[0]).appendChild(s);
   }
 
   var telHref = function(n){ return "tel:+1" + (n||"").replace(/\D/g,""); };
@@ -386,6 +445,7 @@
   function boot(){
     injectAnalytics();
     trackCalls();
+    injectRetreaver();
     document.body.insertBefore(header(), document.body.firstChild);
     if(window.RENUE_PAGE==="vertical") buildVertical();
     document.body.appendChild(footer());
