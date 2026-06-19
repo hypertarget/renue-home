@@ -10,6 +10,12 @@
   // TrustedForm: on by default (set window.RENUE_TRUSTEDFORM=false to disable). Captures a
   // tamper-proof consent certificate URL that materially raises lead value + TCPA defensibility.
   var TRUSTEDFORM = (window.RENUE_TRUSTEDFORM !== false);
+  // Analytics / ads — OFF until an ID is set (set the global in each page head, or fill in below).
+  // GA4 is the hub: page_view (auto on load), generate_lead (on submit), call_click (on tel: taps).
+  // Link GA4 -> Google Ads and import those key events as conversions (no separate Ads snippet needed).
+  var GA4_ID     = window.RENUE_GA4 || "G-7YCT9CPCVN";  // Renue Home GA4 (account Erio); override via window.RENUE_GA4
+  var ADS_ID     = window.RENUE_ADS_ID || "";      // "AW-XXXXXXXXX" (optional; loads gtag for Ads too)
+  var META_PIXEL = window.RENUE_META_PIXEL || "";  // Meta/Facebook pixel id (optional)
   var RF = { active:false, idx:0, data:{}, cfg:null }; // quiz state for browser-back support
 
   // Persistent hidden cert fields, present from page load (the quiz is an SPA and the
@@ -37,6 +43,40 @@
       var s = document.getElementsByTagName("script")[0];
       s.parentNode.insertBefore(tf, s);
     }catch(e){}
+  }
+
+  function injectAnalytics(){
+    if((GA4_ID || ADS_ID) && !window.__rf_ga){
+      window.__rf_ga = true;
+      var s=document.createElement("script"); s.async=true;
+      s.src="https://www.googletagmanager.com/gtag/js?id="+encodeURIComponent(GA4_ID||ADS_ID);
+      var f=document.getElementsByTagName("script")[0]; f.parentNode.insertBefore(s,f);
+      window.dataLayer=window.dataLayer||[];
+      window.gtag=function(){ dataLayer.push(arguments); };
+      gtag('js', new Date());
+      if(GA4_ID) gtag('config', GA4_ID);
+      if(ADS_ID) gtag('config', ADS_ID);
+    }
+    if(META_PIXEL && !window.__rf_meta){
+      window.__rf_meta = true;
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+        (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', META_PIXEL); fbq('track','PageView');
+    }
+  }
+
+  // Fire a call_click event on any tel: tap (header CTA, sticky bar, in-page buttons) — delegated
+  // so it also catches CTAs the engine injects after load.
+  function trackCalls(){
+    document.addEventListener("click", function(e){
+      var a = e.target && e.target.closest ? e.target.closest('a[href^="tel:"]') : null;
+      if(!a) return;
+      try{ if(window.gtag) gtag('event','call_click',{vertical:(window.RENUE_VERTICAL||""),page:location.pathname}); }catch(_){}
+      try{ if(window.fbq) fbq('track','Contact'); }catch(_){}
+    }, true);
   }
 
   var telHref = function(n){ return "tel:+1" + (n||"").replace(/\D/g,""); };
@@ -344,6 +384,8 @@
 
   /* ===== Boot ===== */
   function boot(){
+    injectAnalytics();
+    trackCalls();
     document.body.insertBefore(header(), document.body.firstChild);
     if(window.RENUE_PAGE==="vertical") buildVertical();
     document.body.appendChild(footer());
