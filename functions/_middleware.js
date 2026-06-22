@@ -1,7 +1,8 @@
-// Cloudflare Pages edge middleware: inject the visitor's US state (from Cloudflare's
-// edge geo, request.cf) into the page so funnel.js can personalize the hero headline.
-// Relevance only — no fabricated "state program/rebate" claims. Falls back silently
-// (injects nothing) when geo is missing/non-US/low-confidence, so the hero stays generic.
+// Cloudflare Pages edge middleware. Injects into every HTML page's <head>:
+//  1. The Pinterest domain-verify meta tag (always) — for claiming renuehome.com.
+//  2. The visitor's US state (from Cloudflare edge geo) so funnel.js can personalize the
+//     hero. Relevance only — no fabricated "state program/rebate" claims. Falls back
+//     silently when geo is missing/non-US/low-confidence.
 export async function onRequest(context) {
   const response = await context.next();
 
@@ -9,20 +10,18 @@ export async function onRequest(context) {
   const ct = response.headers.get("content-type") || "";
   if (!ct.includes("text/html")) return response;
 
+  // Always present: Pinterest domain verification.
+  let snippet = '<meta name="p:domain_verify" content="e592bdb73b32d572ef318517fd14a3b6"/>';
+
+  // Conditionally add edge-geo state for the hero personalization.
   const cf = context.request.cf || {};
-  const country = cf.country;             // e.g. "US"
-  const region = cf.region;               // full state name, e.g. "Texas"
-  const regionCode = cf.regionCode || ""; // e.g. "TX"
-
-  // Require confident US geo. VPNs / mobile carriers often omit region -> skip and stay generic.
-  if (country !== "US" || !region) return response;
-
-  // Sanitize before embedding in a <script> (defense-in-depth; values are Cloudflare-controlled).
-  // Keep spaces so multi-word states render ("New York", "North Carolina").
-  const clean = (s) => String(s).replace(/[<>"'`\\]/g, "").slice(0, 40);
-  const snippet =
-    "<script>window.RENUE_GEO_REGION=" + JSON.stringify(clean(region)) +
-    ";window.RENUE_GEO_REGION_CODE=" + JSON.stringify(clean(regionCode)) + ";</script>";
+  if (cf.country === "US" && cf.region) {
+    // Keep spaces so multi-word states render ("New York", "North Carolina").
+    const clean = (s) => String(s).replace(/[<>"'`\\]/g, "").slice(0, 40);
+    snippet +=
+      "<script>window.RENUE_GEO_REGION=" + JSON.stringify(clean(cf.region)) +
+      ";window.RENUE_GEO_REGION_CODE=" + JSON.stringify(clean(cf.regionCode || "")) + ";</script>";
+  }
 
   return new HTMLRewriter()
     .on("head", { element(el) { el.append(snippet, { html: true }); } })
