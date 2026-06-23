@@ -186,7 +186,7 @@
   // Friendly concierge avatar (brand gradient) for the conversational quiz framing.
   var AVATAR = '<span class="qavatar"><svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="av" x1="6" y1="42" x2="42" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#14B8A6"/><stop offset="1" stop-color="#7ED957"/></linearGradient></defs><circle cx="24" cy="24" r="24" fill="url(#av)"/><circle cx="24" cy="19" r="7" fill="#fff"/><path d="M11 40c1.5-7 6.8-11 13-11s11.5 4 13 11" fill="#fff"/></svg><span class="qonline"></span></span>';
 
-  var NAV = [["Bathroom","/bathroom"],["Windows","/windows"],["Roofing","/roofing"],["HVAC","/hvac"],["Kitchen","/kitchen"]];
+  var NAV = [["Bathroom","/bathroom"],["Windows","/windows"],["Roofing","/roofing"],["HVAC","/hvac"],["Kitchen","/kitchen"],["Guides","/guides"]];
 
   /* Conversational helper line shown under each question (per-step override wins). */
   function helperFor(step, idx, total){
@@ -225,7 +225,7 @@
       : 'To request information without consenting to automated calls or texts, call (XXX) XXX-XXXX.';
     f.innerHTML='<div class="wrap"><div class="ftop">'+
       '<div class="fbrand">'+LOGO+'<span><span class="r">RENUE</span> <span class="h">HOME</span></span></div>'+
-      '<nav><a href="/locations">Service Areas</a><a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a><a href="/california-privacy-notice">California Privacy Notice</a><a href="/partners">Marketing Partners</a><a href="/do-not-sell-or-share">Do Not Sell or Share My Personal Information</a></nav>'+
+      '<nav><a href="/guides">Guides</a><a href="/locations">Service Areas</a><a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a><a href="/california-privacy-notice">California Privacy Notice</a><a href="/partners">Marketing Partners</a><a href="/do-not-sell-or-share">Do Not Sell or Share My Personal Information</a></nav>'+
       '</div>'+
       '<p class="disc">Renue Home is an advertising marketplace and matching service for homeowners seeking home improvement services. Renue Home is not a provider, manufacturer, installer, or contractor. Information submitted may be shared with independent home improvement professionals or companies in your area. Renue Home does not endorse, warrant, or guarantee the services or products of any individual company. '+nonconsent+'</p>'+
       '<div class="copy">&copy; '+new Date().getFullYear()+' Renue Home &middot; Fresh Starts. Better Homes. &middot; <span class="dom">RENUEHOME.COM</span></div>'+
