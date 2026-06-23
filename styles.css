@@ -259,3 +259,30 @@ body.quiz-engaged{padding-bottom:0!important}
 /* utilities */
 .hide{display:none!important}
 .mt0{margin-top:0}
+
+/* Article / SEO content pages */
+.art-wrap{max-width:780px;margin:0 auto;padding:40px 20px 64px}
+.art-wrap h1{font-size:clamp(26px,3.6vw,40px);font-weight:800;line-height:1.18;color:var(--navy);margin:0 0 18px}
+.art-wrap .art-lead{font-size:18px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+.art-wrap h2{font-size:22px;font-weight:800;color:var(--navy);margin:40px 0 14px;border-top:1px solid var(--line);padding-top:28px}
+.art-wrap h2:first-of-type{border-top:none;padding-top:0}
+.art-wrap h3{font-size:17px;font-weight:700;color:var(--navy);margin:22px 0 10px}
+.art-wrap p{color:#3a444e;line-height:1.68;margin:0 0 16px}
+.art-wrap ul,.art-wrap ol{margin:0 0 16px;padding-left:22px;color:#3a444e;line-height:1.68}
+.art-wrap li{margin-bottom:6px}
+.art-wrap a{color:var(--teal);text-decoration:underline}
+.cost-tbl-wrap{overflow-x:auto;margin:18px 0 26px}
+.cost-tbl{width:100%;border-collapse:collapse;font-size:14.5px;min-width:400px}
+.cost-tbl th{background:var(--soft);font-weight:700;padding:10px 13px;text-align:left;border-bottom:2px solid var(--line)}
+.cost-tbl td{padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+.cost-tbl tr:last-child td{border-bottom:none}
+.cost-tbl td:nth-child(2),.cost-tbl th:nth-child(2){white-space:nowrap}
+.art-cta{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:28px 24px;margin:36px 0;text-align:center}
+.art-cta h3{font-size:20px;font-weight:800;margin:0 0 8px;color:var(--navy)}
+.art-cta p{color:var(--muted);margin:0 0 18px}
+.art-faq-q{font-weight:700;margin:20px 0 5px;color:var(--navy)}
+.art-sources{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.art-sources h3{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}
+.art-sources ol{margin:0;padding-left:18px}
+.art-sources li{margin-bottom:4px}
+.art-disc{font-size:13px;color:var(--muted);margin-top:24px;padding-top:14px;border-top:1px solid var(--line);line-height:1.55}
