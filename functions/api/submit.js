@@ -34,8 +34,12 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, message: "Missing or invalid required fields" }, 400);
   }
 
-  const ip = request.headers.get("CF-Connecting-IP") || "";
-  const ua = request.headers.get("User-Agent") || "";
+  // Test-only override: when the request carries x-rnh-test:1, allow ip/useragent
+  // from the payload so ping tests can vary source. The real funnel never sends
+  // this header, so production leads always use the true request ip/ua.
+  const isTestReq = request.headers.get("x-rnh-test") === "1";
+  const ip = (isTestReq && lead.ip) ? String(lead.ip) : (request.headers.get("CF-Connecting-IP") || "");
+  const ua = (isTestReq && lead.useragent) ? String(lead.useragent) : (request.headers.get("User-Agent") || "");
 
   // Normalized record (handy for logging / future fraud scoring).
   const record = {
