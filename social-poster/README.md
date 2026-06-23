@@ -1,54 +1,47 @@
-# Renue Home — Social Auto-Poster
+# Renue Home — Social Auto-Poster + Generator
 
-Posts branded cards to the Renue Home **Facebook Page** + **Instagram** on a schedule
-(Mon/Wed/Fri 9am CT) using the Meta Graph API. Runs as a **GitHub Action in this repo** — no
-extra server. Generated images are committed to `assets/social-posts/` so Cloudflare Pages
-serves them at a public URL (Instagram's API requires a public image URL).
+Posts branded cards to **Facebook**, **Instagram**, and **Pinterest** on a schedule, and
+**generates fresh cards by itself every week** from a vetted content bank. Runs entirely as
+GitHub Actions in this repo. No server.
 
-It runs in **safe dry-run mode until you add the `META_PAGE_TOKEN` secret**, so nothing posts
-until you flip it on.
+Two Actions:
+- **social-post** (Mon/Wed/Fri 9am CT) publishes the next card in the rotation to every platform
+  whose secrets are set. Safe dry-run until `META_PAGE_TOKEN` (or `PINTEREST_TOKEN`) exists.
+- **social-generate** (Sun 8am CT) composes new cards from the bank, renders them, and adds them
+  to the rotation. No secrets needed, fully autonomous.
+
+## How content stays fresh (and honest)
+`content-bank.json` holds the source material: 7 stat cards (each with a **real, cited source**)
+and 18 evergreen angles (tips, questions, checklists, myths, real-talk). `compose.mjs` pulls the
+next unused items, renders each with a **seeded palette** so a recycled item looks different next
+cycle, and never repeats until the whole bank has been used. There's **no LLM at runtime**, so
+nothing gets invented. To add new material, edit `content-bank.json`.
+
+**Copy rule (baked in):** no em dashes, no colons, no semicolons. Commas and periods only. Real
+cited stats over fluff. Emoji live in captions, never in the card art (they tofu in these fonts).
 
 ## Files
-- `themes.json` — the post templates (headline, subhead, caption, tag, alt).
-- `render.mjs` — renders the 1080×1080 cards → `assets/social-posts/*.png` and rebuilds
-  `content-calendar.json`. Run `npm install` then `node render.mjs`. (Needs `sharp`.)
-- `content-calendar.json` — the ordered post list the publisher reads.
-- `publish.mjs` — posts the next card to FB + IG; evergreen rotation via `state.json`. Pure
-  Node (no deps). `node publish.mjs --dry-run` to preview.
-- `state.json` — `{ "cursor": N }` rotation pointer (auto-committed by the Action).
-- `../.github/workflows/social-post.yml` — the cron + the secrets wiring.
+- `content-bank.json` — the source stats + angles. Edit this to add content.
+- `lib.mjs` — the rendering engine (layouts, fonts, palettes, square + Pinterest-pin render).
+- `compose.mjs` — `node compose.mjs [count] [--fresh]` builds new cards into the rotation.
+- `publish.mjs` — `node publish.mjs [--dry-run] [--platform=fb|ig|pin|all] [--id=…]` posts next.
+- `content-calendar.json` — the live rotation (auto-managed).
+- `state.json` / `bank-state.json` — rotation cursor / bank usage (auto-managed).
+- `fonts/` — the TTFs (Anton, Caveat, Permanent Marker, Poppins) so the Action can render.
+- `render.mjs` + `themes.json` — legacy manual renderer; `compose.mjs` is the path now.
 
-## Go-live (3 things, all yours)
-1. **Create the Meta app + token** — follow `../META-API-TOKEN-GUIDE.md`. You'll end up with:
-   App ID, **Page access token**, **Page ID**, **Instagram Business account id**.
-2. **Confirm Instagram is a Business account linked to the Page** (the guide's prerequisite).
-3. **Add three GitHub repo secrets** (repo → Settings → Secrets and variables → Actions → New
-   repository secret):
-   - `META_PAGE_TOKEN` = the long-lived Page token
-   - `META_PAGE_ID` = the Page id
-   - `IG_USER_ID` = the Instagram Business account id
+## Secrets (repo → Settings → Secrets and variables → Actions)
+- Facebook + Instagram: `META_PAGE_TOKEN`, `META_PAGE_ID`, `IG_USER_ID` (see `../META-API-TOKEN-GUIDE.md`)
+- Pinterest (optional): `PINTEREST_TOKEN`, `PINTEREST_BOARD_ID` (see `PINTEREST-API-TOKEN-GUIDE.md`)
 
-Then test once: repo → **Actions → social-post → Run workflow** (leave dry-run off). It posts
-the next card to both platforms. After that it runs automatically Mon/Wed/Fri.
+## Run / adjust
+- Test a post: **Actions → social-post → Run workflow**. Generate now: **social-generate → Run**.
+- Cadence: edit the `cron` lines in the two workflow files (UTC; 14:00 = 9am CDT, 13:00 = 8am CDT).
+- One-off specific post: `node publish.mjs --id=<calendar id>`.
 
-## Adjusting
-- **Cadence:** edit the `cron` in `social-post.yml` (it's UTC; 14:00 UTC = 9am CDT).
-- **Content:** edit `themes.json`, then `node render.mjs` to rebuild the cards + calendar.
-- **One-off / specific post:** `node publish.mjs --id=bathroom` or `--platform=ig`.
+## Local re-render (optional, needs fonts)
+`npm install` then put the TTFs from `fonts/` on the font path (`cp fonts/*.ttf ~/.fonts && fc-cache -f`),
+then `node compose.mjs 3`.
 
-## Voice & design rules (don't look like AI slop)
-- **No em dashes, no colons, no semicolons** in any card text or caption. Use commas and
-  periods. These punctuation marks are the easiest "written by AI" tells.
-- **Be perfect by being imperfect.** Vary the layouts, fonts, palettes and sizes so the feed
-  never looks templated. Lowercase, a casual aside, a question, a doodle = good.
-- **Real beats fluff.** Use actual stats and cite the source on the card. Emoji belong in the
-  caption, not baked into the image (they tofu in these fonts).
-
-## Notes / guardrails
-- Captions use honest, advertising/matching-service framing (no outcome guarantees) to stay
-  within FTC + Meta rules and match the site disclaimers. Keep new captions in that voice.
-- The Page token is long-lived but can be invalidated (password change / manual revoke). If the
-  Action starts failing on auth, regenerate the token (guide) and update the secret.
-- **Moving to the Hermes box later:** it's just `node publish.mjs` on a cron with the same three
-  env vars — drop this folder on Hermes and add a crontab line instead of the Action. The image
-  hosting (Cloudflare Pages) stays the same.
+## Move to the Hermes box later
+Same scripts on a cron with the same env vars. Cloudflare Pages keeps hosting the images.

@@ -1,83 +1,172 @@
 [
   {
-    "id": "stat-windows",
+    "id": "spring-refresh-0",
+    "bank_id": "spring-refresh",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/spring-refresh-0.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/spring-refresh-0-pin.png",
+    "caption": "new season, good excuse 🌱 whether it's paint, a new bathroom, or finally redoing the floors, spring is a great time to start.\n\ncompare free quotes from local pros at renuehome.com.",
+    "alt": "Spring is for fresh starts at home.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-kitchen-1",
+    "bank_id": "stat-kitchen",
     "layout": "stat",
-    "image_path": "/assets/social-posts/stat-windows.png",
-    "image_url": "https://renuehome.com/assets/social-posts/stat-windows.png",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-kitchen-1.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-kitchen-1-pin.png",
+    "caption": "good news for kitchen dreamers. a minor kitchen remodel recoups around 113% at resale, per the 2025 Cost vs. Value Report. you can actually come out ahead.\n\nwant to see what one would cost near you? renuehome.com\n\n#kitchenremodel #homeimprovement",
+    "alt": "A minor kitchen remodel recoups about 113 percent at resale.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-exterior-2",
+    "bank_id": "stat-exterior",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-exterior-2.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-exterior-2-pin.png",
+    "caption": "here's a pattern worth knowing. 8 of the 10 best ROI home projects in 2025 are exterior replacements (doors, siding, windows, roof). curb appeal really does pay.\n\nplanning one? renuehome.com gets you free local quotes.\n\n#curbappeal #homevalue",
+    "alt": "Eight of the top ten ROI home projects in 2025 are exterior replacements.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-windows-3",
+    "bank_id": "stat-windows",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-windows-3.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-windows-3-pin.png",
     "caption": "ok this one actually surprised me 👀 if you've still got the original single-pane windows, ENERGY STAR says new ones can shave around 13% off your energy bills.\n\ncurious what replacements run in your area? compare free quotes at renuehome.com, no obligation.\n\n#energysavings #homeimprovement",
-    "alt": "Did you know new ENERGY STAR windows can cut energy bills by about 13 percent vs single-pane windows. Source ENERGY STAR.",
+    "alt": "New ENERGY STAR windows can cut energy bills by about 13 percent vs single-pane. Source ENERGY STAR.",
     "status": "pending"
   },
   {
-    "id": "tip-three-quotes",
+    "id": "tip-three-quotes-4",
+    "bank_id": "tip-three-quotes",
     "layout": "note",
-    "image_path": "/assets/social-posts/tip-three-quotes.png",
-    "image_url": "https://renuehome.com/assets/social-posts/tip-three-quotes.png",
-    "caption": "friendly reminder from someone who has seen the bills. get THREE quotes before you sign anything. the spread between contractors can be wild.\n\nrenue home makes it easy, one form, a few local pros, you compare. renuehome.com\n\nwhat's the biggest quote difference you've ever gotten? 👇",
-    "alt": "Handwritten tip, always get 3 quotes before you sign anything. It can save you thousands.",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-three-quotes-4.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-three-quotes-4-pin.png",
+    "caption": "friendly reminder from someone who has seen the bills. get THREE quotes before you sign anything. the spread between contractors can be wild.\n\nrenue home makes it easy, one form, a few local pros, you compare. renuehome.com\n\nwhat's the biggest quote gap you've ever gotten? 👇",
+    "alt": "Tip, always get 3 quotes before you sign anything.",
     "status": "pending"
   },
   {
-    "id": "stat-garage-door",
-    "layout": "stat",
-    "image_path": "/assets/social-posts/stat-garage-door.png",
-    "image_url": "https://renuehome.com/assets/social-posts/stat-garage-door.png",
-    "caption": "plot twist. the home upgrade with the best resale ROI in 2025 isn't a kitchen or a bath, it's a new garage door. 268%, per the Cost vs. Value Report.\n\nthinking about it? compare local quotes free at renuehome.com.\n\n#homevalue #curbappeal #homeimprovement",
-    "alt": "268 percent return at resale on a new garage door, the number one home upgrade for ROI in 2025. Source 2025 Cost vs Value Report.",
-    "status": "pending"
-  },
-  {
-    "id": "which-room-first",
-    "layout": "question",
-    "image_path": "/assets/social-posts/which-room-first.png",
-    "image_url": "https://renuehome.com/assets/social-posts/which-room-first.png",
-    "caption": "settle a debate for us 😅 you've got $10k to put into ONE part of your home. where's it going, kitchen, bath, windows, or roof?\n\ndrop your pick below. and if you're actually planning one, renuehome.com gets you free quotes from local pros.",
-    "alt": "You've got $10,000. Which room gets it? Kitchen, bathroom, windows, or roof?",
-    "status": "pending"
-  },
-  {
-    "id": "contractor-checklist",
-    "layout": "checklist",
-    "image_path": "/assets/social-posts/contractor-checklist.png",
-    "image_url": "https://renuehome.com/assets/social-posts/contractor-checklist.png",
-    "caption": "save this one 📌 four things to check before you hand anyone a deposit.\n\n✔ license + insurance\n✔ the quote in writing\n✔ a couple references\n✔ a real start and finish timeline\n\nthe pros in the renue home network are independent local companies, so you still vet them. this just helps. renuehome.com",
-    "alt": "Before you hire a contractor. License and insurance, everything in writing, ask for references, a real timeline.",
-    "status": "pending"
-  },
-  {
-    "id": "drafty-windows-marker",
-    "layout": "marker",
-    "image_path": "/assets/social-posts/drafty-windows-marker.png",
-    "image_url": "https://renuehome.com/assets/social-posts/drafty-windows-marker.png",
-    "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com",
-    "alt": "Drafty windows are heating the whole street.",
-    "status": "pending"
-  },
-  {
-    "id": "myth-comparing",
-    "layout": "myth",
-    "image_path": "/assets/social-posts/myth-comparing.png",
-    "image_url": "https://renuehome.com/assets/social-posts/myth-comparing.png",
-    "caption": "the \"i'll get around to it\" home project, meet the 2 minute version.\n\nthe myth is that comparing contractors is a pain. the reality is one short form on renuehome.com and local pros reach out to you. you compare on your own time.\n\nno obligation, ever.",
-    "alt": "Myth, comparing home pros is a hassle. Truth, one short form, local pros reach out, you pick.",
-    "status": "pending"
-  },
-  {
-    "id": "no-pressure",
+    "id": "no-pressure-5",
+    "bank_id": "no-pressure",
     "layout": "realtalk",
-    "image_path": "/assets/social-posts/no-pressure.png",
-    "image_url": "https://renuehome.com/assets/social-posts/no-pressure.png",
+    "image_url": "https://renuehome.com/assets/social-posts/no-pressure-5.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/no-pressure-5-pin.png",
     "caption": "we built renue home to be the opposite of the runaround. answer a few questions, get matched with local pros, compare free quotes. you're in control the whole way.\n\nrenuehome.com 🏡",
-    "alt": "No pressure. No pushy sales calls up front. Just real quotes you can actually compare.",
+    "alt": "No pressure, no pushy sales calls, just real quotes you can compare.",
     "status": "pending"
   },
   {
-    "id": "summer-projects",
-    "layout": "marker",
-    "image_path": "/assets/social-posts/summer-projects.png",
-    "image_url": "https://renuehome.com/assets/social-posts/summer-projects.png",
-    "caption": "long days, dry weather, this is the season stuff actually gets done ☀️ whatever's on your list (finally fixing that roof?), start by comparing free quotes from local pros.\n\nrenuehome.com",
-    "alt": "Summer is when home projects actually happen.",
+    "id": "stat-bath-6",
+    "bank_id": "stat-bath",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-bath-6.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-bath-6-pin.png",
+    "caption": "a midrange bathroom remodel recoups about 80% at resale (2025 Cost vs. Value Report). so you get a fresh bathroom now and most of it back later.\n\ncompare free quotes from local pros at renuehome.com.\n\n#bathroomremodel #homevalue",
+    "alt": "A midrange bathroom remodel recoups about 80 percent at resale.",
+    "status": "pending"
+  },
+  {
+    "id": "myth-quotes-cost-7",
+    "bank_id": "myth-quotes-cost",
+    "layout": "myth",
+    "image_url": "https://renuehome.com/assets/social-posts/myth-quotes-cost-7.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/myth-quotes-cost-7-pin.png",
+    "caption": "let's bust a common one. people assume getting quotes costs something. it doesn't. comparing quotes from local pros on renuehome.com is free, with no obligation to hire anyone.\n\nthat's the whole idea. 🏡",
+    "alt": "Myth, getting quotes costs money. Truth, comparing quotes is free.",
+    "status": "pending"
+  },
+  {
+    "id": "tip-permits-8",
+    "bank_id": "tip-permits",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-permits-8.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-permits-8-pin.png",
+    "caption": "boring but important. on a big remodel, make sure your contractor actually pulls permits. unpermitted work can come back to bite you when you sell.\n\nwant pros who do it right? compare local quotes at renuehome.com.",
+    "alt": "Tip, make sure your contractor pulls permits on a big remodel.",
+    "status": "pending"
+  },
+  {
+    "id": "dream-project-9",
+    "bank_id": "dream-project",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/dream-project-9.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/dream-project-9-pin.png",
+    "caption": "let's daydream for a sec ✨ money no object, what's the home project you'd do first?\n\ntell us below. when you're ready to price the real version, renuehome.com gets you free local quotes.",
+    "alt": "Money aside, what is your dream home project?",
+    "status": "pending"
+  },
+  {
+    "id": "which-room-first-10",
+    "bank_id": "which-room-first",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/which-room-first-10.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/which-room-first-10-pin.png",
+    "caption": "settle a debate for us 😅 you've got $10k to put into ONE part of your home. where's it going, kitchen, bath, windows, or roof?\n\ndrop your pick below. and if you're actually planning one, renuehome.com gets you free quotes from local pros.",
+    "alt": "You have 10 thousand dollars, which room gets it?",
+    "status": "pending"
+  },
+  {
+    "id": "contractor-checklist-11",
+    "bank_id": "contractor-checklist",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/contractor-checklist-11.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/contractor-checklist-11-pin.png",
+    "caption": "save this one 📌 four things to check before you hand anyone a deposit.\n\n✔ license + insurance\n✔ the quote in writing\n✔ a couple references\n✔ a real start and finish timeline\n\nthe pros in the renue home network are independent local companies, so you still vet them. this just helps. renuehome.com",
+    "alt": "Before you hire a contractor checklist.",
+    "status": "pending"
+  },
+  {
+    "id": "red-flags-12",
+    "bank_id": "red-flags",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/red-flags-12.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/red-flags-12-pin.png",
+    "caption": "trust your gut, but also trust this list 🚩 walk away if you see\n\n✔ cash only with a big deposit\n✔ no written quote\n✔ pressure to sign today\n✔ no license number\n\ncompare vetted local pros the calm way at renuehome.com.",
+    "alt": "Contractor red flags checklist.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-hvac-13",
+    "bank_id": "stat-hvac",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-hvac-13.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-hvac-13-pin.png",
+    "caption": "about HALF of your home's energy bill goes to heating and cooling, per the EIA. which is exactly why a tune-up or a more efficient system can pay for itself.\n\ncompare free HVAC quotes near you at renuehome.com.\n\n#hvac #energysavings",
+    "alt": "About half of home energy use goes to heating and cooling.",
+    "status": "pending"
+  },
+  {
+    "id": "tip-gutters-14",
+    "bank_id": "tip-gutters",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-gutters-14.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-gutters-14-pin.png",
+    "caption": "small chore, big payoff. clogged gutters send water where you don't want it, straight toward your foundation. knock it out before the next big storm. 🌧️\n\nneed a pro for the gutters or the damage they caused? renuehome.com",
+    "alt": "Tip, clean your gutters before the first big storm.",
+    "status": "pending"
+  },
+  {
+    "id": "quote-checklist-15",
+    "bank_id": "quote-checklist",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/quote-checklist-15.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/quote-checklist-15-pin.png",
+    "caption": "a real quote is more than a number. before you compare, make sure each one spells out 👇\n\n✔ the full scope of work\n✔ materials and labor\n✔ a start date\n✔ payment terms\n\ncompare apples to apples at renuehome.com.",
+    "alt": "What a real quote includes checklist.",
+    "status": "pending"
+  },
+  {
+    "id": "tip-deposit-16",
+    "bank_id": "tip-deposit",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-deposit-16.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-deposit-16-pin.png",
+    "caption": "rule of thumb worth saving. a reasonable deposit is normal. paying for the whole job before it starts is not. 🚩\n\ncompare quotes from local pros at renuehome.com and pay as the work gets done.",
+    "alt": "Tip, never pay 100 percent up front.",
     "status": "pending"
   }
 ]

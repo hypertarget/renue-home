@@ -1,19 +1,9 @@
 {
   "name": "renue-social-poster",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Auto-poster for Renue Home (Facebook Page + Instagram via Meta Graph API).",
-  "scripts": {
-    "render": "node render.mjs",
-    "publish": "node publish.mjs"
-  },
-  "dependencies": {
-    "@fontsource/anton": "^5.2.7",
-    "@fontsource/archivo-black": "^5.2.8",
-    "@fontsource/caveat": "^5.2.8",
-    "@fontsource/permanent-marker": "^5.2.7",
-    "@fontsource/poppins": "^5.2.7",
-    "sharp": "^0.33.5"
-  }
+  "description": "Auto-poster + autonomous generator for Renue Home (Facebook, Instagram, Pinterest).",
+  "scripts": { "compose": "node compose.mjs", "publish": "node publish.mjs" },
+  "dependencies": { "sharp": "^0.33.5" }
 }
