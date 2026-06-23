@@ -4,49 +4,191 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Home Improvement Guides and Cost Data — Renue Home</title>
-<meta name="description" content="Honest, sourced home improvement guides and cost data from Renue Home. Real 2026 price ranges and how to choose a pro, by project type." />
+<meta name="description" content="Sourced cost guides and hiring advice for bathroom remodels, window replacement, roofing, HVAC, and more. Real 2026 price ranges with citations, updated as new data comes out." />
 <link rel="canonical" href="https://renuehome.com/guides" />
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/styles.css">
 <style>
-  .guide .ghub{margin:18px 0 30px}
-  .guide .gcluster{margin:26px 0}
-  .guide .gcluster h2{margin-bottom:6px}
-  .guide .glist{list-style:none;padding:0;margin:10px 0}
-  .guide .glist li{margin:0 0 10px}
-  .guide .glist a{font-weight:600;color:#14B8A6;text-decoration:none}
-  .guide .glist .gd{display:block;font-weight:400;color:#5a6b66;font-size:14px}
-  .guide .soon{color:#8a9692;font-weight:400}
+  .ghero{padding:44px 0 12px;border-bottom:1px solid #e7eaef;margin-bottom:32px}
+  .ghero h1{font-size:clamp(26px,3.8vw,38px);font-weight:800;margin:0 0 12px;color:#0F1A23}
+  .ghero p{color:#5b6670;font-size:16px;max-width:640px;margin:0;line-height:1.6}
+  .gpromise{display:flex;gap:18px;flex-wrap:wrap;margin-top:16px}
+  .gpromise span{font-size:13px;font-weight:700;color:#14B8A6;display:inline-flex;align-items:center;gap:5px}
+  .gclusters{display:flex;flex-direction:column;gap:36px;margin-bottom:48px}
+  .gcluster{border:1px solid #e7eaef;border-radius:16px;overflow:hidden}
+  .gcluster-head{padding:16px 22px;background:#f6f8fa;border-bottom:1px solid #e7eaef;display:flex;align-items:center;gap:12px}
+  .gcluster-head h2{font-size:17px;font-weight:800;margin:0;color:#0F1A23}
+  .gcount{font-size:12px;font-weight:700;color:#14B8A6;background:#e8f9f7;border-radius:99px;padding:2px 8px}
+  .glist{list-style:none;padding:0;margin:0}
+  .gitem{display:flex;align-items:flex-start;gap:14px;padding:16px 22px;border-bottom:1px solid #f0f2f5}
+  .gitem:last-child{border-bottom:none}
+  .gitem-icon{width:36px;height:36px;border-radius:9px;flex:none;display:flex;align-items:center;justify-content:center}
+  .gitem-icon.cost{background:#e8f9f7}
+  .gitem-icon.guide{background:#f0f0ff}
+  .gitem-icon.soon{background:#f5f5f5}
+  .gitem-body{flex:1;min-width:0}
+  .gitem-body a{font-weight:700;font-size:15px;color:#0F1A23;text-decoration:none;display:block;margin-bottom:3px}
+  .gitem-body a:hover{color:#14B8A6}
+  .gitem-body .gd{font-size:13.5px;color:#5b6670;line-height:1.5}
+  .gitem-body .gsoon{font-size:13px;font-weight:700;color:#9aa5af}
+  .gbadge{font-size:11px;font-weight:700;border-radius:5px;padding:2px 6px;display:inline-block;margin-left:6px;vertical-align:middle}
+  .gbadge.new{background:#e8f9f7;color:#0e8c80}
+  .gitem-body .gsoon-label{font-size:13.5px;font-weight:600;color:#9aa5af;display:block;margin-bottom:3px}
+  .gmore{padding:16px 22px;background:#fafbfc;font-size:13.5px;color:#5b6670;border-top:1px solid #f0f2f5}
+  .gmore a{color:#14B8A6;text-decoration:none;font-weight:600}
+  .ghub-cta{background:#f3f8f6;border:1px solid #cde8e3;border-radius:16px;padding:26px 24px;text-align:center;margin-bottom:48px}
+  .ghub-cta strong{display:block;font-size:17px;color:#0F1A23;margin-bottom:8px}
+  .ghub-cta p{color:#5b6670;font-size:14.5px;margin:0 0 16px}
+  .ghub-cta a{display:inline-block;background:#14B8A6;color:#fff;font-weight:700;padding:13px 26px;border-radius:10px;text-decoration:none;font-size:15px}
+  .gnote{font-size:13px;color:#9aa5af;margin-top:32px;padding-top:20px;border-top:1px solid #e7eaef;line-height:1.55}
+  svg.gi{width:18px;height:18px;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none}
+  @media(max-width:600px){
+    .gitem{padding:14px 16px}
+    .gcluster-head{padding:13px 16px}
+    .gmore{padding:13px 16px}
+  }
 </style>
 <script>window.RENUE_PAGE="guide";window.RENUE_PHONE="(877) 704-1720";window.RENUE_NONCONSENT_PHONE="(877) 704-1720";</script>
 <script defer src="/funnel.js"></script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"CollectionPage","name":"Home Improvement Guides and Cost Data","url":"https://renuehome.com/guides","publisher":{"@type":"Organization","name":"Renue Home","url":"https://renuehome.com"}}
+{"@context":"https://schema.org","@type":"CollectionPage","name":"Home Improvement Guides and Cost Data","url":"https://renuehome.com/guides","description":"Sourced cost guides and hiring advice for bathroom, windows, roofing, HVAC, kitchen, and more. Real 2026 price ranges with citations.","publisher":{"@type":"Organization","name":"Renue Home","url":"https://renuehome.com"}}
 </script>
 </head>
 <body>
-<div class="wrap"><article class="legal guide">
+<div class="wrap">
 
-  <h1>Home Improvement Guides and Cost Data</h1>
-  <p class="ghub">Straight, sourced answers on what home projects really cost in 2026 and how to hire the right pro. We cite our numbers and we update them as new data comes out. No fluff, no fake reviews.</p>
-
-  <div class="gcluster">
-    <h2>Bathroom</h2>
-    <ul class="glist">
-      <li><a href="/guides/bathroom-remodel-cost">Bathroom Remodel Cost in 2026</a>
-        <span class="gd">Real ranges for a full remodel, walk-in shower, and tub-to-shower conversion, plus what drives the price.</span></li>
-      <li class="soon">How to choose a bathroom remodeler <span class="soon">(coming soon)</span></li>
-    </ul>
+  <div class="ghero">
+    <h1>Home Improvement Guides</h1>
+    <p>Straight, sourced answers on what home projects really cost in 2026 and how to choose the right professional. We cite our numbers and update them as new data comes out.</p>
+    <div class="gpromise">
+      <span><svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><path d="M20 6 9 17l-5-5"/></svg>All costs sourced and cited</span>
+      <span><svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><path d="M20 6 9 17l-5-5"/></svg>No fake reviews or invented stats</span>
+      <span><svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><path d="M20 6 9 17l-5-5"/></svg>Updated for 2026</span>
+    </div>
   </div>
 
-  <div class="gcluster">
-    <h2>More projects</h2>
-    <p class="soon">Cost guides for windows, roofing, HVAC, kitchen, flooring, and more are on the way. Want a quote in the meantime? Pick your project on the <a href="/#projects">homepage</a> and compare local pros in about a minute.</p>
+  <div class="gclusters">
+
+    <!-- BATHROOM -->
+    <div class="gcluster">
+      <div class="gcluster-head">
+        <svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><path d="M5 11V6a2 2 0 0 1 4 0"/><path d="M3 11h18v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M7 18l-1 3M17 18l1 3"/></svg>
+        <h2>Bathroom</h2>
+        <span class="gcount">2 guides</span>
+      </div>
+      <ul class="glist">
+        <li class="gitem">
+          <div class="gitem-icon cost"><svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/><circle cx="12" cy="12" r="4"/></svg></div>
+          <div class="gitem-body">
+            <a href="/guides/bathroom-remodel-cost">Bathroom Remodel Cost in 2026</a>
+            <span class="gd">National ranges for a full remodel ($8,000 to $45,000), walk-in shower, and tub-to-shower conversion, plus what drives the price.</span>
+          </div>
+        </li>
+        <li class="gitem">
+          <div class="gitem-icon cost"><svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2"/><circle cx="12" cy="12" r="4"/></svg></div>
+          <div class="gitem-body">
+            <a href="/guides/walk-in-shower-cost">Walk-In Shower Cost in 2026 <span class="gbadge new">New</span></a>
+            <span class="gd">Detailed ranges by project type, from a basic tub swap ($1,500 to $4,000) to a custom tile shower with frameless glass ($7,000 to $14,000).</span>
+          </div>
+        </li>
+        <li class="gitem">
+          <div class="gitem-icon soon"><svg class="gi" viewBox="0 0 24 24" stroke="#b0bec5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="gitem-body">
+            <span class="gsoon-label">How to Choose a Bathroom Remodeler</span>
+            <span class="gd">Questions to ask, red flags to watch for, and what to look for in a contract. Coming soon.</span>
+          </div>
+        </li>
+        <li class="gitem">
+          <div class="gitem-icon soon"><svg class="gi" viewBox="0 0 24 24" stroke="#b0bec5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="gitem-body">
+            <span class="gsoon-label">Bathroom Tile Cost in 2026</span>
+            <span class="gd">Material and labor ranges by tile type, from ceramic to large-format porcelain. Coming soon.</span>
+          </div>
+        </li>
+      </ul>
+      <div class="gmore">Ready to compare quotes? <a href="/bathroom">Get free bathroom estimates &rsaquo;</a></div>
+    </div>
+
+    <!-- WINDOWS -->
+    <div class="gcluster">
+      <div class="gcluster-head">
+        <svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M4 12h16"/></svg>
+        <h2>Windows</h2>
+        <span class="gcount">Coming soon</span>
+      </div>
+      <ul class="glist">
+        <li class="gitem">
+          <div class="gitem-icon soon"><svg class="gi" viewBox="0 0 24 24" stroke="#b0bec5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="gitem-body">
+            <span class="gsoon-label">Window Replacement Cost in 2026</span>
+            <span class="gd">Per-window pricing ($300 to $900 installed) and whole-home estimates by window type and frame material. Coming soon.</span>
+          </div>
+        </li>
+        <li class="gitem">
+          <div class="gitem-icon soon"><svg class="gi" viewBox="0 0 24 24" stroke="#b0bec5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="gitem-body">
+            <span class="gsoon-label">How to Choose a Window Company</span>
+            <span class="gd">What to check on warranties, installation certification, and contract terms before you sign. Coming soon.</span>
+          </div>
+        </li>
+      </ul>
+      <div class="gmore">Compare local window installers now: <a href="/windows">Get free window quotes &rsaquo;</a></div>
+    </div>
+
+    <!-- ROOFING -->
+    <div class="gcluster">
+      <div class="gcluster-head">
+        <svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><path d="M3 11l9-7 9 7"/><path d="M5 10v9h14v-9"/></svg>
+        <h2>Roofing</h2>
+        <span class="gcount">Coming soon</span>
+      </div>
+      <ul class="glist">
+        <li class="gitem">
+          <div class="gitem-icon soon"><svg class="gi" viewBox="0 0 24 24" stroke="#b0bec5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="gitem-body">
+            <span class="gsoon-label">Roof Replacement Cost in 2026</span>
+            <span class="gd">What homeowners pay by roof size and material, from asphalt shingle ($6,500 to $20,000) to metal and tile. Coming soon.</span>
+          </div>
+        </li>
+        <li class="gitem">
+          <div class="gitem-icon soon"><svg class="gi" viewBox="0 0 24 24" stroke="#b0bec5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="gitem-body">
+            <span class="gsoon-label">How to Choose a Roofing Contractor</span>
+            <span class="gd">Licensing, insurance, shingle certifications, and contract terms to verify before work starts. Coming soon.</span>
+          </div>
+        </li>
+      </ul>
+      <div class="gmore">Compare local roofers now: <a href="/roofing">Get free roofing quotes &rsaquo;</a></div>
+    </div>
+
+    <!-- MORE COMING -->
+    <div class="gcluster">
+      <div class="gcluster-head">
+        <svg class="gi" viewBox="0 0 24 24" stroke="#14B8A6"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+        <h2>More guides coming</h2>
+      </div>
+      <ul class="glist">
+        <li class="gitem">
+          <div class="gitem-icon soon"><svg class="gi" viewBox="0 0 24 24" stroke="#b0bec5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div class="gitem-body">
+            <span class="gsoon-label">HVAC, Kitchen, Flooring, Solar, and more</span>
+            <span class="gd">Cost guides and hiring advice for every vertical are on the way. In the meantime, get quotes for any project on the <a href="/#projects" style="color:#14B8A6;text-decoration:none;font-weight:600">homepage</a>.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
   </div>
 
-  <p class="note">Renue Home is a free advertising and matching service that connects homeowners with independent local professionals. Renue Home is not a contractor and does not perform, price, or guarantee any work. Costs shown in our guides are general estimates from third-party sources and are not quotes.</p>
+  <div class="ghub-cta">
+    <strong>Need a quote now?</strong>
+    <p>Pick your project and compare free, no-obligation quotes from local professionals in your area. No account needed.</p>
+    <a href="/#projects">Start My Home Project</a>
+  </div>
 
-</article></div>
+  <p class="gnote">Renue Home is a free advertising and matching service that connects homeowners with independent local professionals. Renue Home is not a contractor and does not perform, price, or guarantee any work. Costs shown in our guides are general estimates from third-party sources and are not quotes.</p>
+
+</div>
 </body>
 </html>
