@@ -12,7 +12,7 @@
   var TRUSTEDFORM = (window.RENUE_TRUSTEDFORM !== false);
   // Jornaya / LeadiD: set window.RENUE_JORNAYA_CAMPAIGN to your Jornaya campaign UUID to start
   // generating a LeadiD token on every lead (alongside TrustedForm). Empty = off until set.
-  var JORNAYA = window.RENUE_JORNAYA_CAMPAIGN || "";
+  var JORNAYA = window.RENUE_JORNAYA_CAMPAIGN || "48EE243A-8FC1-3FD8-F71B-AE0FF3D94A70"; // Renue Home Jornaya campaign
   // Analytics / ads — OFF until an ID is set (set the global in each page head, or fill in below).
   // GA4 is the hub: page_view (auto on load), generate_lead (on submit), call_click (on tel: taps).
   // Link GA4 -> Google Ads and import those key events as conversions (no separate Ads snippet needed).
