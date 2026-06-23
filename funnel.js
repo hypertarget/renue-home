@@ -20,6 +20,8 @@
   var ADS_ID     = window.RENUE_ADS_ID || "AW-18253863009";      // Renue Home Google Ads (loads gtag for Ads too)
   // Google Ads conversion action for a form submit ("RNH Lead Form Submit"). send_to = AW id / label.
   var ADS_CONVERSION = window.RENUE_ADS_CONVERSION || "AW-18253863009/Jhf8CNKasMQcEOGwj4BE";
+  // Google Ads click-to-call conversion ("RNH Click-to-Call", Contact category, secondary/observational).
+  var ADS_CALL_CONVERSION = window.RENUE_ADS_CALL_CONVERSION || "AW-18253863009/bfThCOfXucQcEOGwj4BE";
   var ADS_DEFAULT_VALUE = 40; // fallback conversion value when no accepted bid is returned
   var META_PIXEL = window.RENUE_META_PIXEL || "";  // Meta/Facebook pixel id (optional)
   // Retreaver Dynamic Number Insertion: each visitor gets a unique tracking number that carries
@@ -121,6 +123,7 @@
       var a = e.target && e.target.closest ? e.target.closest('a[href^="tel:"]') : null;
       if(!a) return;
       try{ if(window.gtag) gtag('event','call_click',{vertical:(window.RENUE_VERTICAL||""),page:location.pathname}); }catch(_){}
+      try{ if(window.gtag && ADS_ID) gtag('event','conversion',{ send_to:ADS_CALL_CONVERSION }); }catch(_){}
       try{ if(window.fbq) fbq('track','Contact'); }catch(_){}
     }, true);
   }
