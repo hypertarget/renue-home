@@ -69,8 +69,19 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
+  // Conversion value for Google Ads = accepted buyer payout from Twyne (if any), else null (client falls back).
+  const payoutRaw = twyne && twyne.body ? twyne.body.publisher_payout : undefined;
+  const payout = payoutRaw != null ? parseFloat(payoutRaw) : NaN;
+  const txnId = (twyne && twyne.leadid) ? String(twyne.leadid) : (record.jornayaLeadiD || "");
+
   const callNumber = (env && env.CALL_NUMBER) || "";
-  return json({ ok: true, callNumber, twyne });
+  return json({
+    ok: true,
+    callNumber,
+    value: payout > 0 ? payout : null,
+    transaction_id: txnId,
+    twyne,
+  });
 }
 
 // Build the x-www-form-urlencoded body Twyne expects (FPI field grid).
