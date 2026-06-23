@@ -1,0 +1,53 @@
+name: social-post
+
+# Auto-posts the next Renue Home card to Facebook + Instagram on a schedule.
+# Runs in safe DRY-RUN automatically until the META_PAGE_TOKEN secret is added,
+# so merging this file does NOT post anything on its own.
+
+on:
+  schedule:
+    - cron: "0 14 * * 1,3,5"   # Mon/Wed/Fri 14:00 UTC = 9am CT (CDT)
+  workflow_dispatch:            # lets you run it manually from the Actions tab
+    inputs:
+      dry_run:
+        description: "Force dry run (print only)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # to commit the rotation cursor (state.json) back
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Publish next post
+        env:
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: |
+          cd social-poster
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            node publish.mjs --dry-run
+          else
+            node publish.mjs
+          fi
+
+      - name: Commit rotation cursor
+        run: |
+          if ! git diff --quiet -- social-poster/state.json; then
+            git config user.name "renue-social-bot"
+            git config user.email "bot@renuehome.com"
+            git add social-poster/state.json
+            git commit -m "social: advance rotation cursor"
+            git push
+          else
+            echo "No cursor change (dry run or no token) — nothing to commit."
+          fi
