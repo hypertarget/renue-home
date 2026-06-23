@@ -1,0 +1,89 @@
+[
+  {
+    "slug": "stat-windows",
+    "layout": "stat",
+    "bg": "#0F1A23", "ink": "#FFFFFF", "accent": "#7ED957",
+    "kicker": "DID YOU KNOW",
+    "number": "~13%",
+    "support": "New ENERGY STAR windows can cut a home's energy bills by about this much vs. old single-pane. Your wallet says thanks.",
+    "source": "via ENERGY STAR",
+    "alt": "Did you know new ENERGY STAR windows can cut energy bills by about 13 percent vs single-pane windows. Source ENERGY STAR.",
+    "caption": "ok this one actually surprised me 👀 if you've still got the original single-pane windows, ENERGY STAR says new ones can shave around 13% off your energy bills.\n\ncurious what replacements run in your area? compare free quotes at renuehome.com, no obligation.\n\n#energysavings #homeimprovement"
+  },
+  {
+    "slug": "tip-three-quotes",
+    "layout": "note",
+    "bg": "#F6F0E2", "ink": "#1c2b1f", "accent": "#E1604A",
+    "lines": ["always get 3 quotes", "before you sign", "anything."],
+    "aside": "(it can save you $1,000s. seriously)",
+    "alt": "Handwritten tip, always get 3 quotes before you sign anything. It can save you thousands.",
+    "caption": "friendly reminder from someone who has seen the bills. get THREE quotes before you sign anything. the spread between contractors can be wild.\n\nrenue home makes it easy, one form, a few local pros, you compare. renuehome.com\n\nwhat's the biggest quote difference you've ever gotten? 👇"
+  },
+  {
+    "slug": "stat-garage-door",
+    "layout": "stat",
+    "bg": "#14B8A6", "ink": "#0F1A23", "accent": "#0F1A23",
+    "kicker": "BIGGEST BANG FOR YOUR BUCK",
+    "number": "268%",
+    "support": "Return at resale on a new garage door, the #1 home upgrade for ROI in 2025. Boring? Maybe. Worth it? Very.",
+    "source": "via the 2025 Cost vs. Value Report",
+    "alt": "268 percent return at resale on a new garage door, the number one home upgrade for ROI in 2025. Source 2025 Cost vs Value Report.",
+    "caption": "plot twist. the home upgrade with the best resale ROI in 2025 isn't a kitchen or a bath, it's a new garage door. 268%, per the Cost vs. Value Report.\n\nthinking about it? compare local quotes free at renuehome.com.\n\n#homevalue #curbappeal #homeimprovement"
+  },
+  {
+    "slug": "which-room-first",
+    "layout": "question",
+    "bg": "#7ED957", "ink": "#0F1A23", "accent": "#0F1A23",
+    "headline": "you've got $10k.",
+    "subhead": "which room gets it?",
+    "options": ["Kitchen", "Bathroom", "Windows", "Roof"],
+    "foot": "no wrong answers, drop your pick",
+    "alt": "You've got $10,000. Which room gets it? Kitchen, bathroom, windows, or roof?",
+    "caption": "settle a debate for us 😅 you've got $10k to put into ONE part of your home. where's it going, kitchen, bath, windows, or roof?\n\ndrop your pick below. and if you're actually planning one, renuehome.com gets you free quotes from local pros."
+  },
+  {
+    "slug": "contractor-checklist",
+    "layout": "checklist",
+    "bg": "#FFFFFF", "ink": "#0F1A23", "accent": "#14B8A6",
+    "title": "before you hire a contractor",
+    "items": ["license + insurance", "everything in writing", "ask for references", "a real timeline"],
+    "alt": "Before you hire a contractor. License and insurance, everything in writing, ask for references, a real timeline.",
+    "caption": "save this one 📌 four things to check before you hand anyone a deposit.\n\n✔ license + insurance\n✔ the quote in writing\n✔ a couple references\n✔ a real start and finish timeline\n\nthe pros in the renue home network are independent local companies, so you still vet them. this just helps. renuehome.com"
+  },
+  {
+    "slug": "drafty-windows-marker",
+    "layout": "marker",
+    "bg": "#F4CDA1", "ink": "#0F1A23", "accent": "#E1604A",
+    "lines": ["drafty windows", "are heating", "the whole street."],
+    "highlight": "the whole street.",
+    "alt": "Drafty windows are heating the whole street.",
+    "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com"
+  },
+  {
+    "slug": "myth-comparing",
+    "layout": "myth",
+    "bg": "#0F1A23", "ink": "#FFFFFF", "accent": "#7ED957",
+    "myth": "comparing home pros is a hassle.",
+    "truth": "one short form, local pros reach out, you pick. done.",
+    "alt": "Myth, comparing home pros is a hassle. Truth, one short form, local pros reach out, you pick.",
+    "caption": "the \"i'll get around to it\" home project, meet the 2 minute version.\n\nthe myth is that comparing contractors is a pain. the reality is one short form on renuehome.com and local pros reach out to you. you compare on your own time.\n\nno obligation, ever."
+  },
+  {
+    "slug": "no-pressure",
+    "layout": "realtalk",
+    "bg": "#F6F0E2", "ink": "#1c2b1f", "accent": "#14B8A6",
+    "text": "no pressure. no pushy sales calls up front. just real quotes you can actually compare.",
+    "sign": "from the renue home crew",
+    "alt": "No pressure. No pushy sales calls up front. Just real quotes you can actually compare.",
+    "caption": "we built renue home to be the opposite of the runaround. answer a few questions, get matched with local pros, compare free quotes. you're in control the whole way.\n\nrenuehome.com 🏡"
+  },
+  {
+    "slug": "summer-projects",
+    "layout": "marker",
+    "bg": "#0F1A23", "ink": "#FFFFFF", "accent": "#7ED957",
+    "lines": ["summer is when", "home projects", "actually happen."],
+    "highlight": "actually happen.",
+    "alt": "Summer is when home projects actually happen.",
+    "caption": "long days, dry weather, this is the season stuff actually gets done ☀️ whatever's on your list (finally fixing that roof?), start by comparing free quotes from local pros.\n\nrenuehome.com"
+  }
+]
