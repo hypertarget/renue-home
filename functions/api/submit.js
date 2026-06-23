@@ -1,11 +1,27 @@
 // Cloudflare Pages Function — POST /api/submit
-// Receives the lead, (later) fraud-scores it, ping-posts to buyers, and returns a pay-per-call number.
-// v1: validates + logs + echoes a call number if configured via env. Wire real services later.
+// Receives the lead, validates it, posts it to Twyne (HTM's ping-post platform),
+// and returns a pay-per-call number for the thank-you screen.
 //
-// Set these in Cloudflare Pages → Settings → Environment variables:
-//   LEAD_POST_URL, LEAD_POST_API_KEY, LEAD_BUYER_IDS, LEAD_MAX_BUYERS
-//   CALL_NUMBER (static Ringba/Retreaver number to show on the thank-you screen)
-//   ANURA_INSTANCE_ID / EHAWK_API_KEY (fraud scoring)
+// Twyne is the lead destination: renuehome.com -> Twyne -> ping-post to multiple buyers.
+// We do NOT post to individual buyers (e.g. BlueInk) directly; Twyne handles that.
+//
+// Optional env (Cloudflare Pages -> Settings -> Environment variables):
+//   CALL_NUMBER       static pay-per-call number shown on the thank-you screen
+//   TWYNE_SUBID1      publisher main traffic source id (defaults to "renuehome")
+//   TWYNE_TEST        "true" forces istest=true on every post (use on staging)
+
+// ---- Twyne campaign map -------------------------------------------------------
+// pid/sid are constant for this publisher+source; cid changes per vertical (per FPI).
+// projectField = the funnel step id that holds the buyer's "Project Type" (cq3).
+// Add a line here as each vertical's Field Publisher Instructions arrive.
+const TWYNE = {
+  endpoint: "https://htm.api.twyne.io/lead/submit",
+  pid: "139",
+  sid: "310",
+  campaigns: {
+    bathroom: { cid: "550", projectField: "project" }, // FPI #550 - Home Improvement - Bathroom
+  },
+};
 
 export async function onRequestPost({ request, env }) {
   let lead = {};
@@ -18,27 +34,97 @@ export async function onRequestPost({ request, env }) {
     return json({ ok: false, message: "Missing or invalid required fields" }, 400);
   }
 
-  // Normalized lead record (includes consent proof for TCPA + buyer transmission).
+  const ip = request.headers.get("CF-Connecting-IP") || "";
+  const ua = request.headers.get("User-Agent") || "";
+
+  // Normalized record (handy for logging / future fraud scoring).
   const record = {
     first: lead.first, last: lead.last, email: lead.email, phone: phoneDigits,
-    zip: lead.zip, address: lead.address || "", vertical: lead.vertical || "",
-    city: lead.city || "", answers: lead,                       // full quiz answers
+    zip: lead.zip, address: lead.address || "", city: lead.city || "", state: lead.state || "",
+    vertical: lead.vertical || "", answers: lead,
     consent: lead.consent === true, consentText: lead.consentText || "",
-    trustedFormCertUrl: lead.xxTrustedFormCertUrl || "",        // tamper-proof consent cert
-    trustedFormPingUrl: lead.xxTrustedFormPingUrl || "",
-    pageUrl: lead.pageUrl || "", ip: request.headers.get("CF-Connecting-IP") || "",
-    userAgent: request.headers.get("User-Agent") || "", ts: Date.now(),
+    trustedFormCertUrl: lead.xxTrustedFormCertUrl || "",
+    jornayaLeadiD: lead.universal_leadid || "",
+    pageUrl: lead.pageUrl || "", ip, userAgent: ua, ts: Date.now(),
   };
 
-  // INTEGRATE: fraud score (Anura/eHawk), phone/email verification.
-  // INTEGRATE: ping-post to LEAD_POST_URL with LEAD_BUYER_IDS (Boberdoo/LeadProsper/Phonexa),
-  //            forwarding record.trustedFormCertUrl so buyers can claim the consent cert.
-  if (env && env.LEAD_POST_URL && env.LEAD_POST_API_KEY) {
-    // await fetch(env.LEAD_POST_URL, { method:"POST", headers:{Authorization:`Bearer ${env.LEAD_POST_API_KEY}`}, body: JSON.stringify(record) });
+  // ---- Post to Twyne ----------------------------------------------------------
+  let twyne = { attempted: false };
+  const camp = TWYNE.campaigns[record.vertical];
+  if (camp) {
+    const isTest = (env && env.TWYNE_TEST === "true") || lead.istest === true || lead.istest === "true";
+    const params = buildTwyneParams(lead, record, camp, {
+      ip, ua, subid1: (env && env.TWYNE_SUBID1) || "renuehome", isTest,
+    });
+    try {
+      const r = await fetch(TWYNE.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json" },
+        body: params,
+      });
+      const body = await r.json().catch(() => ({}));
+      twyne = { attempted: true, httpStatus: r.status, status: body.status || "", reason: body.reason || "", leadid: body.leadid || "", body };
+    } catch (e) {
+      twyne = { attempted: true, error: String(e && e.message || e) };
+    }
   }
 
   const callNumber = (env && env.CALL_NUMBER) || "";
-  return json({ ok: true, callNumber, soldTo: Number((env && env.LEAD_MAX_BUYERS) || 4) });
+  return json({ ok: true, callNumber, twyne });
+}
+
+// Build the x-www-form-urlencoded body Twyne expects (FPI field grid).
+function buildTwyneParams(lead, record, camp, opt) {
+  const projectType = lead[camp.projectField] || lead.project || lead.nature || "";
+  const p = new URLSearchParams();
+  // required hidden ids
+  p.set("pid", TWYNE.pid);
+  p.set("sid", TWYNE.sid);
+  p.set("cid", camp.cid);
+  p.set("ip", opt.ip);
+  p.set("subid1", opt.subid1);
+  p.set("useragent", opt.ua);
+  // device + os (optional, derived from UA)
+  p.set("devicetype", deviceType(opt.ua));
+  p.set("os", osCode(opt.ua));
+  // consent proof
+  if (record.jornayaLeadiD) p.set("leadid", record.jornayaLeadiD);
+  if (record.trustedFormCertUrl) p.set("trustedform", record.trustedFormCertUrl);
+  // tracking
+  p.set("domain_url", record.pageUrl || "https://renuehome.com");
+  p.set("externalid", "rh-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8));
+  p.set("istest", opt.isTest ? "true" : "false");
+  // contact + location
+  p.set("first", record.first || "");
+  p.set("last", record.last || "");
+  p.set("email", record.email || "");
+  p.set("phone", record.phone || "");
+  p.set("zip", record.zip || "");
+  p.set("address1", record.address || "");
+  if (lead.address2) p.set("address2", lead.address2);
+  p.set("state", (record.state || "").toUpperCase().slice(0, 2));
+  p.set("city", record.city || "");
+  // custom questions
+  p.set("cq1", lead.credit || "");                 // Credit Rating
+  p.set("cq2", homeowner(lead.owner));             // Homeowner (Yes/No)
+  p.set("cq3", projectType);                        // Project Type
+  return p.toString();
+}
+
+function homeowner(v) {
+  if (!v) return "";
+  return /own|yes/i.test(v) ? "Yes" : "No";
+}
+function deviceType(ua) {
+  if (/tablet|ipad/i.test(ua)) return "T";
+  if (/mobi|iphone|android/i.test(ua)) return "M";
+  return "D";
+}
+function osCode(ua) {
+  if (/iphone|ipad|ios|mac os/i.test(ua)) return "I";
+  if (/android/i.test(ua)) return "A";
+  if (/windows/i.test(ua)) return "W";
+  return "";
 }
 
 // Optional: respond to non-POST so the route exists
