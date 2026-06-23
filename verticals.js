@@ -12,7 +12,11 @@
   // Tighter first question = single low-commitment tap. Contact is always last.
   var TIMELINE = {id:"timeline", type:"single", q:"When are you looking to start?", options:["As soon as possible","Within 1–3 months","3–6 months","Just researching"]};
   var OWNER = {id:"owner", type:"single", q:"Are you the homeowner?", options:["Yes, I own the home","No, I rent"]};
-  var CONTACT = {id:"contact", type:"contact", q:"Where should we send your matches?", sub:"Your information is secure & confidential."};
+  // Credit rating — buyers (e.g. BlueInk) use this for placement/payout. Skippable via "Not sure".
+  var CREDIT = {id:"credit", type:"single", q:"How would you rate your credit?", options:["Excellent","Good","Fair","Poor","Not sure"]};
+  // Contact split into two pages (like mrremodel): name + email first, then phone + address with the TCPA opt-in.
+  var NAME = {id:"name", type:"name", q:"Where should we send your free quotes?", sub:"Your information is secure & confidential."};
+  var CONTACT = {id:"contact", type:"contact", q:"Last step — how can a local pro reach you?", sub:"Add your phone and address so a pro can follow up with your quote."};
   function zip(t){ return {id:"zip", type:"zip", q:t||"Where would this project take place?", sub:"Enter your ZIP code & we will match you with local pros."}; }
 
   window.RENUE_VERTICALS = {
@@ -24,8 +28,9 @@
       steps:[
         {id:"nature", type:"single", q:"What kind of window project is this?", options:["Replace existing windows","Install new windows","Repair existing windows","Not sure yet"]},
         {id:"qty", type:"single", q:"How many windows are involved?", options:["1 window","2–3 windows","4–6 windows","7–9 windows","10+ windows"]},
+        {id:"material", type:"single", q:"What window material are you considering?", options:["Vinyl","Wood","Fiberglass","Aluminum / Metal","Not sure"]},
         zip("Where would this window project take place?"),
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"How much do replacement windows cost?", a:"Costs vary widely by window type, size, material, and how many you replace. Comparing local quotes is the best way to see real pricing for your project."},
@@ -61,9 +66,7 @@
       steps:[
         {id:"project", type:"single", q:"What type of bathroom project are you considering?", options:["Tub-to-shower conversion","Walk-in shower","Full bathroom remodel","Safety / mobility upgrade","Not sure yet"]},
         zip("Where is the project located?"),
-        {id:"features", type:"multi", q:"Any features you’re interested in?", sub:"Select all that apply — or skip.", options:["Low-step entry","Grab bars","Anti-slip flooring","Walk-in tub","Full remodel"]},
-        {id:"financing", type:"single", q:"Are you interested in financing options?", options:["Yes","No","Not sure"]},
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"How long does a bathroom remodel take?", a:"It depends on scope. Some tub-to-shower conversions can be completed quickly, while full remodels take longer. A local pro can give you a timeline."},
@@ -98,10 +101,9 @@
       benefitsHead:"Compare roofing options the easy way",
       steps:[
         {id:"project", type:"single", q:"What type of roofing help do you need?", options:["Roof replacement","Roof repair","Storm damage","New roof installation","Not sure yet"]},
+        {id:"roofing_type", type:"single", q:"What roofing material?", options:["Asphalt shingle","Metal","Tile","Flat / Other","Not sure"]},
         zip("Where is the roofing project located?"),
-        {id:"age", type:"single", q:"Approximately how old is your roof?", options:["0–5 years","6–10 years","11–20 years","20+ years","Not sure"]},
-        {id:"damage", type:"single", q:"Any leaks or storm damage?", options:["Yes — active leak","Yes — storm damage","No","Not sure"]},
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"Does insurance cover roof storm damage?", a:"It can, depending on your policy and the cause of damage. A local roofing pro can help you understand your options and document the damage."},
@@ -137,10 +139,10 @@
       steps:[
         {id:"system", type:"single", q:"What do you need help with?", options:["Air conditioning","Heating","Both heating & cooling","Not sure"]},
         {id:"nature", type:"single", q:"Is this a repair or replacement?", options:["Repair","Replacement","New installation","Not sure yet"]},
+        {id:"system_type", type:"single", q:"What type of system?", options:["Central AC","Ductless / Mini-split","Heat pump","Furnace","Boiler","Not sure"]},
         zip("Where do you need HVAC service?"),
-        {id:"working", type:"single", q:"Is the system currently working?", options:["Yes","No","Sometimes / intermittent"]},
         {id:"soon", type:"single", q:"How soon do you need service?", options:["Emergency / ASAP","This week","This month","Just researching"]},
-        OWNER, CONTACT
+        OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"How much does a new HVAC system cost?", a:"It depends on system size, efficiency, and your home. Comparing local quotes helps you understand fair pricing for your situation."},
@@ -175,9 +177,9 @@
       benefitsHead:"Compare kitchen remodel options with confidence",
       steps:[
         {id:"project", type:"single", q:"What kind of kitchen project?", options:["Full remodel","Cabinets","Countertops","Refresh / update","Not sure yet"]},
+        {id:"cabinet_job", type:"single", q:"Any cabinet work involved?", options:["Reface existing cabinets","Install new cabinets","Custom cabinets","No cabinet work","Not sure"]},
         zip("Where is the kitchen project located?"),
-        {id:"financing", type:"single", q:"Are you interested in financing options?", options:["Yes","No","Not sure"]},
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"How much does a kitchen remodel cost?", a:"Kitchen costs range widely based on size, materials, and scope. Comparing local quotes is the best way to estimate your project."},
@@ -212,9 +214,9 @@
       benefitsHead:"Shop flooring options the smart way",
       steps:[
         {id:"type", type:"single", q:"What type of flooring are you considering?", options:["Hardwood","Laminate / Vinyl","Tile","Carpet","Not sure yet"]},
+        {id:"inquiry_type", type:"single", q:"Installation or repair?", options:["New installation","Repair","Refinishing","Not sure"]},
         zip("Where is the flooring project located?"),
-        {id:"area", type:"single", q:"About how much area?", options:["1 room","2–3 rooms","Whole home","Not sure"]},
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"Which flooring is best for my home?", a:"It depends on your budget, lifestyle, and rooms involved. A local pro can recommend options that fit your needs."},
@@ -252,7 +254,7 @@
         zip("Where is the home located?"),
         {id:"bill", type:"single", q:"Roughly what’s your average monthly electric bill?", options:["Under $100","$100–$200","$200–$400","$400+","Not sure"]},
         {id:"roof", type:"single", q:"What’s the condition of your roof?", options:["Newer","Average","Older","Not sure"]},
-        OWNER, CONTACT
+        OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"Are there incentives or rebates for solar?", a:"Incentives vary by location and over time, and are not available to everyone. A local pro can explain what may apply to your situation."},
@@ -286,9 +288,9 @@
       benefitsHead:"Protect your home with the right gutter pro",
       steps:[
         {id:"project", type:"single", q:"What gutter help do you need?", options:["New gutters","Gutter guards / protection","Repair","Replacement","Not sure yet"]},
+        {id:"material_type", type:"single", q:"Any gutter material in mind?", options:["Aluminum","Copper","Steel","Vinyl","Not sure"]},
         zip("Where is the project located?"),
-        {id:"stories", type:"single", q:"How many stories is your home?", options:["Single-story","Two-story","Three or more"]},
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"Are gutter guards worth it?", a:"They can reduce cleaning and clogs for many homes. A local pro can recommend a solution for your roofline and tree coverage."},
@@ -324,8 +326,7 @@
       steps:[
         {id:"project", type:"single", q:"What painting project do you have in mind?", options:["Interior painting","Exterior painting","Both interior & exterior","Cabinet refinishing","Not sure yet"]},
         zip("Where is the painting project located?"),
-        {id:"size", type:"single", q:"About how large is the project?", options:["1–2 rooms","Several rooms","Whole interior","Whole exterior","Not sure"]},
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"How much does painting cost?", a:"It depends on square footage, surfaces, and prep work. Comparing local quotes is the best way to see real pricing."},
@@ -362,7 +363,7 @@
         {id:"project", type:"single", q:"What siding help do you need?", options:["Full siding replacement","Siding repair","New siding installation","Storm / damage repair","Not sure yet"]},
         {id:"material", type:"single", q:"Any material in mind?", options:["Vinyl","Fiber cement","Wood","Metal","Not sure"]},
         zip("Where is the siding project located?"),
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"How much does new siding cost?", a:"It depends on your home's size, the material, and removal of old siding. Comparing local quotes is the best way to see real pricing."},
@@ -397,9 +398,10 @@
       benefitsHead:"Find the right plumbing pro, faster",
       steps:[
         {id:"project", type:"single", q:"What do you need help with?", options:["Leak or repair","Water heater","Drain / sewer","Fixture install","Repipe","Not sure yet"]},
+        {id:"work", type:"single", q:"Is this an install or a repair?", options:["Install","Repair","Replace","Not sure"]},
         {id:"urgency", type:"single", q:"How urgent is it?", options:["Emergency / ASAP","Within a few days","This month","Just researching"]},
         zip("Where do you need plumbing service?"),
-        OWNER, CONTACT
+        OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"Do you handle plumbing emergencies?", a:"Tell us your timeframe and we'll try to match you with local pros who can help on your schedule, including urgent leaks and outages."},
@@ -436,7 +438,7 @@
         {id:"issue", type:"single", q:"What are you dealing with?", options:["Flooding / standing water","Leak damage","Mold / mildew","Storm damage","Sewage backup","Not sure yet"]},
         {id:"when", type:"single", q:"When did it happen?", options:["Happening now","Within 24 hours","A few days ago","Ongoing / not sure"]},
         zip("Where is the affected property?"),
-        OWNER, CONTACT
+        OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[
         {q:"How fast can someone come out?", a:"Water damage is time-sensitive. Tell us it's urgent and we'll try to match you with local restoration pros who offer rapid response."},
@@ -472,7 +474,7 @@
       steps:[
         {id:"project", type:"single", q:"What type of project do you need help with?", options:["Bathroom","Kitchen","Windows","Roofing","HVAC","Flooring","Solar","Gutters","Painting","Siding","Plumbing","Water damage","Something else"]},
         zip("Where would this project take place?"),
-        TIMELINE, OWNER, CONTACT
+        TIMELINE, OWNER, CREDIT, NAME, CONTACT
       ],
       faqs:[].concat(GENERAL),
       seo:{

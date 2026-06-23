@@ -10,6 +10,9 @@
   // TrustedForm: on by default (set window.RENUE_TRUSTEDFORM=false to disable). Captures a
   // tamper-proof consent certificate URL that materially raises lead value + TCPA defensibility.
   var TRUSTEDFORM = (window.RENUE_TRUSTEDFORM !== false);
+  // Jornaya / LeadiD: set window.RENUE_JORNAYA_CAMPAIGN to your Jornaya campaign UUID to start
+  // generating a LeadiD token on every lead (alongside TrustedForm). Empty = off until set.
+  var JORNAYA = window.RENUE_JORNAYA_CAMPAIGN || "";
   // Analytics / ads — OFF until an ID is set (set the global in each page head, or fill in below).
   // GA4 is the hub: page_view (auto on load), generate_lead (on submit), call_click (on tel: taps).
   // Link GA4 -> Google Ads and import those key events as conversions (no separate Ads snippet needed).
@@ -34,15 +37,42 @@
   // Persistent hidden cert fields, present from page load (the quiz is an SPA and the
   // contact step only renders at the end — TrustedForm needs the field to exist early
   // so its SDK can populate it. These live on <body> and survive step re-renders).
-  function ensureTFFields(){
-    if(!TRUSTEDFORM || document.getElementById("xxTrustedFormCertUrl")) return;
-    // TrustedForm's SDK only writes the cert URL into fields that live inside a <form>.
-    var f=document.createElement("form"); f.id="tf-cert-form"; f.style.display="none";
+  var _geo = {}; // city/state looked up from ZIP (zippopotam.us), merged into the lead at submit.
+
+  // Hidden cert fields, present from page load (the quiz is an SPA and the contact step renders
+  // last — TrustedForm + Jornaya need the fields to exist early so their SDKs can populate them).
+  function ensureCertFields(){
+    if(document.getElementById("rf-cert-form") || (!TRUSTEDFORM && !JORNAYA)) return;
+    var f=document.createElement("form"); f.id="rf-cert-form"; f.style.display="none";
     f.setAttribute("aria-hidden","true"); f.onsubmit=function(){return false;};
-    ["xxTrustedFormCertUrl","xxTrustedFormPingUrl"].forEach(function(n){
-      var i=document.createElement("input"); i.type="hidden"; i.name=n; i.id=n; f.appendChild(i);
+    var names=[];
+    if(TRUSTEDFORM) names=names.concat(["xxTrustedFormCertUrl","xxTrustedFormPingUrl"]);
+    if(JORNAYA) names.push("leadid_token"); // Jornaya populates this by id; submitted as universal_leadid
+    names.forEach(function(n){
+      var i=document.createElement("input"); i.type="hidden"; i.id=n;
+      i.name=(n==="leadid_token")?"universal_leadid":n; f.appendChild(i);
     });
     document.body.appendChild(f);
+  }
+
+  // Jornaya / LeadiD snippet — loads on every page so it can certify the full session.
+  function injectLeadiD(){
+    if(!JORNAYA || window.__rf_leadid) return; window.__rf_leadid = true;
+    try{
+      var s=document.createElement("script"); s.id="LeadiDscript"; s.type="text/javascript"; s.async=true;
+      s.src=(("https:"===document.location.protocol)?"https://":"http://")+"create.lidstatic.com/campaign/"+JORNAYA+".js?snippet_version=2";
+      var p=document.getElementsByTagName("script")[0]; p.parentNode.insertBefore(s,p);
+    }catch(e){}
+  }
+
+  // Look up city + state from ZIP (free, no key). Non-blocking; result merged at submit.
+  function lookupZip(zip){
+    try{
+      fetch("https://api.zippopotam.us/us/"+encodeURIComponent(zip))
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(j){ if(j && j.places && j.places[0]){ _geo.city=j.places[0]["place name"]||""; _geo.state=j.places[0]["state abbreviation"]||""; } })
+        .catch(function(){});
+    }catch(e){}
   }
 
   function injectTrustedForm(){
@@ -162,7 +192,8 @@
   function helperFor(step, idx, total){
     if(step.helper) return step.helper;
     if(step.type==="zip" || step.type==="address") return "We use this only to match you with pros near you — never shared publicly.";
-    if(step.type==="contact") return "Last step! Where should we send your free quotes? Your info is kept private.";
+    if(step.type==="name") return "Almost there! Where should we send your free quotes? Your info is kept private.";
+    if(step.type==="contact") return "Last step! Add your phone and address so a local pro can follow up.";
     if(idx===0) return "Hi! I’ll help you get matched in about 60 seconds — no obligation. Let’s start:";
     if(idx>=total-2) return "Almost there — just a couple more quick questions.";
     if(step.type==="multi") return "Pick anything that applies, or skip. There are no wrong answers.";
@@ -251,7 +282,8 @@
 
     RF.active = true; RF.cfg = cfg;
     injectTrustedForm();
-    ensureTFFields();
+    injectLeadiD();
+    ensureCertFields();
     try{ history.replaceState({rf:0}, ""); }catch(e){}
     renderStep(cfg, 0, {});
     var qc = document.getElementById("quiz");
@@ -356,12 +388,16 @@
     } else if(step.type==="address"){
       h+='<div class="field"><input id="f_addr" placeholder="Street address" value="'+(data.address||'')+'"></div>'+
          '<button class="btn btn-grad btn-lg" type="button" data-addr="1">Continue &rsaquo;</button>';
-    } else if(step.type==="contact"){
-      // TrustedForm tagged consent (use_tagged_consent=true): roles let lead buyers run Verify checks.
+    } else if(step.type==="name"){
+      // Page A: name + email (TrustedForm grantor roles). Phone + address come on the final page.
       h+='<div class="two"><div class="field"><input id="f_first" placeholder="First name" data-tf-element-role="consent-grantor-name" value="'+(data.first||'')+'"></div>'+
          '<div class="field"><input id="f_last" placeholder="Last name" value="'+(data.last||'')+'"></div></div>'+
          '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" data-tf-element-role="consent-grantor-email" value="'+(data.email||'')+'"></div>'+
-         '<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
+         '<button class="btn btn-grad btn-lg" type="button" data-name="1">Continue &rsaquo;</button>';
+    } else if(step.type==="contact"){
+      // Page B (final): phone + street address + TCPA consent + submit. TrustedForm tagged consent.
+      h+='<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
+         '<div class="field"><input id="f_addr" autocomplete="address-line1" placeholder="Street address" value="'+(data.address||'')+'"></div>'+
          '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit">Get My Free Quote &rsaquo;</button>'+
          '<p class="consent" data-tf-element-role="consent-language">By clicking &ldquo;Get My Free Quote,&rdquo; I consent to receive <span data-tf-element-role="contact-method">calls, text messages, and emails</span> from <span data-tf-element-role="consent-advertiser-name">Renue Home and its matched service providers, contractors, dealers, or <a href="/partners">marketing partners</a></span> about my home improvement project at the phone number and email address I provide, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including through automated technology, prerecorded messages, and artificial or AI-generated voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if my number is on a federal, state, or internal Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message and data rates may apply. Message frequency may vary. Reply STOP to opt out of texts. See our <a href="/privacy-policy">Privacy Policy</a> and <a href="/terms-and-conditions">Terms &amp; Conditions</a>.</p>'+
          '<p class="consent disclaim">Renue Home is a free matching service, not a contractor. Renue Home does not perform home improvement services, provide estimates, guarantee pricing, guarantee availability, or warrant the work of any contractor or service provider. Any agreement for services is solely between you and the independent provider you choose. You are responsible for verifying licensing, insurance, references, permits, pricing, scope of work, and contract terms before hiring any provider.</p>';
@@ -397,10 +433,19 @@
       card.querySelector("[data-multinext]").onclick=function(){ var nd={}; nd[step.id]=chosen.join(", "); next(nd); };
     }
     if(step.type==="zip"){
-      card.querySelector("[data-zip]").onclick=function(){ var el=document.getElementById("f_zip"); var v=(el.value||"").trim(); if(!/^\d{5}$/.test(v)){ el.classList.add("bad"); return errEl("Please enter a valid 5-digit ZIP code."); } next({zip:v}); };
+      card.querySelector("[data-zip]").onclick=function(){ var el=document.getElementById("f_zip"); var v=(el.value||"").trim(); if(!/^\d{5}$/.test(v)){ el.classList.add("bad"); return errEl("Please enter a valid 5-digit ZIP code."); } lookupZip(v); next({zip:v}); };
     }
     if(step.type==="address"){
       card.querySelector("[data-addr]").onclick=function(){ var el=document.getElementById("f_addr"); var v=(el.value||"").trim(); if(v.length<5){ el.classList.add("bad"); return errEl("Please enter your project address."); } next({address:v}); };
+    }
+    if(step.type==="name"){
+      card.querySelector("[data-name]").onclick=function(){
+        var first=val("f_first"), last=val("f_last"), email=val("f_email");
+        if(!first){ document.getElementById("f_first").classList.add("bad"); return errEl("Please enter your first name."); }
+        if(!last){ document.getElementById("f_last").classList.add("bad"); return errEl("Please enter your last name."); }
+        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ document.getElementById("f_email").classList.add("bad"); return errEl("Please enter a valid email address."); }
+        next({first:first,last:last,email:email});
+      };
     }
     if(step.type==="contact"){
       card.querySelector("[data-submit]").onclick=function(btn){ submitContact(cfg, idx, data, this); };
@@ -408,21 +453,22 @@
   }
 
   function submitContact(cfg, idx, data, btn){
-    var first=val("f_first"), last=val("f_last"), email=val("f_email"), phone=val("f_phone");
+    var phone=val("f_phone"), addr=val("f_addr");
+    var first=data.first||"", last=data.last||"", email=data.email||"";  // captured on the name page
     var err=function(m,id){ var e=document.getElementById("err"); if(e)e.textContent=m; if(id){var x=document.getElementById(id); if(x)x.classList.add("bad");} };
     document.getElementById("err").textContent="";
-    if(!first){ return err("Please enter your first name.","f_first"); }
-    if(!last){ return err("Please enter your last name.","f_last"); }
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ return err("Please enter a valid email address.","f_email"); }
     if(phone.replace(/\D/g,"").length<10){ return err("Please enter a valid phone number.","f_phone"); }
+    if(addr.length<5){ return err("Please enter your street address.","f_addr"); }
     if(btn.dataset.busy==="1") return; // double-submit guard
     btn.dataset.busy="1"; btn.disabled=true; btn.textContent="Submitting…";
-    var lead = Object.assign({}, data, {first:first,last:last,email:email,phone:phone,vertical:window.RENUE_VERTICAL,consent:true,ts:Date.now()});
+    var lead = Object.assign({}, data, {first:first,last:last,email:email,phone:phone,address:addr,vertical:window.RENUE_VERTICAL,consent:true,ts:Date.now()});
     lead.xxTrustedFormCertUrl = val("xxTrustedFormCertUrl");
     lead.xxTrustedFormPingUrl = val("xxTrustedFormPingUrl");
+    lead.universal_leadid = val("leadid_token"); // Jornaya LeadiD token
     lead.consentText = "By submitting, I consent to receive calls, texts, and emails from Renue Home and/or its home improvement partners (up to "+BUYER_CAP+" companies)...";
     lead.pageUrl = location.href;
-    if(window.RENUE_CITY) lead.city = window.RENUE_CITY.name;
+    lead.city = lead.city || _geo.city || (window.RENUE_CITY?window.RENUE_CITY.name:"");
+    lead.state = lead.state || _geo.state || "";
     doSubmit(cfg, lead, btn);
   }
 
