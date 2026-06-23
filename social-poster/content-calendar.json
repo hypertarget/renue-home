@@ -168,5 +168,35 @@
     "caption": "rule of thumb worth saving. a reasonable deposit is normal. paying for the whole job before it starts is not. 🚩\n\ncompare quotes from local pros at renuehome.com and pay as the work gets done.",
     "alt": "Tip, never pay 100 percent up front.",
     "status": "pending"
+  },
+  {
+    "id": "your-call-17",
+    "bank_id": "your-call",
+    "layout": "realtalk",
+    "image_url": "https://renuehome.com/assets/social-posts/your-call-17.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/your-call-17-pin.png",
+    "caption": "no one knows your home like you do. you set the budget and the timeline, we just make it easy to compare local pros who can do the work.\n\nstart whenever you're ready at renuehome.com.",
+    "alt": "Your home, your budget, your timeline. We bring the local pros to you.",
+    "status": "pending"
+  },
+  {
+    "id": "small-fixes-18",
+    "bank_id": "small-fixes",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/small-fixes-18.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/small-fixes-18-pin.png",
+    "caption": "the cheapest home repair is the one you catch early. that little leak or soft spot only gets pricier the longer it waits.\n\nget a free quote from a local pro before it grows. renuehome.com",
+    "alt": "Small fixes now beat big repairs later.",
+    "status": "pending"
+  },
+  {
+    "id": "summer-projects-19",
+    "bank_id": "summer-projects",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/summer-projects-19.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/summer-projects-19-pin.png",
+    "caption": "long days, dry weather, this is the season stuff actually gets done ☀️ whatever's on your list (finally fixing that roof?), start by comparing free quotes from local pros.\n\nrenuehome.com",
+    "alt": "Summer is when home projects actually happen.",
+    "status": "pending"
   }
 ]
