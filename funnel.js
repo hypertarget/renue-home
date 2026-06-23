@@ -17,7 +17,10 @@
   // GA4 is the hub: page_view (auto on load), generate_lead (on submit), call_click (on tel: taps).
   // Link GA4 -> Google Ads and import those key events as conversions (no separate Ads snippet needed).
   var GA4_ID     = window.RENUE_GA4 || "G-7YCT9CPCVN";  // Renue Home GA4 (account Erio); override via window.RENUE_GA4
-  var ADS_ID     = window.RENUE_ADS_ID || "";      // "AW-XXXXXXXXX" (optional; loads gtag for Ads too)
+  var ADS_ID     = window.RENUE_ADS_ID || "AW-18253863009";      // Renue Home Google Ads (loads gtag for Ads too)
+  // Google Ads conversion action for a form submit ("RNH Lead Form Submit"). send_to = AW id / label.
+  var ADS_CONVERSION = window.RENUE_ADS_CONVERSION || "AW-18253863009/Jhf8CNKasMQcEOGwj4BE";
+  var ADS_DEFAULT_VALUE = 40; // fallback conversion value when no accepted bid is returned
   var META_PIXEL = window.RENUE_META_PIXEL || "";  // Meta/Facebook pixel id (optional)
   // Retreaver Dynamic Number Insertion: each visitor gets a unique tracking number that carries
   // their gclid (call attribution). Campaign 01a27245 (Bathroom Remodel Zip IVR) / pool 5583,
@@ -186,7 +189,7 @@
   // Friendly concierge avatar (brand gradient) for the conversational quiz framing.
   var AVATAR = '<span class="qavatar"><svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="av" x1="6" y1="42" x2="42" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#14B8A6"/><stop offset="1" stop-color="#7ED957"/></linearGradient></defs><circle cx="24" cy="24" r="24" fill="url(#av)"/><circle cx="24" cy="19" r="7" fill="#fff"/><path d="M11 40c1.5-7 6.8-11 13-11s11.5 4 13 11" fill="#fff"/></svg><span class="qonline"></span></span>';
 
-  var NAV = [["Bathroom","/bathroom"],["Windows","/windows"],["Roofing","/roofing"],["HVAC","/hvac"],["Kitchen","/kitchen"],["Guides","/guides"]];
+  var NAV = [["Bathroom","/bathroom"],["Windows","/windows"],["Roofing","/roofing"],["HVAC","/hvac"],["Kitchen","/kitchen"]];
 
   /* Conversational helper line shown under each question (per-step override wins). */
   function helperFor(step, idx, total){
@@ -473,7 +476,7 @@
   }
 
   function doSubmit(cfg, lead, btn){
-    var finish=function(callNumber){
+    var finish=function(callNumber, resp){
       RF.active=false;
       var quiz=document.getElementById("quiz");
       quiz.innerHTML='<div class="card"><div class="thanks show"><div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'+
@@ -482,6 +485,16 @@
         (callNumber?'<div class="callrow"><a class="btn btn-grad btn-lg" href="'+telHref(callNumber)+'">📞 Call now to speak to a specialist</a></div>':'')+
         '<div class="trustcues" style="margin-top:16px"><span>Local pros. Free. No obligation.</span></div></div></div>';
       try{ if(window.gtag) gtag('event','generate_lead',{items:[{item_category:window.RENUE_VERTICAL}]}); }catch(e){}
+      // Google Ads conversion (form submit). Value = accepted buyer bid from Twyne if returned, else fallback.
+      try{
+        if(window.gtag && ADS_ID){
+          var cv = (resp && resp.value!=null && Number(resp.value)>0) ? Number(resp.value) : ADS_DEFAULT_VALUE;
+          var txn = (resp && resp.transaction_id) ? String(resp.transaction_id) : String(lead.universal_leadid||lead.ts);
+          // Enhanced Conversions for Leads — gtag hashes the email/phone client-side.
+          gtag('set','user_data',{ email:(lead.email||"").trim().toLowerCase(), phone_number:'+1'+(lead.phone||"").replace(/\D/g,'') });
+          gtag('event','conversion',{ send_to:ADS_CONVERSION, value:cv, currency:'USD', transaction_id:txn });
+        }
+      }catch(e){}
       try{ if(window.fbq) fbq('track','Lead'); }catch(e){}
       window.scrollTo({top:0,behavior:"smooth"});
     };
@@ -492,7 +505,7 @@
     };
     fetch(SUBMIT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lead)})
       .then(function(r){ if(!r.ok) throw new Error("bad status"); return r.json(); })
-      .then(function(j){ finish(j&&j.callNumber?j.callNumber:PHONE_NUMBER); })
+      .then(function(j){ finish(j&&j.callNumber?j.callNumber:PHONE_NUMBER, j); })
       .catch(fail);
   }
 
