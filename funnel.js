@@ -1,4 +1,5 @@
 /* Renue Home — shared engine: header/footer/sticky injection + config-driven quiz. */
+/* canonical version: includes Google Ads form + call conversions, EC, Twyne/Jornaya cert wiring. Do not overwrite from a stale clone. */
 (function(){
   "use strict";
 
