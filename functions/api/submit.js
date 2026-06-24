@@ -1,4 +1,4 @@
-// Cloudflare Pages Function — POST /api/submit
+// Cloudflare Pages Function — POST /api/submit  [canonical Twyne version — do not overwrite from a stale clone]
 // Receives the lead, validates it, posts it to Twyne (HTM's ping-post platform),
 // and returns a pay-per-call number for the thank-you screen.
 //
