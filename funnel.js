@@ -193,7 +193,7 @@
   // Friendly concierge avatar (brand gradient) for the conversational quiz framing.
   var AVATAR = '<span class="qavatar"><svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="av" x1="6" y1="42" x2="42" y2="6" gradientUnits="userSpaceOnUse"><stop stop-color="#14B8A6"/><stop offset="1" stop-color="#7ED957"/></linearGradient></defs><circle cx="24" cy="24" r="24" fill="url(#av)"/><circle cx="24" cy="19" r="7" fill="#fff"/><path d="M11 40c1.5-7 6.8-11 13-11s11.5 4 13 11" fill="#fff"/></svg><span class="qonline"></span></span>';
 
-  var NAV = [["Bathroom","/bathroom"],["Windows","/windows"],["Roofing","/roofing"],["HVAC","/hvac"],["Kitchen","/kitchen"]];
+  var NAV = [["Bathroom","/bathroom"],["Windows","/windows"],["Roofing","/roofing"],["HVAC","/hvac"]];
 
   /* Conversational helper line shown under each question (per-step override wins). */
   function helperFor(step, idx, total){
