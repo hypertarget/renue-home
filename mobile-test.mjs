@@ -88,7 +88,7 @@ async function audit(page) {
       let p = el.parentElement;
       while (p && p !== document.body) {
         const o = getComputedStyle(p);
-        if (/(auto|scroll)/.test(o.overflowX) || /(auto|scroll)/.test(o.overflow)) return true;
+        if (/(auto|scroll|hidden|clip)/.test(o.overflowX) || /(auto|scroll|hidden|clip)/.test(o.overflow)) return true;
         p = p.parentElement;
       }
       return false;
@@ -109,7 +109,9 @@ async function audit(page) {
       stickyOverlapsForm = document.body.classList.contains("quiz-engaged") && sb.top < cb.bottom && sb.top < ih;
     }
     // Is the primary above-the-fold action visible without scrolling?
-    const primary = document.querySelector("#quizcard .opt, #quizcard #f_zip, #quizcard button, .hero .btn-grad, #projects");
+    // .callbtn first: on call-first pages (e.g. /bathroom-call) the dominant action is the
+    // tap-to-call hero button, not the quiz, so recognize it to avoid a false "below fold" fail.
+    const primary = document.querySelector(".callbtn, #quizcard .opt, #quizcard #f_zip, #quizcard button, .hero .btn-grad, #projects");
     let primaryBelowFold = false;
     if (primary) { const pr = primary.getBoundingClientRect(); primaryBelowFold = pr.top > ih; }
     return {
