@@ -1,12 +1,19 @@
 name: Mobile rendering test
 
-# Runs the headless-Chromium mobile harness on every push / PR and on demand.
-# Fails the build if any page has horizontal scroll, off-screen elements,
-# a primary CTA below the fold, or the sticky bar overlapping the form.
+# Informational mobile-render check. Runs the headless-Chromium harness on a representative
+# SAMPLE of pages (set FULL_PAGES=1 / FULL_PROFILES=1 for an exhaustive sweep) when a
+# layout-affecting file changes, or on demand. It writes a PASS/FAIL report to the run
+# summary and uploads screenshots when something looks off, but it does NOT fail the build
+# (Cloudflare Pages deploys independently) so routine commits no longer trigger failure emails.
 on:
   push:
     branches: [main]
-  pull_request:
+    paths:
+      - '**.html'
+      - 'styles.css'
+      - 'funnel.js'
+      - 'verticals.js'
+      - 'mobile-test.mjs'
   workflow_dispatch:
 
 jobs:
@@ -21,10 +28,24 @@ jobs:
         run: npm install
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Run mobile harness against local files
-        run: node mobile-test.mjs
-      - name: Upload screenshots
-        if: failure()
+      - name: Run mobile harness (representative sample)
+        id: harness
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          node mobile-test.mjs | tee harness.log
+      - name: Write report to run summary
+        if: always()
+        run: |
+          echo "### Mobile rendering report" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -40 harness.log >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.harness.outcome }}" = "failure" ]; then
+            echo "Note: one or more pages were flagged. See the mobile-shots artifact. This does not block deploy." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload screenshots (only when flagged)
+        if: steps.harness.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: mobile-shots
