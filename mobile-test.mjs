@@ -32,7 +32,13 @@ const isUrl = arg && /^https?:\/\//.test(arg);
 const OUT = process.env.SHOTS_DIR || "./mobile-shots";
 mkdirSync(OUT, { recursive: true });
 
+// Two representative devices: the smallest iPhone (best at catching overflow) and an Android.
+// All four can be run with FULL_PROFILES=1 for an exhaustive sweep.
 let PROFILES = [
+  { name: "iPhone-SE", device: devices["iPhone SE"] },
+  { name: "Pixel-7", device: devices["Pixel 7"] },
+];
+if (process.env.FULL_PROFILES) PROFILES = [
   { name: "iPhone-SE", device: devices["iPhone SE"] },
   { name: "iPhone-14", device: devices["iPhone 14"] },
   { name: "iPhone-14-Pro-Max", device: devices["iPhone 14 Pro Max"] },
@@ -47,16 +53,26 @@ const LEGAL = ["/privacy", "/terms", "/ccpa", "/do-not-sell", "/partners"];
 // Auto-discover pages from the .html files in the repo so new verticals /
 // legal / city pages get tested without editing this list.
 function discoverPages() {
-  const files = readdirSync(".").filter((f) => f.endsWith(".html") && !f.startsWith("404"));
-  const routes = files.map((f) => "/" + f.replace(/\.html$/, "").replace(/^index$/, ""));
-  const cityDirs = [];
-  for (const v of ["bathroom", "windows", "roofing"]) {
-    try {
-      const sub = readdirSync(v).filter((f) => f.endsWith(".html")).slice(0, 2);
-      sub.forEach((f) => cityDirs.push(`/${v}/${f.replace(/\.html$/, "")}`));
-    } catch {}
+  const root = readdirSync(".").filter((f) => f.endsWith(".html") && !f.startsWith("404"))
+    .map((f) => "/" + f.replace(/\.html$/, "").replace(/^index$/, ""));
+  // A city page looks like /{vertical}-{city}-{st} (ends in a 2-letter state, 2+ hyphens).
+  const isCity = (r) => /-[a-z]{2}$/.test(r) && (r.match(/-/g) || []).length >= 2;
+  // Guide articles live in /guides/.
+  const guides = [];
+  try { readdirSync("guides").filter((f) => f.endsWith(".html"))
+    .forEach((f) => guides.push("/guides/" + f.replace(/\.html$/, ""))); } catch {}
+
+  if (process.env.FULL_PAGES) {
+    return [...new Set([...root, ...guides])].sort((a, b) => (a === "/" ? -1 : a.localeCompare(b)));
   }
-  return [...new Set([...routes, ...cityDirs])].sort((a, b) => (a === "/" ? -1 : a.localeCompare(b)));
+  // Default = representative sample, since the city pages all share one template:
+  // every non-city page (homepage, vertical landers, call page, legal) + ONE city page
+  // per vertical + the guide articles. Set FULL_PAGES=1 to test all ~130 pages.
+  const nonCity = root.filter((r) => !isCity(r));
+  const oneCityPer = {};
+  root.filter(isCity).forEach((r) => { const v = r.slice(1).split("-")[0]; if (!oneCityPer[v]) oneCityPer[v] = r; });
+  return [...new Set([...nonCity, ...Object.values(oneCityPer), ...guides])]
+    .sort((a, b) => (a === "/" ? -1 : a.localeCompare(b)));
 }
 
 // Walk a vertical funnel to the last step so we screenshot every step on mobile.
