@@ -198,5 +198,35 @@
     "caption": "long days, dry weather, this is the season stuff actually gets done ☀️ whatever's on your list (finally fixing that roof?), start by comparing free quotes from local pros.\n\nrenuehome.com",
     "alt": "Summer is when home projects actually happen.",
     "status": "pending"
+  },
+  {
+    "id": "stat-roof-20",
+    "bank_id": "stat-roof",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-roof-20.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-roof-20-pin.png",
+    "caption": "quick gut check. most asphalt shingle roofs last about 20 to 30 years. if yours is creeping up there, it's worth a look before the next storm.\n\ncompare free quotes from local roofers at renuehome.com.\n\n#roofing #homemaintenance",
+    "alt": "A typical asphalt shingle roof lasts about 20 to 30 years.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-garage-21",
+    "bank_id": "stat-garage",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-garage-21.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-garage-21-pin.png",
+    "caption": "plot twist. the home upgrade with the best resale ROI in 2025 isn't a kitchen or a bath, it's a new garage door. 268%, per the Cost vs. Value Report.\n\nthinking about it? compare local quotes free at renuehome.com.\n\n#homevalue #curbappeal",
+    "alt": "268 percent return at resale on a new garage door, the top ROI project in 2025.",
+    "status": "pending"
+  },
+  {
+    "id": "fix-or-replace-22",
+    "bank_id": "fix-or-replace",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/fix-or-replace-22.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/fix-or-replace-22-pin.png",
+    "caption": "the eternal homeowner question. that aging water heater, roof, or AC, do you patch it one more time or just replace it? 🤔\n\nnot sure which makes sense? a free quote helps you decide. renuehome.com",
+    "alt": "Fix it or replace it, what would you do?",
+    "status": "pending"
   }
 ]
