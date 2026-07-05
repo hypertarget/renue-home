@@ -228,5 +228,35 @@
     "caption": "the eternal homeowner question. that aging water heater, roof, or AC, do you patch it one more time or just replace it? 🤔\n\nnot sure which makes sense? a free quote helps you decide. renuehome.com",
     "alt": "Fix it or replace it, what would you do?",
     "status": "pending"
+  },
+  {
+    "id": "drafty-windows-23",
+    "bank_id": "drafty-windows",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/drafty-windows-23.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/drafty-windows-23-pin.png",
+    "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com",
+    "alt": "Drafty windows are heating the whole street.",
+    "status": "pending"
+  },
+  {
+    "id": "myth-comparing-24",
+    "bank_id": "myth-comparing",
+    "layout": "myth",
+    "image_url": "https://renuehome.com/assets/social-posts/myth-comparing-24.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/myth-comparing-24-pin.png",
+    "caption": "the \"i'll get around to it\" home project, meet the 2 minute version.\n\nthe myth is that comparing contractors is a pain. the reality is one short form on renuehome.com and local pros reach out to you. you compare on your own time.\n\nno obligation, ever.",
+    "alt": "Myth, comparing home pros is a hassle. Truth, one short form and pros reach out.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-windows-25",
+    "bank_id": "stat-windows",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-windows-25.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-windows-25-pin.png",
+    "caption": "ok this one actually surprised me 👀 if you've still got the original single-pane windows, ENERGY STAR says new ones can shave around 13% off your energy bills.\n\ncurious what replacements run in your area? compare free quotes at renuehome.com, no obligation.\n\n#energysavings #homeimprovement",
+    "alt": "New ENERGY STAR windows can cut energy bills by about 13 percent vs single-pane. Source ENERGY STAR.",
+    "status": "pending"
   }
 ]
