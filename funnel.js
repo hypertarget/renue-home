@@ -162,7 +162,10 @@
         var campOpts={ campaign_key:RTVR_CAMPAIGN };
         if(RTVR_PUBLISHER) campOpts.publisher_id=RTVR_PUBLISHER; // runtime publisher attribution
         var campaign=new Retreaver.Campaign(campOpts);
-        campaign.request_number(tags, function(number){
+        // Publisher credit: docs-confirmed mechanism is an affiliate tag on the number request
+      // (Campaign-config publisher_id is silently dropped by jsapi v1 - verified on the wire 2026-07-11).
+      if (RTVR_PUBLISHER) { tags.affiliate_id = RTVR_PUBLISHER; tags.afid = "002 - Internal Eric"; }
+      campaign.request_number(tags, function(number){
           _dni={ n:number.get("number"), f:number.get("formatted_number") };
           window.retreaver_number=number;
           applyDNI(document);
