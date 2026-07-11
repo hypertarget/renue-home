@@ -35,7 +35,7 @@
   // Attribute calls to our internal publisher at runtime (pool stays shared, NOT scoped).
   // Value = the publisher's "Publisher ID" in Retreaver (afid). Swap to "22140" if a test
   // call shows unattributed. "" = campaign-level only.
-  var RTVR_PUBLISHER = (typeof window.RENUE_PUBLISHER_ID!=="undefined") ? window.RENUE_PUBLISHER_ID : "002 - Internal Eric";
+  var RTVR_PUBLISHER = (typeof window.RENUE_PUBLISHER_ID!=="undefined") ? window.RENUE_PUBLISHER_ID : "22140";
   var _dni = null, _dniObs = null;
   var PHONE_RE = /\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/;
   var RF = { active:false, idx:0, data:{}, cfg:null }; // quiz state for browser-back support
