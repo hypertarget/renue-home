@@ -33,9 +33,9 @@
   var RTVR_CAMPAIGN = (typeof window.RENUE_RETREAVER_CAMPAIGN!=="undefined") ? window.RENUE_RETREAVER_CAMPAIGN : "4d684d693a1cb8039a70c9937f0c5ccc";
   var RTVR_HOST = "api.routingapi.com";
   // Attribute calls to our internal publisher at runtime (pool stays shared, NOT scoped).
-  // Value = the publisher's "Publisher ID" in Retreaver (afid). Swap to "22140" if a test
-  // call shows unattributed. "" = campaign-level only.
-  var RTVR_PUBLISHER = (typeof window.RENUE_PUBLISHER_ID!=="undefined") ? window.RENUE_PUBLISHER_ID : "22140";
+  // Value = the publisher's AFID string in Retreaver ("002 - Internal Eric", record id 22140).
+  // Do NOT use the numeric id - the jsapi matches affiliate_id on the afid string only.
+  var RTVR_PUBLISHER = (typeof window.RENUE_PUBLISHER_ID!=="undefined") ? window.RENUE_PUBLISHER_ID : "002 - Internal Eric";
   var _dni = null, _dniObs = null;
   var PHONE_RE = /\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/;
   var RF = { active:false, idx:0, data:{}, cfg:null }; // quiz state for browser-back support
@@ -160,11 +160,11 @@
         });
         if(!tags.subid) tags.subid="renuehome";
         var campOpts={ campaign_key:RTVR_CAMPAIGN };
-        if(RTVR_PUBLISHER) campOpts.publisher_id=RTVR_PUBLISHER; // runtime publisher attribution
+        // NOTE: campOpts.publisher_id is silently dropped by jsapi v1 (verified on the wire 2026-07-11) - kept out.
         var campaign=new Retreaver.Campaign(campOpts);
-        // Publisher credit: docs-confirmed mechanism is an affiliate tag on the number request
-      // (Campaign-config publisher_id is silently dropped by jsapi v1 - verified on the wire 2026-07-11).
-      if (RTVR_PUBLISHER) { tags.affiliate_id = RTVR_PUBLISHER; tags.afid = "002 - Internal Eric"; }
+        // Publisher credit: affiliate_id tag must be the publisher AFID STRING, not the numeric record id.
+        // Verified 2026-07-11 by lease tests: "002 - Internal Eric" sets the number afid; "22140" was consumed but ignored.
+        if (RTVR_PUBLISHER) { tags.affiliate_id = RTVR_PUBLISHER; }
       campaign.request_number(tags, function(number){
           _dni={ n:number.get("number"), f:number.get("formatted_number") };
           window.retreaver_number=number;
