@@ -258,5 +258,35 @@
     "caption": "ok this one actually surprised me 👀 if you've still got the original single-pane windows, ENERGY STAR says new ones can shave around 13% off your energy bills.\n\ncurious what replacements run in your area? compare free quotes at renuehome.com, no obligation.\n\n#energysavings #homeimprovement",
     "alt": "New ENERGY STAR windows can cut energy bills by about 13 percent vs single-pane. Source ENERGY STAR.",
     "status": "pending"
+  },
+  {
+    "id": "stat-roof-26",
+    "bank_id": "stat-roof",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-roof-26.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-roof-26-pin.png",
+    "caption": "quick gut check. most asphalt shingle roofs last about 20 to 30 years. if yours is creeping up there, it's worth a look before the next storm.\n\ncompare free quotes from local roofers at renuehome.com.\n\n#roofing #homemaintenance",
+    "alt": "A typical asphalt shingle roof lasts about 20 to 30 years.",
+    "status": "pending"
+  },
+  {
+    "id": "spring-refresh-27",
+    "bank_id": "spring-refresh",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/spring-refresh-27.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/spring-refresh-27-pin.png",
+    "caption": "new season, good excuse 🌱 whether it's paint, a new bathroom, or finally redoing the floors, spring is a great time to start.\n\ncompare free quotes from local pros at renuehome.com.",
+    "alt": "Spring is for fresh starts at home.",
+    "status": "pending"
+  },
+  {
+    "id": "your-call-28",
+    "bank_id": "your-call",
+    "layout": "realtalk",
+    "image_url": "https://renuehome.com/assets/social-posts/your-call-28.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/your-call-28-pin.png",
+    "caption": "no one knows your home like you do. you set the budget and the timeline, we just make it easy to compare local pros who can do the work.\n\nstart whenever you're ready at renuehome.com.",
+    "alt": "Your home, your budget, your timeline. We bring the local pros to you.",
+    "status": "pending"
   }
 ]
