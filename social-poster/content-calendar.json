@@ -288,5 +288,35 @@
     "caption": "no one knows your home like you do. you set the budget and the timeline, we just make it easy to compare local pros who can do the work.\n\nstart whenever you're ready at renuehome.com.",
     "alt": "Your home, your budget, your timeline. We bring the local pros to you.",
     "status": "pending"
+  },
+  {
+    "id": "drafty-windows-29",
+    "bank_id": "drafty-windows",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/drafty-windows-29.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/drafty-windows-29-pin.png",
+    "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com",
+    "alt": "Drafty windows are heating the whole street.",
+    "status": "pending"
+  },
+  {
+    "id": "summer-projects-30",
+    "bank_id": "summer-projects",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/summer-projects-30.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/summer-projects-30-pin.png",
+    "caption": "long days, dry weather, this is the season stuff actually gets done ☀️ whatever's on your list (finally fixing that roof?), start by comparing free quotes from local pros.\n\nrenuehome.com",
+    "alt": "Summer is when home projects actually happen.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-kitchen-31",
+    "bank_id": "stat-kitchen",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-kitchen-31.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-kitchen-31-pin.png",
+    "caption": "good news for kitchen dreamers. a minor kitchen remodel recoups around 113% at resale, per the 2025 Cost vs. Value Report. you can actually come out ahead.\n\nwant to see what one would cost near you? renuehome.com\n\n#kitchenremodel #homeimprovement",
+    "alt": "A minor kitchen remodel recoups about 113 percent at resale.",
+    "status": "pending"
   }
 ]
