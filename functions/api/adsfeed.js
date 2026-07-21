@@ -22,19 +22,25 @@ export async function onRequestGet(context) {
   if (!env.RETREAVER_API_KEY) return new Response('missing RETREAVER_API_KEY', { status: 500 });
 
   const rows = [];
+  const dbg = { pages: 0, apiStatus: [], totalCalls: 0, sampleKeys: null, matchedOurs: 0, payableOurs: 0, withGclid: 0 };
   for (let page = 1; page <= 10; page++) {
     const companyId = env.RETREAVER_COMPANY_ID || '43677'; // HyperTarget Marketing
     const api = 'https://api.retreaver.com/api/v2/calls.json?api_key=' + env.RETREAVER_API_KEY +
       '&company_id=' + companyId +
       '&created_at_start=2026-07-11T00:00:00Z&order=desc&per_page=100&page=' + page;
     const r = await fetch(api, { headers: { 'Accept': 'application/json' } });
+    dbg.apiStatus.push(r.status);
     if (!r.ok) break;
+    dbg.pages = page;
     const data = await r.json();
     const calls = (Array.isArray(data) ? data : (data.calls || [])).map(function (c) { return c.call || c; });
     if (!calls.length) break;
+    dbg.totalCalls += calls.length;
+    if (!dbg.sampleKeys) { const s = calls[0]; dbg.sampleKeys = Object.keys(s).slice(0, 40); dbg.sampleCid = s.cid; dbg.sampleAfid = s.afid; dbg.sampleCreated = s.created_at; }
     for (const c of calls) {
       const gclid = c.tags && c.tags.gclid;
       const ours = c.cid === '01a27245' || c.afid === '002 - Internal Eric';
+      if (ours) { dbg.matchedOurs++; if (c.payable) dbg.payableOurs++; if (gclid) dbg.withGclid++; }
       // 20+ char id filter keeps manual test gclids (TESTCALL710 etc.) out of the feed
       if (ours && c.payable && gclid && /^[A-Za-z0-9_-]{20,}$/.test(gclid)) {
         rows.push([gclid, 'RNH Qualified Call 90s', fmtTime(c.created_at), String(c.revenue || 150), 'USD']);
@@ -43,6 +49,9 @@ export async function onRequestGet(context) {
     if (calls.length < 100) break;
   }
 
+  if (url.searchParams.get('debug')) {
+    return new Response(JSON.stringify(dbg), { headers: { 'Content-Type': 'application/json' } });
+  }
   const body = 'Parameters:TimeZone=-0500\n' +
     'Google Click ID,Conversion Name,Conversion Time,Conversion Value,Conversion Currency\n' +
     rows.map(function (r) { return r.join(','); }).join('\n') + (rows.length ? '\n' : '');
