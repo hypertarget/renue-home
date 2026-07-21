@@ -27,7 +27,8 @@ export async function onRequestGet(context) {
     const companyId = env.RETREAVER_COMPANY_ID || '43677'; // HyperTarget Marketing
     const api = 'https://api.retreaver.com/api/v2/calls.json?api_key=' + env.RETREAVER_API_KEY +
       '&company_id=' + companyId +
-      '&created_at_start=2026-07-11T00:00:00Z&order=desc&per_page=100&page=' + page;
+      '&afid=' + encodeURIComponent('002 - Internal Eric') +
+      '&created_at_start=2026-07-11T00:00:00Z&per_page=100&page=' + page;
     const r = await fetch(api, { headers: { 'Accept': 'application/json' } });
     dbg.apiStatus.push(r.status);
     if (!r.ok) break;
@@ -36,13 +37,15 @@ export async function onRequestGet(context) {
     const calls = (Array.isArray(data) ? data : (data.calls || [])).map(function (c) { return c.call || c; });
     if (!calls.length) break;
     dbg.totalCalls += calls.length;
-    if (!dbg.sampleKeys) { const s = calls[0]; dbg.sampleKeys = Object.keys(s).slice(0, 40); dbg.sampleCid = s.cid; dbg.sampleAfid = s.afid; dbg.sampleCreated = s.created_at; }
+    if (!dbg.sampleKeys) { const s = calls[0]; dbg.sampleKeys = Object.keys(s).slice(0, 40); dbg.sampleCid = s.cid; dbg.sampleAfid = s.afid; dbg.sampleCreated = s.created_at; dbg.hasTags = ('tags' in s); dbg.hasTagValues = ('tag_values' in s); dbg.samplePayable = s.payable; dbg.sampleRevenue = s.revenue; }
     for (const c of calls) {
-      const gclid = c.tags && c.tags.gclid;
+      let gclid = c.tags && c.tags.gclid;
+      if (!gclid && Array.isArray(c.tag_values)) { const tv = c.tag_values.find(function (x) { return x.key === 'gclid'; }); gclid = tv && tv.value; }
       const ours = c.cid === '01a27245' || c.afid === '002 - Internal Eric';
       if (ours) { dbg.matchedOurs++; if (c.payable) dbg.payableOurs++; if (gclid) dbg.withGclid++; }
       // 20+ char id filter keeps manual test gclids (TESTCALL710 etc.) out of the feed
-      if (ours && c.payable && gclid && /^[A-Za-z0-9_-]{20,}$/.test(gclid)) {
+      const paid = c.payable === true || Number(c.revenue) > 0;
+      if (ours && paid && gclid && /^[A-Za-z0-9_-]{20,}$/.test(gclid)) {
         rows.push([gclid, 'RNH Qualified Call 90s', fmtTime(c.created_at), String(c.revenue || 150), 'USD']);
       }
     }
