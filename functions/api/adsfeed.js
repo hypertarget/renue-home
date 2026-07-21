@@ -23,7 +23,9 @@ export async function onRequestGet(context) {
 
   const rows = [];
   for (let page = 1; page <= 10; page++) {
+    const companyId = env.RETREAVER_COMPANY_ID || '43677'; // HyperTarget Marketing
     const api = 'https://api.retreaver.com/api/v2/calls.json?api_key=' + env.RETREAVER_API_KEY +
+      '&company_id=' + companyId +
       '&created_at_start=2026-07-11T00:00:00Z&order=desc&per_page=100&page=' + page;
     const r = await fetch(api, { headers: { 'Accept': 'application/json' } });
     if (!r.ok) break;
