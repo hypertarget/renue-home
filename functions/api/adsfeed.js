@@ -37,7 +37,8 @@ export async function onRequestGet(context) {
     const calls = (Array.isArray(data) ? data : (data.calls || [])).map(function (c) { return c.call || c; });
     if (!calls.length) break;
     dbg.totalCalls += calls.length;
-    if (!dbg.sampleKeys) { const s = calls[0]; dbg.sampleKeys = Object.keys(s).slice(0, 40); dbg.sampleCid = s.cid; dbg.sampleAfid = s.afid; dbg.sampleCreated = s.created_at; dbg.hasTags = ('tags' in s); dbg.hasTagValues = ('tag_values' in s); dbg.samplePayable = s.payable; dbg.sampleRevenue = s.revenue; }
+    if (!dbg.sampleKeys) { const s = calls[0]; dbg.sampleKeys = Object.keys(s).slice(0, 40); dbg.sampleCid = s.cid; dbg.sampleAfid = s.afid; dbg.sampleCreated = s.created_at; dbg.hasTags = ('tags' in s); dbg.hasTagValues = ('tag_values' in s); dbg.samplePayable = s.payable; dbg.sampleRevenue = s.revenue; dbg.sampleSysCampaign = s.system_campaign_id; dbg.sampleTags = s.tags; }
+      if (!dbg.paidSample && (c.payable === true || Number(c.revenue) > 0)) { dbg.paidSample = { cid: c.cid, sysCampaign: c.system_campaign_id, revenue: c.revenue, dialed: c.dialed_number, tags: c.tags }; }
     for (const c of calls) {
       let gclid = c.tags && c.tags.gclid;
       if (!gclid && Array.isArray(c.tag_values)) { const tv = c.tag_values.find(function (x) { return x.key === 'gclid'; }); gclid = tv && tv.value; }
