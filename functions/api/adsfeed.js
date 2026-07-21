@@ -59,7 +59,7 @@ export async function onRequestGet(context) {
   }
 
   if (debug) return new Response(JSON.stringify(dbg), { headers: { 'Content-Type': 'application/json' } });
-  const body = 'Parameters:TimeZone=-0500\n' +
+  const body = 'Parameters:TimeZone=+0000\n' +
     'Google Click ID,Conversion Name,Conversion Time,Conversion Value,Conversion Currency\n' +
     rows.map(function (r) { return r.join(','); }).join('\n') + (rows.length ? '\n' : '');
   return new Response(body, { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'no-store' } });
