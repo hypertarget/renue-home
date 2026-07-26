@@ -318,5 +318,35 @@
     "caption": "good news for kitchen dreamers. a minor kitchen remodel recoups around 113% at resale, per the 2025 Cost vs. Value Report. you can actually come out ahead.\n\nwant to see what one would cost near you? renuehome.com\n\n#kitchenremodel #homeimprovement",
     "alt": "A minor kitchen remodel recoups about 113 percent at resale.",
     "status": "pending"
+  },
+  {
+    "id": "fix-or-replace-32",
+    "bank_id": "fix-or-replace",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/fix-or-replace-32.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/fix-or-replace-32-pin.png",
+    "caption": "the eternal homeowner question. that aging water heater, roof, or AC, do you patch it one more time or just replace it? 🤔\n\nnot sure which makes sense? a free quote helps you decide. renuehome.com",
+    "alt": "Fix it or replace it, what would you do?",
+    "status": "pending"
+  },
+  {
+    "id": "red-flags-33",
+    "bank_id": "red-flags",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/red-flags-33.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/red-flags-33-pin.png",
+    "caption": "trust your gut, but also trust this list 🚩 walk away if you see\n\n✔ cash only with a big deposit\n✔ no written quote\n✔ pressure to sign today\n✔ no license number\n\ncompare vetted local pros the calm way at renuehome.com.",
+    "alt": "Contractor red flags checklist.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-exterior-34",
+    "bank_id": "stat-exterior",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-exterior-34.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-exterior-34-pin.png",
+    "caption": "here's a pattern worth knowing. 8 of the 10 best ROI home projects in 2025 are exterior replacements (doors, siding, windows, roof). curb appeal really does pay.\n\nplanning one? renuehome.com gets you free local quotes.\n\n#curbappeal #homevalue",
+    "alt": "Eight of the top ten ROI home projects in 2025 are exterior replacements.",
+    "status": "pending"
   }
 ]
