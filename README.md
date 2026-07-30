@@ -28,6 +28,7 @@ node mobile-test.mjs https://renuehome.com
 # or a local copy:
 python3 -m http.server 8080 &  node mobile-test.mjs http://localhost:8080
 ```
+<!-- redeploy 2026-07-30: rotated CONV_FEED_SECRET -->
 Screenshots land in `./mobile-shots/`. Run it before each deploy (or wire into CI) — it would have caught the header overflow and the sticky-bar-over-form issues automatically.
 
 Fresh Starts. Better Homes.
