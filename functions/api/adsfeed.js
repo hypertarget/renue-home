@@ -17,7 +17,7 @@ export async function onRequestGet(context) {
     try { basicOk = atob(auth.slice(6)).split(':').pop() === env.CONV_FEED_SECRET; } catch (e) {}
   }
   if (!env.CONV_FEED_SECRET || (url.searchParams.get('key') !== env.CONV_FEED_SECRET && !basicOk)) {
-    return new Response('forbidden', { status: 403 });
+    return new Response('auth required', { status: 401, headers: { 'WWW-Authenticate': 'Basic realm="adsfeed"' } });
   }
   if (!env.RETREAVER_API_KEY) return new Response('missing RETREAVER_API_KEY', { status: 500 });
   const debug = url.searchParams.get('debug');
