@@ -1,54 +1,38 @@
-// functions/bathroom-call.js
-// Edge geo-personalization for /bathroom-call.
-// Rewrites the hero eyebrow + subline with the visitor's US state, resolved
-// from Cloudflare's request geo (request.cf.region = full state name).
-// Fully defensive: any failure falls back to the static page unchanged.
-
+// functions/bathroom-call.js  (DEBUG build — emits x-geo-* headers; revert before merge)
 export async function onRequest(context) {
-  // Always fetch the underlying static asset first.
   const response = await context.next();
-
   try {
-    const ct = response.headers.get("content-type") || "";
-    if (!ct.includes("text/html")) return response;
-
     const cf = context.request.cf || {};
-    const country = cf.country;
-    // region = full state name (e.g. "Pennsylvania"); may be undefined.
+    const country = cf.country || "";
     let region = typeof cf.region === "string" ? cf.region.trim() : "";
 
-    // Only personalize for US visitors with a resolvable state name.
-    // Anything else (no geo, non-US, datacenter IP) keeps the generic copy.
-    if (country !== "US" || !region || region.length < 3) {
-      return response;
+    const ct = response.headers.get("content-type") || "";
+    const personalize = ct.includes("text/html") && country === "US" && region && region.length >= 3;
+
+    let body = response;
+    if (personalize) {
+      body = new HTMLRewriter()
+        .on("#geo-eyebrow", new TextReplacer(region + " Bathroom Remodel"))
+        .on("#geo-area", new TextReplacer(region))
+        .transform(response);
     }
 
-    const eyebrowText = region + " Bathroom Remodel";
-    const areaText = region;
-
-    const rewritten = new HTMLRewriter()
-      .on("#geo-eyebrow", new TextReplacer(eyebrowText))
-      .on("#geo-area", new TextReplacer(areaText))
-      .transform(response);
-
-    // Never let a personalized page get cached and served to another state.
-    const out = new Response(rewritten.body, rewritten);
-    out.headers.set("Cache-Control", "no-store");
+    const out = new Response(body.body, body);
+    out.headers.set("x-geo-fn", "1");
+    out.headers.set("x-geo-country", country);
+    out.headers.set("x-geo-region", region || "(none)");
+    out.headers.set("x-geo-personalized", personalize ? "1" : "0");
+    if (personalize) out.headers.set("Cache-Control", "no-store");
     return out;
   } catch (e) {
-    // On any error, serve the original page untouched.
-    return response;
+    const out = new Response(response.body, response);
+    out.headers.set("x-geo-fn", "err");
+    out.headers.set("x-geo-err", String(e && e.message || e).slice(0, 120));
+    return out;
   }
 }
 
-// Replaces the inner text of a matched element.
 class TextReplacer {
-  constructor(text) {
-    this.text = text;
-    this.first = true;
-  }
-  element(el) {
-    // Clear existing children, then insert the new text once.
-    el.setInnerContent(this.text, { html: false });
-  }
+  constructor(text) { this.text = text; }
+  element(el) { el.setInnerContent(this.text, { html: false }); }
 }
