@@ -1,4 +1,4 @@
-// functions/bathroom-call.js  (DEBUG build — emits x-geo-* headers; revert before merge)
+// functions/bathroom-call.js  (FIXED + debug headers — revert to clean before merge)
 export async function onRequest(context) {
   const response = await context.next();
   try {
@@ -27,12 +27,15 @@ export async function onRequest(context) {
   } catch (e) {
     const out = new Response(response.body, response);
     out.headers.set("x-geo-fn", "err");
-    out.headers.set("x-geo-err", String(e && e.message || e).slice(0, 120));
+    out.headers.set("x-geo-err", String(e && e.message || e).slice(0, 160));
     return out;
   }
 }
 
+// Replaces the inner text of a matched element.
+// NOTE: the value property must NOT be named `text` — HTMLRewriter treats a
+// `text` field on a handler object as a reserved text-node callback.
 class TextReplacer {
-  constructor(text) { this.text = text; }
-  element(el) { el.setInnerContent(this.text, { html: false }); }
+  constructor(value) { this.value = value; }
+  element(el) { el.setInnerContent(this.value, { html: false }); }
 }
