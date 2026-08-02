@@ -348,5 +348,35 @@
     "caption": "here's a pattern worth knowing. 8 of the 10 best ROI home projects in 2025 are exterior replacements (doors, siding, windows, roof). curb appeal really does pay.\n\nplanning one? renuehome.com gets you free local quotes.\n\n#curbappeal #homevalue",
     "alt": "Eight of the top ten ROI home projects in 2025 are exterior replacements.",
     "status": "pending"
+  },
+  {
+    "id": "dream-project-35",
+    "bank_id": "dream-project",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/dream-project-35.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/dream-project-35-pin.png",
+    "caption": "let's daydream for a sec ✨ money no object, what's the home project you'd do first?\n\ntell us below. when you're ready to price the real version, renuehome.com gets you free local quotes.",
+    "alt": "Money aside, what is your dream home project?",
+    "status": "pending"
+  },
+  {
+    "id": "which-room-first-36",
+    "bank_id": "which-room-first",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/which-room-first-36.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/which-room-first-36-pin.png",
+    "caption": "settle a debate for us 😅 you've got $10k to put into ONE part of your home. where's it going, kitchen, bath, windows, or roof?\n\ndrop your pick below. and if you're actually planning one, renuehome.com gets you free quotes from local pros.",
+    "alt": "You have 10 thousand dollars, which room gets it?",
+    "status": "pending"
+  },
+  {
+    "id": "tip-deposit-37",
+    "bank_id": "tip-deposit",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-deposit-37.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-deposit-37-pin.png",
+    "caption": "rule of thumb worth saving. a reasonable deposit is normal. paying for the whole job before it starts is not. 🚩\n\ncompare quotes from local pros at renuehome.com and pay as the work gets done.",
+    "alt": "Tip, never pay 100 percent up front.",
+    "status": "pending"
   }
 ]
