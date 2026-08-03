@@ -20,8 +20,6 @@
   .callbtn .num{font-size:31px;font-weight:800;letter-spacing:.5px}
   .calltrust{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin:26px auto 0;max-width:580px;color:#dfeae7;font-size:14px;font-weight:600}
   .calltrust span{display:flex;align-items:center;gap:6px}
-  .callqual{margin:14px auto 0;max-width:460px;color:#a9c3bd;font-size:13.5px;font-weight:600;line-height:1.55}
-  .callqual b{color:#7ED957}
   .calltrust b{color:#7ED957;font-size:15px}
   .quizintro{max-width:720px;margin:36px auto 4px;padding:0 20px;text-align:center}
   .quizintro h2{font-size:22px;font-weight:800;color:#0F1A23;margin:0 0 6px}
@@ -35,21 +33,25 @@
   .callsticky{position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:10px 14px;background:#0F1A23;box-shadow:0 -6px 18px rgba(0,0,0,.28)}
   .callsticky a{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#14B8A6,#7ED957);color:#06231d;font-weight:800;font-size:18px;text-decoration:none;border-radius:12px;padding:14px}
   @media(min-width:900px){ .callsticky{display:none} }
+  /* Matching-service disclaimer footer (Google affiliate/transparency) */
+  .cf-foot{max-width:760px;margin:40px auto 0;padding:22px 20px 110px;text-align:center;color:#7a8884;font-size:12.5px;line-height:1.6}
+  .cf-foot p{margin:0 0 8px}
+  .cf-foot a{color:#5a6b66;text-decoration:underline}
+  @media(min-width:900px){ .cf-foot{padding-bottom:32px} }
 </style>
 <script>window.RENUE_PAGE="vertical";window.RENUE_VERTICAL="bathroom";window.RENUE_PHONE="(877) 704-1720";window.RENUE_NONCONSENT_PHONE="(877) 704-1720";</script>
 <script defer src="/verticals.js"></script>
-<script defer src="/funnel.js?v=3"></script>
+<script defer src="/funnel.js"></script>
 </head>
 <body>
 <section class="callhero">
-  <span class="eyebrow" id="geo-eyebrow">Bathroom remodel</span>
+  <span class="eyebrow">Bathroom remodel</span>
   <h1>Talk to a bath specialist now</h1>
-  <p class="sub">Free quote in one call. 1-day installs available, call to check openings in <span id="geo-area">your area</span>.</p>
+  <p class="sub">Free quote in one call. 1-day installs available, call to check openings in your area.</p>
   <a class="callbtn" href="tel:+18777041720">
     <small>📞 CALL NOW FOR YOUR FREE QUOTE</small>
     <span class="num rtvr-number">(877) 704-1720</span>
   </a>
-  <p class="callqual"><b>Homeowners only</b> · Free &amp; no-obligation · Have your project details handy</p>
   <div class="calltrust">
     <span><b>✓</b> Licensed &amp; insured pros</span>
     <span><b>✓</b> Lifetime warranty options</span>
@@ -64,6 +66,11 @@
 </div>
 
 <div id="app"></div>
+
+<footer class="cf-foot">
+  <p>Renue Home is a free advertising and matching service, not a contractor, home-improvement provider, or manufacturer. We connect homeowners with independent, licensed local professionals who may contact you about your project. Renue Home does not perform, supervise, price, warrant, or guarantee any work, and is not responsible for the services provided. Any agreement for services is solely between you and the provider you choose.</p>
+  <p>&copy; Renue Home. <a href="/privacy-policy">Privacy Policy</a> &middot; <a href="/terms-and-conditions">Terms &amp; Conditions</a></p>
+</footer>
 
 <div class="callsticky">
   <a href="tel:+18777041720"><span>📞</span> Call now (877) 704-1720</a>
