@@ -33,8 +33,8 @@
   var RTVR_CAMPAIGN = (typeof window.RENUE_RETREAVER_CAMPAIGN!=="undefined") ? window.RENUE_RETREAVER_CAMPAIGN : "4d684d693a1cb8039a70c9937f0c5ccc";
   var RTVR_HOST = "api.routingapi.com";
   // Attribute calls to our internal publisher at runtime (pool stays shared, NOT scoped).
-  // Value = the publisher's AFID string in Retreaver ("002 - Internal Eric", record id 22140).
-  // Do NOT use the numeric id - the jsapi matches affiliate_id on the afid string only.
+  // Value = the publisher's "Publisher ID" in Retreaver (afid). Swap to "22140" if a test
+  // call shows unattributed. "" = campaign-level only.
   var RTVR_PUBLISHER = (typeof window.RENUE_PUBLISHER_ID!=="undefined") ? window.RENUE_PUBLISHER_ID : "002 - Internal Eric";
   var _dni = null, _dniObs = null;
   var PHONE_RE = /\(?\d{3}\)?[\s.\-]?\d{3}[\s.\-]?\d{4}/;
@@ -160,12 +160,9 @@
         });
         if(!tags.subid) tags.subid="renuehome";
         var campOpts={ campaign_key:RTVR_CAMPAIGN };
-        // NOTE: campOpts.publisher_id is silently dropped by jsapi v1 (verified on the wire 2026-07-11) - kept out.
+        if(RTVR_PUBLISHER) campOpts.publisher_id=RTVR_PUBLISHER; // runtime publisher attribution
         var campaign=new Retreaver.Campaign(campOpts);
-        // Publisher credit: affiliate_id tag must be the publisher AFID STRING, not the numeric record id.
-        // Verified 2026-07-11 by lease tests: "002 - Internal Eric" sets the number afid; "22140" was consumed but ignored.
-        if (RTVR_PUBLISHER) { tags.affiliate_id = RTVR_PUBLISHER; }
-      campaign.request_number(tags, function(number){
+        campaign.request_number(tags, function(number){
           _dni={ n:number.get("number"), f:number.get("formatted_number") };
           window.retreaver_number=number;
           applyDNI(document);
@@ -408,8 +405,8 @@
       // Page B (final): phone + street address + TCPA consent + submit. TrustedForm tagged consent.
       h+='<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
          '<div class="field"><input id="f_addr" autocomplete="address-line1" placeholder="Street address" value="'+(data.address||'')+'"></div>'+
+         '<p class="consent" data-tf-element-role="consent-language">By clicking &ldquo;Get My Free Quote,&rdquo; I am providing my express written consent under the E-SIGN Act to authorize <span data-tf-element-role="consent-advertiser-name">Renue Home and its matched service providers, contractors, dealers, and <a href="/partners">marketing partners</a>, their agents, and parties acting on their behalf</span> to contact me by <span data-tf-element-role="contact-method">phone calls, text messages, and emails</span> at the phone number and email address I provide, to discuss this request and for promotional and marketing purposes, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including through automated dialing technology, prerecorded messages, and artificial or AI-generated voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if my number is on a federal, state, or internal Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message and data rates may apply. Message frequency may vary. Reply STOP to opt out of texts. I also agree to the <a href="/terms-and-conditions">Terms &amp; Conditions</a> and <a href="/privacy-policy">Privacy Policy</a>.</p>'+
          '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit">Get My Free Quote &rsaquo;</button>'+
-         '<p class="consent" data-tf-element-role="consent-language">By clicking &ldquo;Get My Free Quote,&rdquo; I consent to receive <span data-tf-element-role="contact-method">calls, text messages, and emails</span> from <span data-tf-element-role="consent-advertiser-name">Renue Home and its matched service providers, contractors, dealers, or <a href="/partners">marketing partners</a></span> about my home improvement project at the phone number and email address I provide, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including through automated technology, prerecorded messages, and artificial or AI-generated voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if my number is on a federal, state, or internal Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message and data rates may apply. Message frequency may vary. Reply STOP to opt out of texts. See our <a href="/privacy-policy">Privacy Policy</a> and <a href="/terms-and-conditions">Terms &amp; Conditions</a>.</p>'+
          '<p class="consent disclaim">Renue Home is a free matching service, not a contractor. Renue Home does not perform home improvement services, provide estimates, guarantee pricing, guarantee availability, or warrant the work of any contractor or service provider. Any agreement for services is solely between you and the independent provider you choose. You are responsible for verifying licensing, insurance, references, permits, pricing, scope of work, and contract terms before hiring any provider.</p>';
     }
 
