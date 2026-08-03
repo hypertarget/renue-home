@@ -3,7 +3,7 @@
 // Google ignores duplicate (gclid, name, time) rows, so a full daily re-import is idempotent.
 //
 // Ads: Goals > Conversions > Uploads > Schedules > HTTPS
-//   URL https://renuehome.com/api/adsfeed  (Basic auth user 'ads' / password = CONV_FEED_SECRET)
+//   URL https://renue-home.pages.dev/api/adsfeed  (Basic auth user 'ads' / password = CONV_FEED_SECRET)
 // Env (Cloudflare Pages > Settings > Variables): RETREAVER_API_KEY, CONV_FEED_SECRET
 //
 // Match note: the public v2 API hashes cid/afid, so we identify our traffic by the
@@ -14,12 +14,19 @@
 // runs ~200 calls/day across all publishers, so a fixed 12-page cap only reached ~6 days
 // back and silently missed older conversions. We now walk a date window and stop as soon
 // as the log goes older than the window start, so cost scales with the window, not the log.
+// Pages are fetched concurrently in waves; a serial walk of 40+ pages was slow enough to
+// risk the uploader timing out before the CSV was produced.
+//
+// BACKFILL NOTE (2026-08-03): the first converted call (2026-07-16) sits ~page 42 of the
+// account-wide log, so the default window is temporarily days=30 / maxpages=48 to reach it.
+// Once that conversion is confirmed imported in Google Ads, drop back to days=14 /
+// maxpages=40 — at ~200 calls/day the log outgrows a 48-page reach within about a week.
 //
 // Query params (all optional):
-//   days=N            lookback window in days, default 14, max 60
+//   days=N            lookback window in days, default 30, max 60
 //   from=YYYY-MM-DD   explicit window start (overrides days)
 //   to=YYYY-MM-DD     explicit window end, inclusive (for one-time backfills)
-//   maxpages=N        page ceiling, default 40, max 48 (Workers allow 50 subrequests/request)
+//   maxpages=N        page ceiling, default 48, max 48 (Workers allow 50 subrequests/request)
 //   debug=1           return JSON diagnostics instead of CSV
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -37,12 +44,13 @@ export async function onRequestGet(context) {
   // ---- window -------------------------------------------------------------
   const EPOCH = '2026-07-11'; // test start; never look further back than this
   const q = url.searchParams;
-  let days = parseInt(q.get('days') || '14', 10);
-  if (!isFinite(days) || days < 1) days = 14;
+  let days = parseInt(q.get('days') || '30', 10);
+  if (!isFinite(days) || days < 1) days = 30;
   if (days > 60) days = 60;
-  let maxPages = parseInt(q.get('maxpages') || '40', 10);
-  if (!isFinite(maxPages) || maxPages < 1) maxPages = 40;
+  let maxPages = parseInt(q.get('maxpages') || '48', 10);
+  if (!isFinite(maxPages) || maxPages < 1) maxPages = 48;
   if (maxPages > 48) maxPages = 48;
+  const WAVE = 8; // concurrent page fetches per round
 
   const dayRe = /^\d{4}-\d{2}-\d{2}$/;
   const now = new Date();
@@ -54,7 +62,7 @@ export async function onRequestGet(context) {
   const to = dayRe.test(q.get('to') || '') ? q.get('to') : null;
 
   const dbg = {
-    window: { from: from, to: to || 'now', maxPages: maxPages },
+    window: { from: from, to: to || 'now', maxPages: maxPages, wave: WAVE },
     pages: 0, total: 0, newestSeen: null, oldestSeen: null, stopped: 'maxpages',
     candidates: 0, paid: 0, withGclid: 0, emitted: 0, skippedNoGclid: 0, skippedUnpaid: 0
   };
@@ -67,68 +75,84 @@ export async function onRequestGet(context) {
   }
   function day(c) { return String(c.created_at || c.start_time || '').slice(0, 10); }
 
-  const rows = [];
-  const seen = new Set();
   const cid = env.RETREAVER_COMPANY_ID || '43677';
-
-  for (let page = 1; page <= maxPages; page++) {
+  function pageUrl(page) {
     let api = 'https://api.retreaver.com/api/v2/calls.json?api_key=' + env.RETREAVER_API_KEY +
       '&company_id=' + cid +
       '&created_at_start=' + from + 'T00:00:00Z' +
       '&per_page=100&page=' + page;
     if (to) api += '&created_at_end=' + to + 'T23:59:59Z';
-
-    const r = await fetch(api, { headers: { 'Accept': 'application/json' } });
-    if (!r.ok) { dbg.stopped = 'http_' + r.status; break; }
-    dbg.pages = page;
+    return api;
+  }
+  async function fetchPage(page) {
+    const r = await fetch(pageUrl(page), { headers: { 'Accept': 'application/json' } });
+    if (!r.ok) return { page: page, status: r.status, calls: null };
     const data = await r.json();
     const calls = (Array.isArray(data) ? data : (data.calls || [])).map(function (c) { return c.call || c; });
-    if (!calls.length) { dbg.stopped = 'empty_page'; break; }
-    dbg.total += calls.length;
+    return { page: page, status: 200, calls: calls };
+  }
 
-    let pageOldest = null;
-    for (const c of calls) {
-      const d = day(c);
-      if (d) {
-        if (!dbg.newestSeen || d > dbg.newestSeen) dbg.newestSeen = d;
-        if (!dbg.oldestSeen || d < dbg.oldestSeen) dbg.oldestSeen = d;
-        if (!pageOldest || d < pageOldest) pageOldest = d;
+  const rows = [];
+  const seen = new Set();
+  let done = false;
+
+  for (let start = 1; start <= maxPages && !done; start += WAVE) {
+    const batch = [];
+    for (let p = start; p < start + WAVE && p <= maxPages; p++) batch.push(p);
+    const results = await Promise.all(batch.map(fetchPage));
+
+    for (const res of results) {
+      if (done) break;
+      if (res.calls === null) { dbg.stopped = 'http_' + res.status; done = true; break; }
+      const calls = res.calls;
+      if (res.page > dbg.pages) dbg.pages = res.page;
+      if (!calls.length) { dbg.stopped = 'empty_page'; done = true; break; }
+      dbg.total += calls.length;
+
+      let pageOldest = null;
+      for (const c of calls) {
+        const d = day(c);
+        if (d) {
+          if (!dbg.newestSeen || d > dbg.newestSeen) dbg.newestSeen = d;
+          if (!dbg.oldestSeen || d < dbg.oldestSeen) dbg.oldestSeen = d;
+          if (!pageOldest || d < pageOldest) pageOldest = d;
+        }
+        // client-side window filter, so we do not depend on the API honouring the date params
+        if (d && d < from) continue;
+        if (to && d && d > to) continue;
+        if (c.uuid && seen.has(c.uuid)) continue;
+        if (c.uuid) seen.add(c.uuid);
+
+        const subid = tag(c, 'subid');
+        const gclid = tag(c, 'gclid');
+        const goodGclid = /^[A-Za-z0-9_-]{20,}$/.test(gclid);
+        // ours if the funnel stamped subid, or if it carries a gclid at all (only we set that)
+        if (subid !== 'renuehome' && !goodGclid) continue;
+        dbg.candidates++;
+        if (goodGclid) dbg.withGclid++;
+
+        // Retreaver populates these independently; any one of them means the call was bought.
+        const paid = c.payable === true || c.converted === true ||
+          Number(c.revenue) > 0 || Number(c.payout) > 0;
+        if (paid) dbg.paid++;
+
+        if (!paid) { dbg.skippedUnpaid++; continue; }
+        if (!goodGclid) { dbg.skippedNoGclid++; continue; }
+
+        rows.push([
+          gclid,
+          'RNH Qualified Call 90s',
+          fmtTime(c.start_time || c.created_at),
+          String(Number(c.revenue) > 0 ? c.revenue : 150),
+          'USD'
+        ]);
+        dbg.emitted++;
       }
-      // client-side window filter, so we do not depend on the API honouring the date params
-      if (d && d < from) continue;
-      if (to && d && d > to) continue;
-      if (c.uuid && seen.has(c.uuid)) continue;
-      if (c.uuid) seen.add(c.uuid);
 
-      const subid = tag(c, 'subid');
-      const gclid = tag(c, 'gclid');
-      const goodGclid = /^[A-Za-z0-9_-]{20,}$/.test(gclid);
-      // ours if the funnel stamped subid, or if it carries a gclid at all (only we set that)
-      if (subid !== 'renuehome' && !goodGclid) continue;
-      dbg.candidates++;
-      if (goodGclid) dbg.withGclid++;
-
-      // Retreaver populates these independently; any one of them means the call was bought.
-      const paid = c.payable === true || c.converted === true ||
-        Number(c.revenue) > 0 || Number(c.payout) > 0;
-      if (paid) dbg.paid++;
-
-      if (!paid) { dbg.skippedUnpaid++; continue; }
-      if (!goodGclid) { dbg.skippedNoGclid++; continue; }
-
-      rows.push([
-        gclid,
-        'RNH Qualified Call 90s',
-        fmtTime(c.start_time || c.created_at),
-        String(Number(c.revenue) > 0 ? c.revenue : 150),
-        'USD'
-      ]);
-      dbg.emitted++;
+      if (calls.length < 100) { dbg.stopped = 'short_page'; done = true; break; }
+      // newest-first: once a whole page predates the window there is nothing left to find
+      if (pageOldest && pageOldest < from) { dbg.stopped = 'reached_window_start'; done = true; break; }
     }
-
-    if (calls.length < 100) { dbg.stopped = 'short_page'; break; }
-    // newest-first: once a whole page predates the window there is nothing left to find
-    if (pageOldest && pageOldest < from) { dbg.stopped = 'reached_window_start'; break; }
   }
 
   if (q.get('debug')) {
