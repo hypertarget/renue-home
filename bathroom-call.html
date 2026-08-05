@@ -38,6 +38,19 @@
   .cf-foot p{margin:0 0 8px}
   .cf-foot a{color:#5a6b66;text-decoration:underline}
   @media(min-width:900px){ .cf-foot{padding-bottom:32px} }
+
+  /* Call-first: suppress the funnel.js site nav so the only exits are call or quiz */
+  header.site nav{display:none!important}
+  header.site .logo{pointer-events:none;cursor:default}
+  footer.site .ftop nav a[href^="/guides"],
+  footer.site .ftop nav a[href^="/locations"]{display:none!important}
+  /* Tighten the hero so the call button lands above the fold on phones */
+  @media (max-width:600px){
+    .callhero{padding:20px 16px 28px}
+    .callhero h1{font-size:26px;line-height:1.15;margin:6px 0 8px}
+    .callhero .sub{font-size:15px;margin:0 0 16px}
+    .calltrust{margin-top:16px;font-size:13px;gap:8px 16px}
+  }
 </style>
 <script>window.RENUE_PAGE="vertical";window.RENUE_VERTICAL="bathroom";window.RENUE_PHONE="(877) 704-1720";window.RENUE_NONCONSENT_PHONE="(877) 704-1720";</script>
 <script defer src="/verticals.js"></script>
