@@ -378,5 +378,35 @@
     "caption": "rule of thumb worth saving. a reasonable deposit is normal. paying for the whole job before it starts is not. 🚩\n\ncompare quotes from local pros at renuehome.com and pay as the work gets done.",
     "alt": "Tip, never pay 100 percent up front.",
     "status": "pending"
+  },
+  {
+    "id": "myth-quotes-cost-38",
+    "bank_id": "myth-quotes-cost",
+    "layout": "myth",
+    "image_url": "https://renuehome.com/assets/social-posts/myth-quotes-cost-38.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/myth-quotes-cost-38-pin.png",
+    "caption": "let's bust a common one. people assume getting quotes costs something. it doesn't. comparing quotes from local pros on renuehome.com is free, with no obligation to hire anyone.\n\nthat's the whole idea. 🏡",
+    "alt": "Myth, getting quotes costs money. Truth, comparing quotes is free.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-hvac-39",
+    "bank_id": "stat-hvac",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-hvac-39.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-hvac-39-pin.png",
+    "caption": "about HALF of your home's energy bill goes to heating and cooling, per the EIA. which is exactly why a tune-up or a more efficient system can pay for itself.\n\ncompare free HVAC quotes near you at renuehome.com.\n\n#hvac #energysavings",
+    "alt": "About half of home energy use goes to heating and cooling.",
+    "status": "pending"
+  },
+  {
+    "id": "tip-three-quotes-40",
+    "bank_id": "tip-three-quotes",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-three-quotes-40.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-three-quotes-40-pin.png",
+    "caption": "friendly reminder from someone who has seen the bills. get THREE quotes before you sign anything. the spread between contractors can be wild.\n\nrenue home makes it easy, one form, a few local pros, you compare. renuehome.com\n\nwhat's the biggest quote gap you've ever gotten? 👇",
+    "alt": "Tip, always get 3 quotes before you sign anything.",
+    "status": "pending"
   }
 ]
