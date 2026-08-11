@@ -51,6 +51,15 @@
     .callhero .sub{font-size:15px;margin:0 0 16px}
     .calltrust{margin-top:16px;font-size:13px;gap:8px 16px}
   }
+  /* Warm-up quiz: answer-first hero */
+  .wq{max-width:520px;margin:18px auto 0;background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center;color:#0F1A23}
+  .wq .wq-q{font-size:17px;font-weight:800;margin:0 0 12px}
+  .wq-opts{display:flex;flex-direction:column;gap:10px}
+  .wq-opts button{font:inherit;font-weight:700;font-size:16px;padding:13px 12px;border:2px solid #14B8A6;border-radius:10px;background:#f2fbf9;color:#0F1A23;cursor:pointer}
+  .wq-opts button:active{background:#d9f4ee}
+  .wq-note{font-size:12.5px;color:#5a6b66;margin:10px 0 0}
+  .wq-badge{display:inline-block;background:#e8f8e8;color:#1c7c2a;font-weight:800;font-size:13.5px;border-radius:999px;padding:7px 13px;margin:0 0 4px}
+  .callbtn.wq-hidden{display:none}
 </style>
 <script>window.RENUE_PAGE="vertical";window.RENUE_VERTICAL="bathroom";window.RENUE_PHONE="(877) 704-1720";window.RENUE_NONCONSENT_PHONE="(877) 704-1720";</script>
 <script defer src="/verticals.js"></script>
@@ -59,11 +68,20 @@
 <body>
 <section class="callhero">
   <span class="eyebrow">Bathroom remodel</span>
-  <h1 id="callhero-head">Talk to a bath specialist now</h1>
+  <h1 id="callhero-head">What will your new shower or bath cost?</h1>
   <script>(function(){var g=(window.RENUE_GEO_REGION||"").trim();if(!g)return;var h=document.getElementById("callhero-head");if(h)h.textContent=g+" Homeowners: "+h.textContent;})();</script>
-  <p class="sub">Free quote in one call. 1-day installs available, call to check openings in your area.</p>
-  <a class="callbtn" href="tel:+18777041720">
-    <small>📞 CALL NOW FOR YOUR FREE QUOTE</small>
+  <p class="sub">Most walk-in showers and tub-to-shower conversions run $4,000–$12,000 installed. Your exact price takes one free 5-minute call.</p>
+  <div class="wq" id="wq">
+    <p class="wq-q" id="wq-q">Do you own your home?</p>
+    <div class="wq-opts" id="wq-opts">
+      <button type="button" data-a="own-yes">Yes, I own my home</button>
+      <button type="button" data-a="own-no">No, I rent</button>
+    </div>
+    <p class="wq-note">2 quick questions · about 10 seconds</p>
+  </div>
+
+  <a class="callbtn wq-hidden" id="wq-call" href="tel:+18777041720">
+    <small>📞 CALL NOW FOR YOUR EXACT PRICE</small>
     <span class="num rtvr-number">(877) 704-1720</span>
   </a>
   <div class="calltrust">
@@ -75,7 +93,7 @@
 </section>
 
 <div class="quizintro">
-  <h2>Prefer we call you?</h2>
+  <h2>Can’t talk right now?</h2>
   <p>Take our 60-second quiz and a local pro will reach out with your free quote.</p>
 </div>
 
@@ -89,5 +107,26 @@
 <div class="callsticky">
   <a href="tel:+18777041720"><span>📞</span> Call now (877) 704-1720</a>
 </div>
+<script>
+(function(){
+  var q=document.getElementById("wq-q"),opts=document.getElementById("wq-opts"),card=document.getElementById("wq"),btn=document.getElementById("wq-call");
+  if(!q||!opts||!card||!btn)return;
+  var step=1,owns=null;
+  function ev(n,p){try{if(window.gtag)gtag("event",n,p||{});}catch(_){}}
+  opts.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;var a=b.getAttribute("data-a");
+    if(step===1){owns=(a==="own-yes");step=2;ev("warmup_answer",{q:"own_home",a:a});
+      q.textContent="When are you hoping to have it done?";
+      opts.innerHTML='<button type="button" data-a="t-asap">As soon as possible</button><button type="button" data-a="t-3mo">In the next 1–3 months</button><button type="button" data-a="t-research">Just pricing it out</button>';
+      return;}
+    ev("warmup_answer",{q:"timeframe",a:a});ev("warmup_reveal",{owns:owns?"yes":"no",timeframe:a});
+    var badge=owns?"✓ You qualify for a free phone quote":"✓ Quotes are for homeowners — if that’s a partner or parent, call together";
+    var note=(a==="t-research")?"Get today’s exact pricing in one 5-minute call. No obligation.":"Installers have openings this week — lock in your price with one 5-minute call.";
+    card.innerHTML='<span class="wq-badge">'+badge+'</span><p class="wq-note">'+note+"</p>";
+    try{var d=document.querySelector(".callsticky a");if(d)btn.setAttribute("href",d.getAttribute("href"));}catch(_){}
+    btn.classList.remove("wq-hidden");
+  });
+})();
+</script>
 </body>
 </html>
