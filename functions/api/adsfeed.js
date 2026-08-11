@@ -44,9 +44,9 @@ export async function onRequestGet(context) {
   // ---- window -------------------------------------------------------------
   const EPOCH = '2026-07-11'; // test start; never look further back than this
   const q = url.searchParams;
-  let days = parseInt(q.get('days') || '30', 10);
+  let days = parseInt(q.get('days') || '60', 10);
   if (!isFinite(days) || days < 1) days = 30;
-  if (days > 60) days = 60;
+  if (days > 90) days = 90;
   let maxPages = parseInt(q.get('maxpages') || '48', 10);
   if (!isFinite(maxPages) || maxPages < 1) maxPages = 48;
   if (maxPages > 48) maxPages = 48;
@@ -76,16 +76,21 @@ export async function onRequestGet(context) {
   function day(c) { return String(c.created_at || c.start_time || '').slice(0, 10); }
 
   const cid = env.RETREAVER_COMPANY_ID || '43677';
-  function pageUrl(page) {
+  const campId = q.get('campaign_id') || '';
+  const campKey = q.get('campaign_key') || '';
+  function pageUrl(page, mode) {
     let api = 'https://api.retreaver.com/api/v2/calls.json?api_key=' + env.RETREAVER_API_KEY +
       '&company_id=' + cid +
       '&created_at_start=' + from + 'T00:00:00Z' +
       '&per_page=100&page=' + page;
     if (to) api += '&created_at_end=' + to + 'T23:59:59Z';
+    if (campId) api += '&campaign_id=' + encodeURIComponent(campId);
+    if (campKey) api += '&campaign_key=' + encodeURIComponent(campKey);
+    if (mode === 'asc') api += '&sort_by=created_at&order=asc';
     return api;
   }
-  async function fetchPage(page) {
-    const r = await fetch(pageUrl(page), { headers: { 'Accept': 'application/json' } });
+  async function fetchPage(page, mode) {
+    const r = await fetch(pageUrl(page, mode), { headers: { 'Accept': 'application/json' } });
     if (!r.ok) return { page: page, status: r.status, calls: null };
     const data = await r.json();
     const calls = (Array.isArray(data) ? data : (data.calls || [])).map(function (c) { return c.call || c; });
@@ -96,10 +101,31 @@ export async function onRequestGet(context) {
   const seen = new Set();
   let done = false;
 
+  function upstreamFail(reason) {
+    dbg.stopped = reason; dbg.error = true;
+    return new Response(JSON.stringify(dbg, null, 1), {
+      status: 502,
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+    });
+  }
+
+  // Preflight: ask for ASCENDING order so the window START sits on page 1 and a fixed
+  // page cap can never orphan old conversions off the far end (the bug that hid the
+  // Jul 16 qualified call). If the API ignores order/date params, ancient calls come
+  // back and we fall back to the legacy newest-first walk.
+  let mode = 'asc';
+  const pre = await fetchPage(1, 'asc');
+  if (pre.calls === null) return upstreamFail('http_' + pre.status + '_p1');
+  if (pre.calls.length) {
+    const ds = pre.calls.map(day).filter(Boolean).sort();
+    if (ds.length && ds[ds.length - 1] < from) mode = 'desc';
+  }
+  dbg.mode = mode;
+
   for (let start = 1; start <= maxPages && !done; start += WAVE) {
     const batch = [];
     for (let p = start; p < start + WAVE && p <= maxPages; p++) batch.push(p);
-    const results = await Promise.all(batch.map(fetchPage));
+    const results = await Promise.all(batch.map(function (p) { return fetchPage(p, mode); }));
 
     for (const res of results) {
       if (done) break;
@@ -150,10 +176,13 @@ export async function onRequestGet(context) {
       }
 
       if (calls.length < 100) { dbg.stopped = 'short_page'; done = true; break; }
-      // newest-first: once a whole page predates the window there is nothing left to find
-      if (pageOldest && pageOldest < from) { dbg.stopped = 'reached_window_start'; done = true; break; }
+      if (mode === 'desc' && pageOldest && pageOldest < from) { dbg.stopped = 'reached_window_start'; done = true; break; }
+      if (mode === 'asc' && to && pageOldest && pageOldest > to) { dbg.stopped = 'passed_window_end'; done = true; break; }
     }
   }
+
+  // Fail LOUD: an upstream error must never surface as a healthy empty CSV.
+  if (/^http_/.test(dbg.stopped)) return upstreamFail(dbg.stopped);
 
   if (q.get('debug')) {
     return new Response(JSON.stringify(dbg, null, 1), {
