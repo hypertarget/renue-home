@@ -31,12 +31,15 @@
 export async function onRequestGet(context) {
   const { request, env } = context;
   const url = new URL(request.url);
+  // health=1: unauthenticated COUNTS-ONLY probe (no gclids, no rows, no secrets).
+  // Doubles as the invariant monitor: qualified calls present but emitted=0 => alarm.
+  const healthOnly = url.searchParams.get('health') === '1';
   const auth = request.headers.get('Authorization') || '';
   let basicOk = false;
   if (auth.startsWith('Basic ')) {
     try { basicOk = atob(auth.slice(6)).split(':').pop() === env.CONV_FEED_SECRET; } catch (e) {}
   }
-  if (!env.CONV_FEED_SECRET || (url.searchParams.get('key') !== env.CONV_FEED_SECRET && !basicOk)) {
+  if (!healthOnly && (!env.CONV_FEED_SECRET || (url.searchParams.get('key') !== env.CONV_FEED_SECRET && !basicOk))) {
     return new Response('auth required', { status: 401, headers: { 'WWW-Authenticate': 'Basic realm="adsfeed"' } });
   }
   if (!env.RETREAVER_API_KEY) return new Response('missing RETREAVER_API_KEY', { status: 500 });
@@ -183,6 +186,12 @@ export async function onRequestGet(context) {
 
   // Fail LOUD: an upstream error must never surface as a healthy empty CSV.
   if (/^http_/.test(dbg.stopped)) return upstreamFail(dbg.stopped);
+
+  if (healthOnly) {
+    return new Response(JSON.stringify({ window: dbg.window, mode: dbg.mode, pages: dbg.pages, total: dbg.total, candidates: dbg.candidates, paid: dbg.paid, withGclid: dbg.withGclid, emitted: dbg.emitted, stopped: dbg.stopped, newestSeen: dbg.newestSeen, oldestSeen: dbg.oldestSeen }, null, 1), {
+      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
+    });
+  }
 
   if (q.get('debug')) {
     return new Response(JSON.stringify(dbg, null, 1), {
