@@ -50,9 +50,9 @@ export async function onRequestGet(context) {
   let days = parseInt(q.get('days') || '60', 10);
   if (!isFinite(days) || days < 1) days = 30;
   if (days > 90) days = 90;
-  let maxPages = parseInt(q.get('maxpages') || '48', 10);
+  let maxPages = parseInt(q.get('maxpages') || '36', 10);
   if (!isFinite(maxPages) || maxPages < 1) maxPages = 48;
-  if (maxPages > 40) maxPages = 40; // + preflight stays under the 50-subrequest Workers cap even with retries
+  if (maxPages > 36) maxPages = 36; // asc scan + recent sweep + preflight stay under the 50-subrequest cap
   const WAVE = 4; // concurrent page fetches per round (8 tripped Retreaver rate limits)
 
   const dayRe = /^\d{4}-\d{2}-\d{2}$/;
@@ -81,10 +81,10 @@ export async function onRequestGet(context) {
   const cid = env.RETREAVER_COMPANY_ID || '43677';
   const campId = q.get('campaign_id') || '';
   const campKey = q.get('campaign_key') || '';
-  function pageUrl(page, mode) {
+  function pageUrl(page, mode, startOverride) {
     let api = 'https://api.retreaver.com/api/v2/calls.json?api_key=' + env.RETREAVER_API_KEY +
       '&company_id=' + cid +
-      '&created_at_start=' + from + 'T00:00:00Z' +
+      '&created_at_start=' + (startOverride || from) + 'T00:00:00Z' +
       '&per_page=100&page=' + page;
     if (to) api += '&created_at_end=' + to + 'T23:59:59Z';
     if (campId) api += '&campaign_id=' + encodeURIComponent(campId);
@@ -92,11 +92,11 @@ export async function onRequestGet(context) {
     if (mode === 'asc') api += '&sort_by=created_at&order=asc';
     return api;
   }
-  async function fetchPage(page, mode) {
-    let r = await fetch(pageUrl(page, mode), { headers: { 'Accept': 'application/json' } });
+  async function fetchPage(page, mode, startOverride) {
+    let r = await fetch(pageUrl(page, mode, startOverride), { headers: { 'Accept': 'application/json' } });
     if (!r.ok && (r.status === 429 || r.status >= 500)) {
       await new Promise(function (res) { setTimeout(res, 800); });
-      r = await fetch(pageUrl(page, mode), { headers: { 'Accept': 'application/json' } });
+      r = await fetch(pageUrl(page, mode, startOverride), { headers: { 'Accept': 'application/json' } });
     }
     if (!r.ok) return { page: page, status: r.status, calls: null };
     const data = await r.json();
@@ -114,6 +114,38 @@ export async function onRequestGet(context) {
       status: 424, // NOT 502: Cloudflare masks worker 502s with its branded error page
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     });
+  }
+
+  function processCall(c, winFrom) {
+    const d = day(c);
+    const f0 = winFrom || from;
+    if (d && d < f0) return;
+    if (to && d && d > to) return;
+    if (c.uuid && seen.has(c.uuid)) return;
+    if (c.uuid) seen.add(c.uuid);
+
+    const subid = tag(c, 'subid');
+    const gclid = tag(c, 'gclid');
+    const goodGclid = /^[A-Za-z0-9_-]{20,}$/.test(gclid);
+    if (subid !== 'renuehome' && !goodGclid) return;
+    dbg.candidates++;
+    if (goodGclid) dbg.withGclid++;
+
+    const paid = c.payable === true || c.converted === true ||
+      Number(c.revenue) > 0 || Number(c.payout) > 0;
+    if (paid) dbg.paid++;
+
+    if (!paid) { dbg.skippedUnpaid++; return; }
+    if (!goodGclid) { dbg.skippedNoGclid++; return; }
+
+    rows.push([
+      gclid,
+      'RNH Qualified Call 90s',
+      fmtTime(c.start_time || c.created_at),
+      String(Number(c.revenue) > 0 ? c.revenue : 150),
+      'USD'
+    ]);
+    dbg.emitted++;
   }
 
   // Preflight: ask for ASCENDING order so the window START sits on page 1 and a fixed
@@ -150,36 +182,7 @@ export async function onRequestGet(context) {
           if (!dbg.oldestSeen || d < dbg.oldestSeen) dbg.oldestSeen = d;
           if (!pageOldest || d < pageOldest) pageOldest = d;
         }
-        // client-side window filter, so we do not depend on the API honouring the date params
-        if (d && d < from) continue;
-        if (to && d && d > to) continue;
-        if (c.uuid && seen.has(c.uuid)) continue;
-        if (c.uuid) seen.add(c.uuid);
-
-        const subid = tag(c, 'subid');
-        const gclid = tag(c, 'gclid');
-        const goodGclid = /^[A-Za-z0-9_-]{20,}$/.test(gclid);
-        // ours if the funnel stamped subid, or if it carries a gclid at all (only we set that)
-        if (subid !== 'renuehome' && !goodGclid) continue;
-        dbg.candidates++;
-        if (goodGclid) dbg.withGclid++;
-
-        // Retreaver populates these independently; any one of them means the call was bought.
-        const paid = c.payable === true || c.converted === true ||
-          Number(c.revenue) > 0 || Number(c.payout) > 0;
-        if (paid) dbg.paid++;
-
-        if (!paid) { dbg.skippedUnpaid++; continue; }
-        if (!goodGclid) { dbg.skippedNoGclid++; continue; }
-
-        rows.push([
-          gclid,
-          'RNH Qualified Call 90s',
-          fmtTime(c.start_time || c.created_at),
-          String(Number(c.revenue) > 0 ? c.revenue : 150),
-          'USD'
-        ]);
-        dbg.emitted++;
+        processCall(c);
       }
 
       if (calls.length < 100) { dbg.stopped = 'short_page'; done = true; break; }
@@ -188,11 +191,28 @@ export async function onRequestGet(context) {
     }
   }
 
+  // Recent sweep (newest-first, last 72h): today's conversions must appear promptly
+  // even while the ascending scan is still deep in history behind the page cap.
+  if (!/^http_/.test(dbg.stopped)) {
+    let rf = new Date(now.getTime() - 3 * 86400000).toISOString().slice(0, 10);
+    if (rf < from) rf = from;
+    dbg.recent = { from: rf, pages: 0, added: 0 };
+    const before = dbg.emitted;
+    for (let p = 1; p <= 8; p++) {
+      const res = await fetchPage(p, 'desc', rf);
+      if (res.calls === null) { dbg.stopped = 'http_' + res.status + '_recent_p' + p; break; }
+      dbg.recent.pages = p;
+      for (const c of res.calls) processCall(c, rf);
+      if (res.calls.length < 100) break;
+    }
+    dbg.recent.added = dbg.emitted - before;
+  }
+
   // Fail LOUD: an upstream error must never surface as a healthy empty CSV.
   if (/^http_/.test(dbg.stopped)) return upstreamFail(dbg.stopped);
 
   if (healthOnly) {
-    return new Response(JSON.stringify({ window: dbg.window, mode: dbg.mode, pages: dbg.pages, total: dbg.total, candidates: dbg.candidates, paid: dbg.paid, withGclid: dbg.withGclid, emitted: dbg.emitted, stopped: dbg.stopped, newestSeen: dbg.newestSeen, oldestSeen: dbg.oldestSeen }, null, 1), {
+    return new Response(JSON.stringify({ window: dbg.window, mode: dbg.mode, pages: dbg.pages, total: dbg.total, candidates: dbg.candidates, paid: dbg.paid, withGclid: dbg.withGclid, emitted: dbg.emitted, recent: dbg.recent, stopped: dbg.stopped, newestSeen: dbg.newestSeen, oldestSeen: dbg.oldestSeen }, null, 1), {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     });
   }
