@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Bathroom Remodel Cost — Get Your Exact Price by Phone | Renue Home</title>
+<meta name="description" content="What will your bathroom remodel cost? Every project prices by scope. Skip the guesswork — one free 5-minute call with a local specialist gets your exact number." />
+<meta name="robots" content="noindex, follow" />
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<style>
+  /* Call-first landing page for Google call traffic. Call CTA dominant, quiz demoted. */
+  .callhero{background:linear-gradient(160deg,#0F1A23,#15323a);color:#fff;padding:36px 20px 44px;text-align:center}
+  .callhero .eyebrow{display:inline-block;color:#7ED957;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:13px;margin-bottom:12px}
+  .callhero h1{font-size:clamp(28px,6vw,44px);line-height:1.12;font-weight:800;margin:0 auto 14px;max-width:16ch}
+  .callhero p.sub{font-size:17px;color:#cfe0dc;margin:0 auto 26px;max-width:34ch;line-height:1.5}
+  .callbtn{display:flex;flex-direction:column;align-items:center;gap:3px;max-width:440px;margin:0 auto;background:linear-gradient(135deg,#14B8A6,#7ED957);color:#06231d;text-decoration:none;border-radius:16px;padding:18px 22px;box-shadow:0 12px 30px rgba(20,184,166,.4)}
+  .callbtn small{font-weight:800;font-size:13px;letter-spacing:.04em}
+  .callbtn .num{font-size:31px;font-weight:800;letter-spacing:.5px}
+  .calltrust{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin:26px auto 0;max-width:580px;color:#dfeae7;font-size:14px;font-weight:600}
+  .calltrust span{display:flex;align-items:center;gap:6px}
+  .calltrust b{color:#7ED957;font-size:15px}
+  .quizintro{max-width:720px;margin:36px auto 4px;padding:0 20px;text-align:center}
+  .quizintro h2{font-size:22px;font-weight:800;color:#0F1A23;margin:0 0 6px}
+  .quizintro p{color:#5a6b66;margin:0}
+  /* Demote the engine hero: hide its copy column, keep only the quiz card */
+  #app .hero{padding-top:4px}
+  #app .hero .hero-grid{display:block;max-width:640px;margin:0 auto}
+  #app .hero .hero-grid>div:first-child{display:none}
+  /* Replace the engine sticky with a call-only sticky bar */
+  .sticky{display:none!important}
+  .callsticky{position:fixed;left:0;right:0;bottom:0;z-index:9999;padding:10px 14px;background:#0F1A23;box-shadow:0 -6px 18px rgba(0,0,0,.28)}
+  .callsticky a{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#14B8A6,#7ED957);color:#06231d;font-weight:800;font-size:18px;text-decoration:none;border-radius:12px;padding:14px}
+  @media(min-width:900px){ .callsticky{display:none} }
+  /* Matching-service disclaimer footer (Google affiliate/transparency) */
+  .cf-foot{max-width:760px;margin:40px auto 0;padding:22px 20px 110px;text-align:center;color:#7a8884;font-size:12.5px;line-height:1.6}
+  .cf-foot p{margin:0 0 8px}
+  .cf-foot a{color:#5a6b66;text-decoration:underline}
+  @media(min-width:900px){ .cf-foot{padding-bottom:32px} }
+
+  /* Call-first: suppress the funnel.js site nav so the only exits are call or quiz */
+  header.site nav a:not(.phone){display:none!important}
+  header.site .logo{pointer-events:none;cursor:default}
+  footer.site .ftop nav a[href^="/guides"],
+  footer.site .ftop nav a[href^="/locations"]{display:none!important}
+  /* Tighten the hero so the call button lands above the fold on phones */
+  @media (max-width:600px){
+    .callhero{padding:20px 16px 28px}
+    .callhero h1{font-size:26px;line-height:1.15;margin:6px 0 8px}
+    .callhero .sub{font-size:15px;margin:0 0 16px}
+    .calltrust{margin-top:16px;font-size:13px;gap:8px 16px}
+  }
+  /* Warm-up quiz: answer-first hero */
+  .wq{max-width:520px;margin:18px auto 0;background:#fff;border-radius:14px;padding:18px 16px;box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:center;color:#0F1A23}
+  .wq .wq-q{font-size:17px;font-weight:800;margin:0 0 12px}
+  .wq-opts{display:flex;flex-direction:column;gap:10px}
+  .wq-opts button{font:inherit;font-weight:700;font-size:16px;padding:13px 12px;border:2px solid #14B8A6;border-radius:10px;background:#f2fbf9;color:#0F1A23;cursor:pointer}
+  .wq-opts button:active{background:#d9f4ee}
+  .wq-note{font-size:12.5px;color:#5a6b66;margin:10px 0 0}
+  .wq-badge{display:inline-block;background:#e8f8e8;color:#1c7c2a;font-weight:800;font-size:13.5px;border-radius:999px;padding:7px 13px;margin:0 0 4px}
+  .callbtn.wq-hidden{display:none}
+  .wq-prog{height:8px;background:#e8eeec;border-radius:999px;overflow:hidden;margin:0 0 6px}
+  .wq-bar{height:100%;width:0;background:linear-gradient(90deg,#14B8A6,#7ED957);border-radius:999px;transition:width .5s ease}
+  .wq-pct{font-size:12px;color:#5a6b66;margin:0 0 10px;font-weight:700}
+  .wq-spin{width:34px;height:34px;border:4px solid #e8eeec;border-top-color:#14B8A6;border-radius:50%;margin:6px auto 12px;animation:wqspin .9s linear infinite}
+  @keyframes wqspin{to{transform:rotate(360deg)}}
+  body:not(.wq-revealed) .callsticky{display:none}
+</style>
+<script>window.RENUE_PAGE="vertical";window.RENUE_VERTICAL="bathroom";window.RENUE_PHONE="(877) 704-1720";window.RENUE_NONCONSENT_PHONE="(877) 704-1720";</script>
+<script defer src="/verticals.js"></script>
+<script defer src="/funnel.js"></script>
+</head>
+<body>
+<section class="callhero">
+  <span class="eyebrow">Bathroom remodel cost</span>
+  <h1 id="callhero-head">What will your bathroom remodel cost?</h1>
+  <script>(function(){var g=(window.RENUE_GEO_REGION||"").trim();if(!g)return;var h=document.getElementById("callhero-head");if(h)h.textContent=g+" Homeowners: "+h.textContent;})();</script>
+  <p class="sub">No two bathrooms price the same — scope, materials, and layout all change the number. Answer 3 quick questions and get your exact price in one free 5-minute call. No obligation.</p>
+  <div class="wq" id="wq">
+    <div class="wq-prog"><div class="wq-bar" id="wq-bar" style="width:0%"></div></div>
+    <p class="wq-pct" id="wq-pct">0% complete</p>
+    <p class="wq-q" id="wq-q">What type of project are you pricing?</p>
+    <div class="wq-opts" id="wq-opts">
+      <button type="button" data-a="p-full">Complete bathroom remodel</button>
+      <button type="button" data-a="p-shower">Shower replacement</button>
+      <button type="button" data-a="p-t2s">Tub-to-shower conversion</button>
+      <button type="button" data-a="p-tub">Bathtub / walk-in tub</button>
+      <button type="button" data-a="p-access">Safety &amp; accessibility</button>
+      <button type="button" data-a="p-unsure">Not sure yet</button>
+    </div>
+    <p class="wq-note">3 quick questions · about 15 seconds</p>
+  </div>
+
+  <a class="callbtn wq-hidden" id="wq-call" href="tel:+18777041720">
+    <small>📞 CALL NOW FOR YOUR EXACT PRICE</small>
+    <span class="num rtvr-number">(877) 704-1720</span>
+  </a>
+  <div class="calltrust">
+    <span><b>✓</b> Licensed &amp; insured pros</span>
+    <span><b>✓</b> Lifetime warranty options</span>
+    <span><b>✓</b> Top-rated local installers</span>
+    <span><b>✓</b> 1-day installs available</span>
+  </div>
+</section>
+
+<div class="quizintro">
+  <h2>Can’t talk right now?</h2>
+  <p>Take our 60-second quiz and a local pro will reach out with your free quote.</p>
+</div>
+
+<div id="app"></div>
+
+<footer class="cf-foot">
+  <p>Renue Home is a free advertising and matching service, not a contractor, home-improvement provider, or manufacturer. We connect homeowners with independent, licensed local professionals who may contact you about your project. Renue Home does not perform, supervise, price, warrant, or guarantee any work, and is not responsible for the services provided. Any agreement for services is solely between you and the provider you choose.</p>
+  <p>&copy; Renue Home. <a href="/privacy-policy">Privacy Policy</a> &middot; <a href="/terms-and-conditions">Terms &amp; Conditions</a></p>
+</footer>
+
+<div class="callsticky">
+  <a href="tel:+18777041720"><span>📞</span> Call now (877) 704-1720</a>
+</div>
+<script>
+(function(){
+  var card=document.getElementById("wq"),btn=document.getElementById("wq-call");
+  if(!card||!btn)return;
+  var step=1,owns=null,proj="",revealed=false;
+  function $id(i){return document.getElementById(i);}
+  function ev(n,p){try{if(window.gtag)gtag("event",n,p||{});}catch(_){}}
+  function prog(p){try{var b=$id("wq-bar"),c=$id("wq-pct");if(b)b.style.width=p+"%";if(c)c.textContent=p+"% complete";}catch(_){}}
+  function reveal(zipok){
+    if(revealed)return;revealed=true;
+    ev("warmup_reveal",{owns:owns?"yes":"no",zip_tagged:zipok?"yes":"no",project:proj});
+    var badge="\u2713 You\u2019re matched \u2014 your local specialist is ready";
+    var note=zipok?"ZIP saved. One quick call gets your exact price \u2014 free, no obligation.":"One quick call gets your exact price. Have your ZIP handy.";
+    card.innerHTML='<span class="wq-badge">'+badge+'</span><p class="wq-note">'+note+"</p>";
+    try{var d=document.querySelector(".callsticky a");if(d)btn.setAttribute("href",d.getAttribute("href"));}catch(_){}
+    btn.classList.remove("wq-hidden");
+    document.body.classList.add("wq-revealed");
+  }
+  function frame(qh,oh){
+    card.innerHTML='<div class="wq-prog"><div class="wq-bar" id="wq-bar"></div></div><p class="wq-pct" id="wq-pct"></p><p class="wq-q" id="wq-q">'+qh+'</p><div class="wq-opts" id="wq-opts">'+oh+'</div><p class="wq-note" id="wq-note"></p>';
+  }
+  function askOwn(){
+    step=2;
+    frame("Do you own your home?",'<button type="button" data-a="own-yes">Yes, I own my home</button><button type="button" data-a="own-no">No, I rent</button>');
+    prog(33);
+  }
+  function dq(){
+    ev("warmup_dq",{});
+    frame("Quotes are for homeowners",'<button type="button" data-a="dq-cont">The homeowner will join the call</button>');
+    prog(33);
+    var n=$id("wq-note");if(n)n.textContent="Our local specialists can only quote projects for the property owner. If the homeowner can join you on the call, you can continue.";
+  }
+  function askZip(){
+    step=3;
+    frame("Where\u2019s the project? Enter your ZIP code",'<input id="wq-zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="ZIP code" style="font:inherit;font-size:18px;font-weight:700;text-align:center;padding:12px;border:2px solid #14B8A6;border-radius:10px;width:100%;box-sizing:border-box"><button type="button" data-a="zip-go">See my price by phone</button>');
+    prog(66);
+    var z=$id("wq-zip");
+    if(z){z.addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,5);});try{z.focus();}catch(_){}}
+  }
+  function showMatching(){
+    ev("warmup_matching",{});
+    card.innerHTML='<div class="wq-spin"></div><p class="wq-q">Matching you with your local specialist\u2026</p><p class="wq-note">Checking coverage for your ZIP</p>';
+  }
+  function submitZip(){
+    var el=$id("wq-zip");var z=(el||{}).value||"";
+    if(!/^\d{5}$/.test(z)||z==="00000"){if(el){el.style.borderColor="#d9534f";el.focus();}return;}
+    ev("warmup_answer",{q:"zip",a:"entered"});
+    prog(90);
+    showMatching();
+    var done=false,tagOK=false,minOver=false;
+    function maybe(){if(done&&minOver)reveal(tagOK);}
+    setTimeout(function(){minOver=true;maybe();},2600);
+    var tm=setTimeout(function(){done=true;maybe();},3500);
+    try{
+      var n=window.retreaver_number;
+      if(n&&typeof n.add_tags==="function"){
+        var tags={zipcode:z};if(proj)tags.project=proj;
+        n.add_tags(tags,function(){clearTimeout(tm);tagOK=true;done=true;ev("warmup_zip_tagged",{});maybe();});
+      }else{clearTimeout(tm);done=true;maybe();}
+    }catch(_){clearTimeout(tm);done=true;maybe();}
+  }
+  card.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;var a=b.getAttribute("data-a")||"";
+    if(a.indexOf("p-")===0){proj=a.slice(2);ev("warmup_answer",{q:"project",a:proj});askOwn();return;}
+    if(a==="own-yes"){owns=true;ev("warmup_answer",{q:"own_home",a:"own-yes"});askZip();return;}
+    if(a==="own-no"){owns=false;ev("warmup_answer",{q:"own_home",a:"own-no"});dq();return;}
+    if(a==="dq-cont"){ev("warmup_dq_continue",{});askZip();return;}
+    if(a==="zip-go")submitZip();
+  });
+  card.addEventListener("keydown",function(e){if(step===3&&e.key==="Enter"){e.preventDefault();submitZip();}});
+})();
+</script>
+</body>
+</html>
