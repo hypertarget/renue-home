@@ -111,21 +111,44 @@
 (function(){
   var q=document.getElementById("wq-q"),opts=document.getElementById("wq-opts"),card=document.getElementById("wq"),btn=document.getElementById("wq-call");
   if(!q||!opts||!card||!btn)return;
-  var step=1,owns=null;
+  var step=1,owns=null,revealed=false;
   function ev(n,p){try{if(window.gtag)gtag("event",n,p||{});}catch(_){}}
-  opts.addEventListener("click",function(e){
-    var b=e.target.closest("button");if(!b)return;var a=b.getAttribute("data-a");
-    if(step===1){owns=(a==="own-yes");step=2;ev("warmup_answer",{q:"own_home",a:a});
-      q.textContent="When are you hoping to have it done?";
-      opts.innerHTML='<button type="button" data-a="t-asap">As soon as possible</button><button type="button" data-a="t-3mo">In the next 1–3 months</button><button type="button" data-a="t-research">Just pricing it out</button>';
-      return;}
-    ev("warmup_answer",{q:"timeframe",a:a});ev("warmup_reveal",{owns:owns?"yes":"no",timeframe:a});
+  function reveal(zipok){
+    if(revealed)return;revealed=true;
+    ev("warmup_reveal",{owns:owns?"yes":"no",zip_tagged:zipok?"yes":"no"});
     var badge=owns?"✓ You qualify for a free phone quote":"✓ Quotes are for homeowners — if that’s a partner or parent, call together";
-    var note=(a==="t-research")?"Get today’s exact pricing in one 5-minute call. No obligation.":"Installers have openings this week — lock in your price with one 5-minute call.";
+    var note=zipok?"Your area is loaded — the call skips straight to pricing. About 5 minutes, no obligation.":"One quick 5-minute call gets your exact price. Have your ZIP handy.";
     card.innerHTML='<span class="wq-badge">'+badge+'</span><p class="wq-note">'+note+"</p>";
     try{var d=document.querySelector(".callsticky a");if(d)btn.setAttribute("href",d.getAttribute("href"));}catch(_){}
     btn.classList.remove("wq-hidden");
+  }
+  function askZip(){
+    step=2;
+    q.textContent="Where’s the project? Enter your ZIP code";
+    opts.innerHTML='<input id="wq-zip" type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="ZIP code" style="font:inherit;font-size:18px;font-weight:700;text-align:center;padding:12px;border:2px solid #14B8A6;border-radius:10px;width:100%;box-sizing:border-box">'+
+      '<button type="button" data-a="zip-go">See my price by phone</button>';
+    var z=document.getElementById("wq-zip");
+    z.addEventListener("input",function(){this.value=this.value.replace(/\D/g,"").slice(0,5);});
+    try{z.focus();}catch(_){}
+  }
+  function submitZip(){
+    var el=document.getElementById("wq-zip");var z=(el||{}).value||"";
+    if(!/^\d{5}$/.test(z)||z==="00000"){if(el){el.style.borderColor="#d9534f";el.focus();}return;}
+    ev("warmup_answer",{q:"zip",a:"entered"});
+    var tm=setTimeout(function(){reveal(false);},3500);
+    try{
+      var n=window.retreaver_number;
+      if(n&&typeof n.add_tags==="function"){
+        n.add_tags({zipcode:z},function(){clearTimeout(tm);ev("warmup_zip_tagged",{});reveal(true);});
+      }else{clearTimeout(tm);reveal(false);}
+    }catch(_){clearTimeout(tm);reveal(false);}
+  }
+  opts.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;var a=b.getAttribute("data-a");
+    if(step===1){owns=(a==="own-yes");ev("warmup_answer",{q:"own_home",a:a});askZip();return;}
+    if(a==="zip-go")submitZip();
   });
+  opts.addEventListener("keydown",function(e){if(step===2&&e.key==="Enter"){e.preventDefault();submitZip();}});
 })();
 </script>
 </body>
