@@ -212,7 +212,7 @@ export async function onRequestGet(context) {
   if (/^http_/.test(dbg.stopped)) return upstreamFail(dbg.stopped);
 
   if (healthOnly) {
-    return new Response(JSON.stringify({ window: dbg.window, mode: dbg.mode, pages: dbg.pages, total: dbg.total, candidates: dbg.candidates, paid: dbg.paid, withGclid: dbg.withGclid, emitted: dbg.emitted, recent: dbg.recent, stopped: dbg.stopped, newestSeen: dbg.newestSeen, oldestSeen: dbg.oldestSeen }, null, 1), {
+    return new Response(JSON.stringify({ window: dbg.window, mode: dbg.mode, pages: dbg.pages, total: dbg.total, candidates: dbg.candidates, paid: dbg.paid, withGclid: dbg.withGclid, emitted: dbg.emitted, sampleTime: rows.length ? rows[0][2] : null, recent: dbg.recent, stopped: dbg.stopped, newestSeen: dbg.newestSeen, oldestSeen: dbg.oldestSeen }, null, 1), {
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     });
   }
@@ -228,13 +228,14 @@ export async function onRequestGet(context) {
   return new Response(body, { headers: { 'Content-Type': 'text/csv; charset=utf-8', 'Cache-Control': 'no-store' } });
 }
 
-// Retreaver timestamps carry a real offset (e.g. -05:00). The old version dropped it while
-// the header declared +0000, shifting every conversion 5-6 hours earlier than it happened —
-// which can place the conversion before its own click and get the row rejected. Keep the offset.
+// Google's importer rejects per-row offsets outright ("The value '...+00:00' in column
+// 'Conversion Time' is invalid" — Aug 12 scheduled run). Convert to true UTC and emit no
+// offset; the Parameters:TimeZone=+0000 header pins the zone, so the real instant is
+// preserved (no silent 5-6h shift like the old offset-dropping version).
 function fmtTime(iso) {
-  const s = String(iso);
-  const m = s.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})/);
-  if (!m) return '';
-  const off = s.match(/([+-]\d{2}:\d{2})$/);
-  return m[1] + ' ' + m[2] + (off ? off[1] : '+00:00');
+  const d = new Date(String(iso));
+  if (isNaN(d)) return '';
+  const p = (n) => String(n).padStart(2, '0');
+  return d.getUTCFullYear() + '-' + p(d.getUTCMonth() + 1) + '-' + p(d.getUTCDate()) +
+    ' ' + p(d.getUTCHours()) + ':' + p(d.getUTCMinutes()) + ':' + p(d.getUTCSeconds());
 }
