@@ -117,7 +117,7 @@
     if(revealed)return;revealed=true;
     ev("warmup_reveal",{owns:owns?"yes":"no",zip_tagged:zipok?"yes":"no"});
     var badge=owns?"✓ You qualify for a free phone quote":"✓ Quotes are for homeowners — if that’s a partner or parent, call together";
-    var note=zipok?"Your area is loaded — the call skips straight to pricing. About 5 minutes, no obligation.":"One quick 5-minute call gets your exact price. Have your ZIP handy.";
+    var note=zipok?"ZIP saved. One quick call gets your exact price — about 5 minutes, no obligation.":"One quick 5-minute call gets your exact price. Have your ZIP handy.";
     card.innerHTML='<span class="wq-badge">'+badge+'</span><p class="wq-note">'+note+"</p>";
     try{var d=document.querySelector(".callsticky a");if(d)btn.setAttribute("href",d.getAttribute("href"));}catch(_){}
     btn.classList.remove("wq-hidden");
