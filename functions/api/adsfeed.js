@@ -52,8 +52,8 @@ export async function onRequestGet(context) {
   if (days > 90) days = 90;
   let maxPages = parseInt(q.get('maxpages') || '48', 10);
   if (!isFinite(maxPages) || maxPages < 1) maxPages = 48;
-  if (maxPages > 48) maxPages = 48;
-  const WAVE = 8; // concurrent page fetches per round
+  if (maxPages > 40) maxPages = 40; // + preflight stays under the 50-subrequest Workers cap even with retries
+  const WAVE = 4; // concurrent page fetches per round (8 tripped Retreaver rate limits)
 
   const dayRe = /^\d{4}-\d{2}-\d{2}$/;
   const now = new Date();
@@ -93,7 +93,11 @@ export async function onRequestGet(context) {
     return api;
   }
   async function fetchPage(page, mode) {
-    const r = await fetch(pageUrl(page, mode), { headers: { 'Accept': 'application/json' } });
+    let r = await fetch(pageUrl(page, mode), { headers: { 'Accept': 'application/json' } });
+    if (!r.ok && (r.status === 429 || r.status >= 500)) {
+      await new Promise(function (res) { setTimeout(res, 800); });
+      r = await fetch(pageUrl(page, mode), { headers: { 'Accept': 'application/json' } });
+    }
     if (!r.ok) return { page: page, status: r.status, calls: null };
     const data = await r.json();
     const calls = (Array.isArray(data) ? data : (data.calls || [])).map(function (c) { return c.call || c; });
@@ -107,7 +111,7 @@ export async function onRequestGet(context) {
   function upstreamFail(reason) {
     dbg.stopped = reason; dbg.error = true;
     return new Response(JSON.stringify(dbg, null, 1), {
-      status: 502,
+      status: 424, // NOT 502: Cloudflare masks worker 502s with its branded error page
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }
     });
   }
