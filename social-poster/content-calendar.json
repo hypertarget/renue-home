@@ -408,5 +408,35 @@
     "caption": "friendly reminder from someone who has seen the bills. get THREE quotes before you sign anything. the spread between contractors can be wild.\n\nrenue home makes it easy, one form, a few local pros, you compare. renuehome.com\n\nwhat's the biggest quote gap you've ever gotten? 👇",
     "alt": "Tip, always get 3 quotes before you sign anything.",
     "status": "pending"
+  },
+  {
+    "id": "no-pressure-41",
+    "bank_id": "no-pressure",
+    "layout": "realtalk",
+    "image_url": "https://renuehome.com/assets/social-posts/no-pressure-41.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/no-pressure-41-pin.png",
+    "caption": "we built renue home to be the opposite of the runaround. answer a few questions, get matched with local pros, compare free quotes. you're in control the whole way.\n\nrenuehome.com 🏡",
+    "alt": "No pressure, no pushy sales calls, just real quotes you can compare.",
+    "status": "pending"
+  },
+  {
+    "id": "myth-comparing-42",
+    "bank_id": "myth-comparing",
+    "layout": "myth",
+    "image_url": "https://renuehome.com/assets/social-posts/myth-comparing-42.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/myth-comparing-42-pin.png",
+    "caption": "the \"i'll get around to it\" home project, meet the 2 minute version.\n\nthe myth is that comparing contractors is a pain. the reality is one short form on renuehome.com and local pros reach out to you. you compare on your own time.\n\nno obligation, ever.",
+    "alt": "Myth, comparing home pros is a hassle. Truth, one short form and pros reach out.",
+    "status": "pending"
+  },
+  {
+    "id": "small-fixes-43",
+    "bank_id": "small-fixes",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/small-fixes-43.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/small-fixes-43-pin.png",
+    "caption": "the cheapest home repair is the one you catch early. that little leak or soft spot only gets pricier the longer it waits.\n\nget a free quote from a local pro before it grows. renuehome.com",
+    "alt": "Small fixes now beat big repairs later.",
+    "status": "pending"
   }
 ]

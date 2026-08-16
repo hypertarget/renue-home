@@ -15,7 +15,10 @@
     "tip-deposit",
     "myth-quotes-cost",
     "stat-hvac",
-    "tip-three-quotes"
+    "tip-three-quotes",
+    "no-pressure",
+    "myth-comparing",
+    "small-fixes"
   ],
-  "gen": 41
+  "gen": 44
 }
