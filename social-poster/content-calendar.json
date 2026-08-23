@@ -438,5 +438,35 @@
     "caption": "the cheapest home repair is the one you catch early. that little leak or soft spot only gets pricier the longer it waits.\n\nget a free quote from a local pro before it grows. renuehome.com",
     "alt": "Small fixes now beat big repairs later.",
     "status": "pending"
+  },
+  {
+    "id": "tip-permits-44",
+    "bank_id": "tip-permits",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-permits-44.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-permits-44-pin.png",
+    "caption": "boring but important. on a big remodel, make sure your contractor actually pulls permits. unpermitted work can come back to bite you when you sell.\n\nwant pros who do it right? compare local quotes at renuehome.com.",
+    "alt": "Tip, make sure your contractor pulls permits on a big remodel.",
+    "status": "pending"
+  },
+  {
+    "id": "tip-gutters-45",
+    "bank_id": "tip-gutters",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-gutters-45.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-gutters-45-pin.png",
+    "caption": "small chore, big payoff. clogged gutters send water where you don't want it, straight toward your foundation. knock it out before the next big storm. 🌧️\n\nneed a pro for the gutters or the damage they caused? renuehome.com",
+    "alt": "Tip, clean your gutters before the first big storm.",
+    "status": "pending"
+  },
+  {
+    "id": "quote-checklist-46",
+    "bank_id": "quote-checklist",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/quote-checklist-46.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/quote-checklist-46-pin.png",
+    "caption": "a real quote is more than a number. before you compare, make sure each one spells out 👇\n\n✔ the full scope of work\n✔ materials and labor\n✔ a start date\n✔ payment terms\n\ncompare apples to apples at renuehome.com.",
+    "alt": "What a real quote includes checklist.",
+    "status": "pending"
   }
 ]
