@@ -468,5 +468,35 @@
     "caption": "a real quote is more than a number. before you compare, make sure each one spells out 👇\n\n✔ the full scope of work\n✔ materials and labor\n✔ a start date\n✔ payment terms\n\ncompare apples to apples at renuehome.com.",
     "alt": "What a real quote includes checklist.",
     "status": "pending"
+  },
+  {
+    "id": "contractor-checklist-47",
+    "bank_id": "contractor-checklist",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/contractor-checklist-47.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/contractor-checklist-47-pin.png",
+    "caption": "save this one 📌 four things to check before you hand anyone a deposit.\n\n✔ license + insurance\n✔ the quote in writing\n✔ a couple references\n✔ a real start and finish timeline\n\nthe pros in the renue home network are independent local companies, so you still vet them. this just helps. renuehome.com",
+    "alt": "Before you hire a contractor checklist.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-bath-48",
+    "bank_id": "stat-bath",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-bath-48.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-bath-48-pin.png",
+    "caption": "a midrange bathroom remodel recoups about 80% at resale (2025 Cost vs. Value Report). so you get a fresh bathroom now and most of it back later.\n\ncompare free quotes from local pros at renuehome.com.\n\n#bathroomremodel #homevalue",
+    "alt": "A midrange bathroom remodel recoups about 80 percent at resale.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-garage-49",
+    "bank_id": "stat-garage",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-garage-49.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-garage-49-pin.png",
+    "caption": "plot twist. the home upgrade with the best resale ROI in 2025 isn't a kitchen or a bath, it's a new garage door. 268%, per the Cost vs. Value Report.\n\nthinking about it? compare local quotes free at renuehome.com.\n\n#homevalue #curbappeal",
+    "alt": "268 percent return at resale on a new garage door, the top ROI project in 2025.",
+    "status": "pending"
   }
 ]

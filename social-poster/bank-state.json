@@ -21,7 +21,10 @@
     "small-fixes",
     "tip-permits",
     "tip-gutters",
-    "quote-checklist"
+    "quote-checklist",
+    "contractor-checklist",
+    "stat-bath",
+    "stat-garage"
   ],
-  "gen": 47
+  "gen": 50
 }
