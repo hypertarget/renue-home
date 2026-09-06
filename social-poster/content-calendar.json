@@ -498,5 +498,35 @@
     "caption": "plot twist. the home upgrade with the best resale ROI in 2025 isn't a kitchen or a bath, it's a new garage door. 268%, per the Cost vs. Value Report.\n\nthinking about it? compare local quotes free at renuehome.com.\n\n#homevalue #curbappeal",
     "alt": "268 percent return at resale on a new garage door, the top ROI project in 2025.",
     "status": "pending"
+  },
+  {
+    "id": "summer-projects-50",
+    "bank_id": "summer-projects",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/summer-projects-50.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/summer-projects-50-pin.png",
+    "caption": "long days, dry weather, this is the season stuff actually gets done ☀️ whatever's on your list (finally fixing that roof?), start by comparing free quotes from local pros.\n\nrenuehome.com",
+    "alt": "Summer is when home projects actually happen.",
+    "status": "pending"
+  },
+  {
+    "id": "myth-quotes-cost-51",
+    "bank_id": "myth-quotes-cost",
+    "layout": "myth",
+    "image_url": "https://renuehome.com/assets/social-posts/myth-quotes-cost-51.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/myth-quotes-cost-51-pin.png",
+    "caption": "let's bust a common one. people assume getting quotes costs something. it doesn't. comparing quotes from local pros on renuehome.com is free, with no obligation to hire anyone.\n\nthat's the whole idea. 🏡",
+    "alt": "Myth, getting quotes costs money. Truth, comparing quotes is free.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-bath-52",
+    "bank_id": "stat-bath",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-bath-52.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-bath-52-pin.png",
+    "caption": "a midrange bathroom remodel recoups about 80% at resale (2025 Cost vs. Value Report). so you get a fresh bathroom now and most of it back later.\n\ncompare free quotes from local pros at renuehome.com.\n\n#bathroomremodel #homevalue",
+    "alt": "A midrange bathroom remodel recoups about 80 percent at resale.",
+    "status": "pending"
   }
 ]
