@@ -1,25 +1,37 @@
 // Cloudflare Pages Function — POST /api/submit  [canonical Twyne version — do not overwrite from a stale clone]
-// Receives the lead, validates it, posts it to Twyne (HTM's ping-post platform),
+// Receives the lead, validates it, posts it to Twyne (HTM's lead platform),
 // and returns a pay-per-call number for the thank-you screen.
 //
-// Twyne is the lead destination: renuehome.com -> Twyne -> ping-post to multiple buyers.
-// We do NOT post to individual buyers (e.g. BlueInk) directly; Twyne handles that.
+// Two campaign kinds:
+//   kind "fpi"   = classic ping-post FPI mapping (cq1=credit, cq2=homeowner, cq3=project). e.g. #550.
+//   kind "ws554" = WestShore API direct post (#554, CPL). cq1 = category hard-coded per funnel
+//                  ("bathroom"/"window") — NEVER derived from user input (no server-side validation
+//                  on Twyne's end; correctness lives here). trustedform is REQUIRED: if the cert is
+//                  missing the lead is NOT posted (consumer still sees the thank-you screen).
+//                  Spec: shared brain sops/campaigns/westshore-api-554-direct-post--v1.
 //
 // Optional env (Cloudflare Pages -> Settings -> Environment variables):
 //   CALL_NUMBER       static pay-per-call number shown on the thank-you screen
-//   TWYNE_SUBID1      publisher main traffic source id (defaults to "renuehome")
+//   TWYNE_SUBID1      overrides the derived traffic source for subid1 (fpi default "renuehome")
 //   TWYNE_TEST        "true" forces istest=true on every post (use on staging)
 
 // ---- Twyne campaign map -------------------------------------------------------
-// pid/sid are constant for this publisher+source; cid changes per vertical (per FPI).
-// projectField = the funnel step id that holds the buyer's "Project Type" (cq3).
-// Add a line here as each vertical's Field Publisher Instructions arrive.
 const TWYNE = {
   endpoint: "https://htm.api.twyne.io/lead/submit",
   pid: "139",
   sid: "310",
   campaigns: {
-    bathroom: { cid: "550", projectField: "project" }, // FPI #550 - Home Improvement - Bathroom
+    bathroom: { cid: "550", kind: "fpi", projectField: "project" }, // FPI #550 - Home Improvement - Bathroom (LIVE)
+    // --- WestShore API #554 direct post: STAGED, activate only after istest verification + Eric's OK ---
+    // bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
+    // windows:  { cid: "554", kind: "ws554", category: "window" },
+  },
+  // Test-only #554 route. Reachable ONLY when the request carries x-rnh-test:1 AND the payload
+  // sets testCampaign:"ws554". Posts through here are ALWAYS istest=true regardless of payload.
+  // The real funnel never sends the header, so production traffic cannot reach this route.
+  ws554Test: {
+    bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
+    windows:  { cid: "554", kind: "ws554", category: "window" },
   },
 };
 
@@ -49,27 +61,42 @@ export async function onRequestPost({ request, env }) {
     consent: lead.consent === true, consentText: lead.consentText || "",
     trustedFormCertUrl: lead.xxTrustedFormCertUrl || "",
     jornayaLeadiD: lead.universal_leadid || "",
-    pageUrl: lead.pageUrl || "", ip, userAgent: ua, ts: Date.now(),
+    pageUrl: lead.pageUrl || "", referrer: lead.referrer || "", ip, userAgent: ua, ts: Date.now(),
   };
+
+  // ---- Campaign selection -------------------------------------------------------
+  let camp = TWYNE.campaigns[record.vertical];
+  let forceTest = false;
+  if (isTestReq && lead.testCampaign === "ws554" && TWYNE.ws554Test[record.vertical]) {
+    camp = TWYNE.ws554Test[record.vertical];
+    forceTest = true; // staging route never posts a non-test lead
+  }
 
   // ---- Post to Twyne ----------------------------------------------------------
   let twyne = { attempted: false };
-  const camp = TWYNE.campaigns[record.vertical];
   if (camp) {
-    const isTest = (env && env.TWYNE_TEST === "true") || lead.istest === true || lead.istest === "true";
-    const params = buildTwyneParams(lead, record, camp, {
-      ip, ua, subid1: (env && env.TWYNE_SUBID1) || "renuehome", isTest,
-    });
-    try {
-      const r = await fetch(TWYNE.endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json" },
-        body: params,
-      });
-      const body = await r.json().catch(() => ({}));
-      twyne = { attempted: true, httpStatus: r.status, status: body.status || "", reason: body.reason || "", leadid: body.leadid || "", body };
-    } catch (e) {
-      twyne = { attempted: true, error: String(e && e.message || e) };
+    // WestShore #554 hard gate: no TrustedForm cert, no post. Twyne would Accept a
+    // cert-less lead (no server-side validation) — we refuse instead, per HTM policy.
+    if (camp.kind === "ws554" && !record.trustedFormCertUrl) {
+      twyne = { attempted: false, blocked: "trustedform-missing", cid: camp.cid };
+    } else {
+      const isTest = forceTest || (env && env.TWYNE_TEST === "true") || lead.istest === true || lead.istest === "true";
+      const subid1 = (env && env.TWYNE_SUBID1) ||
+        (camp.kind === "ws554" ? trafficSource(record.pageUrl, record.referrer) : "renuehome");
+      const params = buildTwyneParams(lead, record, camp, { ip, ua, subid1, isTest });
+      try {
+        const r = await fetch(TWYNE.endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json" },
+          body: params,
+        });
+        // Twyne answers HTTP 200 on everything — the JSON body's `status` is the truth
+        // (Accepted / Queued / Rejected / Error). Never treat 200 as success.
+        const body = await r.json().catch(() => ({}));
+        twyne = { attempted: true, httpStatus: r.status, status: body.status || "", reason: body.reason || "", errors: body.errors || [], leadid: body.leadid || "", cid: camp.cid, body };
+      } catch (e) {
+        twyne = { attempted: true, error: String(e && e.message || e), cid: camp.cid };
+      }
     }
   }
 
@@ -88,9 +115,29 @@ export async function onRequestPost({ request, env }) {
   });
 }
 
-// Build the x-www-form-urlencoded body Twyne expects (FPI field grid).
+// Derive subid1 (publisher main traffic source) for #554 so results break out by source.
+// Order: paid click ids -> utm_source[-medium] -> referrer engine -> direct.
+function trafficSource(pageUrl, referrer) {
+  try {
+    const u = new URL(pageUrl || "https://renuehome.com");
+    const q = u.searchParams;
+    if (q.get("gclid") || q.get("gbraid") || q.get("wbraid")) return "google-cpc";
+    if (q.get("msclkid")) return "bing-cpc";
+    if (q.get("fbclid")) return "facebook-cpc";
+    const us = (q.get("utm_source") || "").toLowerCase();
+    const um = (q.get("utm_medium") || "").toLowerCase();
+    if (us) return (us + (um ? "-" + um : "")).replace(/[^a-z0-9-]/g, "").slice(0, 40);
+    const r = (referrer || "").toLowerCase();
+    if (r.indexOf("google.") > -1) return "google-organic";
+    if (r.indexOf("bing.") > -1) return "bing-organic";
+    if (r.indexOf("facebook.") > -1 || r.indexOf("fb.") > -1) return "facebook";
+    if (r) return "referral";
+    return "direct";
+  } catch (_) { return "renuehome"; }
+}
+
+// Build the x-www-form-urlencoded body Twyne expects.
 function buildTwyneParams(lead, record, camp, opt) {
-  const projectType = lead[camp.projectField] || lead.project || lead.nature || "";
   const p = new URLSearchParams();
   // required hidden ids
   p.set("pid", TWYNE.pid);
@@ -109,20 +156,33 @@ function buildTwyneParams(lead, record, camp, opt) {
   p.set("domain_url", record.pageUrl || "https://renuehome.com");
   p.set("externalid", "rh-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8));
   p.set("istest", opt.isTest ? "true" : "false");
-  // contact + location
+  // contact
   p.set("first", record.first || "");
   p.set("last", record.last || "");
   p.set("email", record.email || "");
-  p.set("phone", record.phone || "");
+  p.set("phone", record.phone || "");   // 10 digits, no formatting (Twyne validates phone upfront)
   p.set("zip", record.zip || "");
-  p.set("address1", record.address || "");
-  if (lead.address2) p.set("address2", lead.address2);
-  p.set("state", (record.state || "").toUpperCase().slice(0, 2));
-  p.set("city", record.city || "");
-  // custom questions
-  p.set("cq1", lead.credit || "");                 // Credit Rating
-  p.set("cq2", homeowner(lead.owner));             // Homeowner (Yes/No)
-  p.set("cq3", projectType);                        // Project Type
+
+  if (camp.kind === "ws554") {
+    // WestShore API #554 — spec fields only (sops/campaigns/westshore-api-554-direct-post--v1).
+    p.set("country", "US");
+    p.set("cq1", camp.category);        // hard-coded category: "bathroom" | "window"
+    // subid2 = gclid when present (fixed order per spec note)
+    try {
+      const g = new URL(record.pageUrl || "https://renuehome.com").searchParams.get("gclid");
+      if (g) p.set("subid2", g);
+    } catch (_) {}
+  } else {
+    // Classic FPI mapping (e.g. #550): address + custom questions from the funnel.
+    const projectType = lead[camp.projectField] || lead.project || lead.nature || "";
+    p.set("address1", record.address || "");
+    if (lead.address2) p.set("address2", lead.address2);
+    p.set("state", (record.state || "").toUpperCase().slice(0, 2));
+    p.set("city", record.city || "");
+    p.set("cq1", lead.credit || "");                 // Credit Rating
+    p.set("cq2", homeowner(lead.owner));             // Homeowner (Yes/No)
+    p.set("cq3", projectType);                        // Project Type
+  }
   return p.toString();
 }
 
