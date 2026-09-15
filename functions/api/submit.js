@@ -4,7 +4,7 @@
 //
 // Two campaign kinds:
 //   kind "fpi"   = classic ping-post FPI mapping (cq1=credit, cq2=homeowner, cq3=project). e.g. #550.
-//   kind "ws554" = WestShore API direct post (#554, CPL). cq1 = category hard-coded per funnel
+//   kind "ws554" = WestShore API campaign (#554, CPL). cq1 = category hard-coded per funnel
 //                  ("bathroom"/"window") — NEVER derived from user input (no server-side validation
 //                  on Twyne's end; correctness lives here). trustedform is REQUIRED: if the cert is
 //                  missing the lead is NOT posted (consumer still sees the thank-you screen).
@@ -21,10 +21,12 @@ const TWYNE = {
   pid: "139",
   sid: "310",
   campaigns: {
-    bathroom: { cid: "550", kind: "fpi", projectField: "project" }, // FPI #550 - Home Improvement - Bathroom (LIVE)
-    // --- WestShore API #554 direct post: STAGED, activate only after istest verification + Eric's OK ---
-    // bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
-    // windows:  { cid: "554", kind: "ws554", category: "window" },
+    // WestShore API campaign #554 — Twyne runs its ping-post auction on every post (WestShore =
+    // the anchor API buyer; highest bidder wins). cq1 category hard-coded per funnel.
+    // ACTIVE 2026-09-15 per Eric, after istest verification (leadids 6253630/6253631).
+    bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
+    windows:  { cid: "554", kind: "ws554", category: "window" },
+    // Retired 2026-09-15: bathroom -> { cid: "550", kind: "fpi", projectField: "project" } (FPI #550).
   },
   // Test-only #554 route. Reachable ONLY when the request carries x-rnh-test:1 AND the payload
   // sets testCampaign:"ws554". Posts through here are ALWAYS istest=true regardless of payload.
