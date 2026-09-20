@@ -558,5 +558,35 @@
     "caption": "friendly reminder from someone who has seen the bills. get THREE quotes before you sign anything. the spread between contractors can be wild.\n\nrenue home makes it easy, one form, a few local pros, you compare. renuehome.com\n\nwhat's the biggest quote gap you've ever gotten? 👇",
     "alt": "Tip, always get 3 quotes before you sign anything.",
     "status": "pending"
+  },
+  {
+    "id": "tip-gutters-56",
+    "bank_id": "tip-gutters",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-gutters-56.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-gutters-56-pin.png",
+    "caption": "small chore, big payoff. clogged gutters send water where you don't want it, straight toward your foundation. knock it out before the next big storm. 🌧️\n\nneed a pro for the gutters or the damage they caused? renuehome.com",
+    "alt": "Tip, clean your gutters before the first big storm.",
+    "status": "pending"
+  },
+  {
+    "id": "red-flags-57",
+    "bank_id": "red-flags",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/red-flags-57.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/red-flags-57-pin.png",
+    "caption": "trust your gut, but also trust this list 🚩 walk away if you see\n\n✔ cash only with a big deposit\n✔ no written quote\n✔ pressure to sign today\n✔ no license number\n\ncompare vetted local pros the calm way at renuehome.com.",
+    "alt": "Contractor red flags checklist.",
+    "status": "pending"
+  },
+  {
+    "id": "quote-checklist-58",
+    "bank_id": "quote-checklist",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/quote-checklist-58.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/quote-checklist-58-pin.png",
+    "caption": "a real quote is more than a number. before you compare, make sure each one spells out 👇\n\n✔ the full scope of work\n✔ materials and labor\n✔ a start date\n✔ payment terms\n\ncompare apples to apples at renuehome.com.",
+    "alt": "What a real quote includes checklist.",
+    "status": "pending"
   }
 ]
