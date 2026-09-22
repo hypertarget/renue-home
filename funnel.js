@@ -1,5 +1,7 @@
 /* Renue Home — shared engine: header/footer/sticky injection + config-driven quiz. */
 /* canonical version: includes Google Ads form + call conversions, EC, Twyne/Jornaya cert wiring. Do not overwrite from a stale clone. */
+/* 2026-09-22 CRO pass: LP mode (logo-only header, legal-only footer), persistent call bar that hides only while typing,
+   Ads conversion fires ONLY when Twyne reports the lead sold (Accepted/Queued), renter disqualify, real phone/email validation. */
 (function(){
   "use strict";
 
@@ -8,6 +10,9 @@
   var NON_CONSENT_PHONE = window.RENUE_NONCONSENT_PHONE || ""; // line for info without consenting to automated calls.
   var SUBMIT_ENDPOINT = "/api/submit";
   var BUYER_CAP = 4;
+  // Landing-page mode (paid traffic): set window.RENUE_LP=true in the page head. Header = logo + phone only
+  // (no nav links out of the funnel), footer = legal links only (no Guides / Service Areas leaks).
+  var LP = (window.RENUE_LP === true);
   // TrustedForm: on by default (set window.RENUE_TRUSTEDFORM=false to disable). Captures a
   // tamper-proof consent certificate URL that materially raises lead value + TCPA defensibility.
   var TRUSTEDFORM = (window.RENUE_TRUSTEDFORM !== false);
@@ -23,7 +28,12 @@
   var ADS_CONVERSION = window.RENUE_ADS_CONVERSION || "AW-18253863009/Jhf8CNKasMQcEOGwj4BE";
   // Google Ads click-to-call conversion ("RNH Click-to-Call", Contact category, secondary/observational).
   var ADS_CALL_CONVERSION = window.RENUE_ADS_CALL_CONVERSION || "AW-18253863009/bfThCOfXucQcEOGwj4BE";
-  var ADS_DEFAULT_VALUE = 40; // fallback conversion value when no accepted bid is returned
+  // Fallback conversion value when Twyne sells the lead but returns no payout (WestShore #554 CPL = $60).
+  var ADS_DEFAULT_VALUE = 60;
+  // Fire the Ads form conversion ONLY when the server reports the lead actually sold (Twyne status
+  // Accepted/Queued). Rejected / blocked / errored posts still show the thank-you but send no conversion,
+  // so Smart Bidding learns from revenue, not from form fills. Set window.RENUE_ADS_FIRE_ALWAYS=true to revert.
+  var ADS_FIRE_ONLY_ON_SALE = (window.RENUE_ADS_FIRE_ALWAYS !== true);
   var META_PIXEL = window.RENUE_META_PIXEL || "";  // Meta/Facebook pixel id (optional)
   // Retreaver Dynamic Number Insertion: each visitor gets a unique tracking number that carries
   // their gclid (call attribution). Campaign 01a27245 (Bathroom Remodel Zip IVR) / pool 5583,
@@ -198,13 +208,35 @@
   /* Conversational helper line shown under each question (per-step override wins). */
   function helperFor(step, idx, total){
     if(step.helper) return step.helper;
-    if(step.type==="zip" || step.type==="address") return "We use this only to match you with pros near you — never shared publicly.";
+    if(step.type==="zip" || step.type==="address") return "We use this only to match you with pros near you. Never shared publicly.";
     if(step.type==="name") return "Almost there! Where should we send your free quotes? Your info is kept private.";
     if(step.type==="contact") return "Last step! Add your phone and address so a local pro can follow up.";
-    if(idx===0) return "Hi! I’ll help you get matched in about 60 seconds — no obligation. Let’s start:";
-    if(idx>=total-2) return "Almost there — just a couple more quick questions.";
+    if(idx===0) return "Hi! This takes about 60 seconds and there’s no obligation. Let’s start.";
+    if(idx>=total-2) return "Almost there, just a couple more quick questions.";
     if(step.type==="multi") return "Pick anything that applies, or skip. There are no wrong answers.";
-    return "Great — thanks! Next quick question:";
+    return "Great, thanks! Next quick question.";
+  }
+
+  /* ===== Contact validation =====
+     Phone: 10 digits (a leading 1 is dropped), NANP-shaped (area code + exchange start 2-9, no N11),
+     not all one digit, not sequential, not the fictional 555-01XX block. Returns the 10 digits or "". */
+  function normPhone(raw){
+    var d=(raw||"").replace(/\D/g,"");
+    if(d.length===11 && d.charAt(0)==="1") d=d.slice(1);
+    if(d.length!==10) return "";
+    if(/^(\d)\1{9}$/.test(d)) return "";
+    if(!/^[2-9]/.test(d) || !/^[2-9]/.test(d.slice(3))) return "";
+    if(d.charAt(1)==="1" && d.charAt(2)==="1") return "";
+    if(/^\d{3}55501\d{2}$/.test(d)) return "";
+    if("01234567890123456789".indexOf(d)>-1 || "98765432109876543210".indexOf(d)>-1) return "";
+    return d;
+  }
+  // Common mistyped domains (gmail.con, gmial.com ...). Returns true when the address looks mistyped.
+  function emailTypo(email){
+    var e=(email||"").toLowerCase();
+    if(/@[a-z0-9.\-]+\.(con|cmo|ocm|comm|vom|xom|om|cm|coom)$/.test(e)) return true;
+    if(/@(gmial|gamil|gnail|gmaill|gmal|hotmal|hotmial|yaho|yahooo|yhoo|outlok|iclould|icoud)\.com$/.test(e)) return true;
+    return false;
   }
 
   function phoneCTA(cls){
@@ -214,10 +246,16 @@
 
   /* ===== Header ===== */
   function header(){
-    var h=document.createElement("header"); h.className="site";
+    var h=document.createElement("header"); h.className="site"+(LP?" lp":"");
     var ctaHref = (window.RENUE_PAGE==="vertical") ? "#quiz" : "/#projects";
     var ctaTxt = (window.RENUE_PAGE==="vertical") ? "Get Free Quote" : "Start My Home Project";
-    h.innerHTML='<div class="wrap bar"><a class="logo" href="/">'+LOGO+'<span class="word"><span class="r">RENUE</span><span class="h">H O M E</span></span></a>'+
+    var brand = '<span class="word"><span class="r">RENUE</span><span class="h">H O M E</span></span>';
+    if(LP){
+      // Paid landing page: nothing that leads away from the funnel. Logo (no link) + phone CTA only.
+      h.innerHTML='<div class="wrap bar"><span class="logo">'+LOGO+brand+'</span><nav>'+phoneCTA("phone")+'</nav></div>';
+      return h;
+    }
+    h.innerHTML='<div class="wrap bar"><a class="logo" href="/">'+LOGO+brand+'</a>'+
       '<nav>'+NAV.map(function(n){return '<a class="navlink" href="'+n[1]+'">'+n[0]+'</a>';}).join('')+
       phoneCTA("phone")+
       '<a class="btn btn-grad" style="padding:11px 18px;font-size:14px" href="'+ctaHref+'">'+ctaTxt+'</a></nav></div>';
@@ -226,13 +264,16 @@
 
   /* ===== Footer ===== */
   function footer(){
-    var f=document.createElement("footer"); f.className="site";
+    var f=document.createElement("footer"); f.className="site"+(LP?" lp":"");
     var nonconsent = NON_CONSENT_PHONE
       ? 'To request information without consenting to automated calls or texts, call '+NON_CONSENT_PHONE+'.'
       : 'To request information without consenting to automated calls or texts, call (XXX) XXX-XXXX.';
+    // LP mode drops the site-navigation links (Guides, Service Areas). Legal links always stay.
+    var links = (LP ? '' : '<a href="/guides">Guides</a><a href="/locations">Service Areas</a>')+
+      '<a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a><a href="/california-privacy-notice">California Privacy Notice</a><a href="/partners">Marketing Partners</a><a href="/do-not-sell-or-share">Do Not Sell or Share My Personal Information</a>';
     f.innerHTML='<div class="wrap"><div class="ftop">'+
       '<div class="fbrand">'+LOGO+'<span><span class="r">RENUE</span> <span class="h">HOME</span></span></div>'+
-      '<nav><a href="/guides">Guides</a><a href="/locations">Service Areas</a><a href="/privacy-policy">Privacy Policy</a><a href="/terms-and-conditions">Terms &amp; Conditions</a><a href="/california-privacy-notice">California Privacy Notice</a><a href="/partners">Marketing Partners</a><a href="/do-not-sell-or-share">Do Not Sell or Share My Personal Information</a></nav>'+
+      '<nav>'+links+'</nav>'+
       '</div>'+
       '<p class="disc">Renue Home is an advertising marketplace and matching service for homeowners seeking home improvement services. Renue Home is not a provider, manufacturer, installer, or contractor. Information submitted may be shared with independent home improvement professionals or companies in your area. Renue Home does not endorse, warrant, or guarantee the services or products of any individual company. '+nonconsent+'</p>'+
       '<div class="copy">&copy; '+new Date().getFullYear()+' Renue Home &middot; Fresh Starts. Better Homes. &middot; <span class="dom">RENUEHOME.COM</span></div>'+
@@ -240,12 +281,15 @@
     return f;
   }
 
-  /* ===== Sticky mobile CTA ===== */
+  /* ===== Sticky mobile CTA =====
+     Before the quiz starts: Call + Get Free Quote. Once engaged the quote button drops (the quiz IS the
+     page) and a single call button stays available on every step. It hides only while an input has
+     focus (keyboard up) and on the thank-you screen, so it never sits on top of a field. */
   function sticky(){
     var s=document.createElement("div"); s.className="sticky";
     var qHref = (window.RENUE_PAGE==="vertical") ? "#quiz" : "/#projects";
     var qTxt = (window.RENUE_PAGE==="vertical") ? "Get Free Quote" : "Start My Project";
-    var call = PHONE_NUMBER ? '<a class="btn btn-call" href="'+telHref(PHONE_NUMBER)+'">Call Now</a>'
+    var call = PHONE_NUMBER ? '<a class="btn btn-call" href="'+telHref(PHONE_NUMBER)+'">Call '+PHONE_NUMBER+'</a>'
                             : '<a class="btn btn-call" href="'+qHref+'">Call Now</a>';
     s.innerHTML=call+'<a class="btn btn-grad" href="'+qHref+'">'+qTxt+'</a>';
     return s;
@@ -263,7 +307,7 @@
     if(city){
       headline = cfg.name+' Pros in '+city.metro+', '+city.state;
       sub = 'Compare free, no-obligation '+cfg.word+' quotes from '+city.metro+'-area professionals serving your area. Takes under a minute.';
-      title = cfg.name+' Quotes in '+city.metro+', '+city.state+' — Renue Home';
+      title = cfg.name+' Quotes in '+city.metro+', '+city.state+' | Renue Home';
       eyebrow = 'Serving '+city.metro+' & nearby areas';
     }
     // Edge geo (Cloudflare): prepend the visitor's state to the hero for relevance lift.
@@ -272,11 +316,11 @@
     if(!city && window.RENUE_GEO_REGION){
       headline = window.RENUE_GEO_REGION + " Homeowners: " + headline;
     }
-    document.title = title || ("Renue Home — "+cfg.name);
+    document.title = title || ("Renue Home | "+cfg.name);
 
     app.innerHTML =
       '<section class="hero"><div class="wrap hero-grid">'+
-        '<div><span class="eyebrow">'+eyebrow+'</span>'+
+        '<div class="hcopy"><span class="eyebrow">'+eyebrow+'</span>'+
           '<h1 class="head">'+headline+'</h1>'+
           '<p class="lead">'+sub+'</p>'+
           '<div class="trustline">'+
@@ -294,7 +338,18 @@
     try{ history.replaceState({rf:0}, ""); }catch(e){}
     renderStep(cfg, 0, {});
     var qc = document.getElementById("quiz");
-    if(qc) qc.addEventListener("focusin", function(){ document.body.classList.add("quiz-engaged"); });
+    if(qc){
+      qc.addEventListener("focusin", function(e){
+        document.body.classList.add("quiz-engaged");
+        var t=e.target; if(t && (t.tagName==="INPUT" || t.tagName==="TEXTAREA")) document.body.classList.add("quiz-typing");
+      });
+      qc.addEventListener("focusout", function(){
+        setTimeout(function(){
+          var a=document.activeElement;
+          if(!(a && (a.tagName==="INPUT" || a.tagName==="TEXTAREA") && qc.contains(a))) document.body.classList.remove("quiz-typing");
+        }, 120);
+      });
+    }
     wireFaq();
   }
 
@@ -371,6 +426,29 @@
       '</div></section>';
   }
 
+  function trustCuesHtml(){
+    return '<div class="trustcues">'+
+        '<span>'+LOCK+' 256-bit SSL secured</span>'+
+        '<span>'+SHIELD+' Your info is private</span>'+
+        '<span>'+CK+' No spam, ever</span>'+
+        (TRUSTEDFORM?'<span>'+CK+' TrustedForm&reg; verified</span>':'')+
+      '</div>';
+  }
+
+  /* Polite dead-end when an answer disqualifies the lead (e.g. renter). Nothing is posted, no
+     conversion fires. Back returns to the question so a mis-tap can be fixed. */
+  function renderDQ(cfg, idx, data, step, msg){
+    var card = document.getElementById("quizcard");
+    if(!card) return;
+    card.innerHTML = '<div class="thanks show"><div class="big dq"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16.5v.5"/></svg></div>'+
+      '<div class="q">Thanks for your interest</div>'+
+      '<p class="qsub">'+msg+'</p>'+
+      '<button class="btn btn-ghost" type="button" data-back="1">&lsaquo; Back to the question</button></div>'+trustCuesHtml();
+    card.querySelector("[data-back]").onclick=function(){ renderStep(cfg, idx, data); };
+    try{ if(window.gtag) gtag('event','quiz_disqualified',{vertical:(window.RENUE_VERTICAL||""),step:step.id}); }catch(e){}
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
   function renderStep(cfg, idx, data){
     var steps = cfg.steps;
     var card = document.getElementById("quizcard");
@@ -397,26 +475,20 @@
          '<button class="btn btn-grad btn-lg" type="button" data-addr="1">Continue &rsaquo;</button>';
     } else if(step.type==="name"){
       // Page A: name + email (TrustedForm grantor roles). Phone + address come on the final page.
-      h+='<div class="two"><div class="field"><input id="f_first" placeholder="First name" data-tf-element-role="consent-grantor-name" value="'+(data.first||'')+'"></div>'+
-         '<div class="field"><input id="f_last" placeholder="Last name" value="'+(data.last||'')+'"></div></div>'+
-         '<div class="field"><input id="f_email" type="email" inputmode="email" placeholder="Email address" data-tf-element-role="consent-grantor-email" value="'+(data.email||'')+'"></div>'+
+      h+='<div class="two"><div class="field"><input id="f_first" placeholder="First name" autocomplete="given-name" data-tf-element-role="consent-grantor-name" value="'+(data.first||'')+'"></div>'+
+         '<div class="field"><input id="f_last" placeholder="Last name" autocomplete="family-name" value="'+(data.last||'')+'"></div></div>'+
+         '<div class="field"><input id="f_email" type="email" inputmode="email" autocomplete="email" placeholder="Email address" data-tf-element-role="consent-grantor-email" value="'+(data.email||'')+'"></div>'+
          '<button class="btn btn-grad btn-lg" type="button" data-name="1">Continue &rsaquo;</button>';
     } else if(step.type==="contact"){
       // Page B (final): phone + street address + TCPA consent + submit. TrustedForm tagged consent.
-      h+='<div class="field"><input id="f_phone" type="tel" inputmode="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
+      h+='<div class="field"><input id="f_phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Phone number" data-tf-element-role="consent-grantor-phone" value="'+(data.phone||'')+'"></div>'+
          '<div class="field"><input id="f_addr" autocomplete="address-line1" placeholder="Street address" value="'+(data.address||'')+'"></div>'+
          '<p class="consent" data-tf-element-role="consent-language">By clicking &ldquo;Get My Free Quote,&rdquo; I give my express written consent under the E-SIGN Act authorizing <span data-tf-element-role="consent-advertiser-name">Renue Home and its <a href="/partners">marketing partners</a>, their agents, and parties acting on their behalf</span> to contact me by <span data-tf-element-role="contact-method">calls, texts, and emails</span> at the number and email I provide, for marketing purposes, <span data-tf-element-role="consent-grantor-waived-regulated-technologies">including by automated dialing, prerecorded messages, and AI-generated voice</span>, <span data-tf-element-role="consent-grantor-waived-dnc">even if my number is on a federal, state, or internal Do Not Call list</span>. <span data-tf-element-role="consent-grantor-waived-purchase-condition">Consent is not a condition of purchase</span>. Message and data rates may apply. Reply STOP to opt out. I also agree to the <a href="/terms-and-conditions">Terms &amp; Conditions</a> and <a href="/privacy-policy">Privacy Policy</a>.</p>'+
          '<button class="btn btn-grad btn-lg" type="button" data-submit="1" data-tf-element-role="submit">Get My Free Quote &rsaquo;</button>'+
          '<p class="consent disclaim">Renue Home is a free matching service, not a contractor. Renue Home does not perform home improvement services, provide estimates, guarantee pricing, guarantee availability, or warrant the work of any contractor or service provider. Any agreement for services is solely between you and the independent provider you choose. You are responsible for verifying licensing, insurance, references, permits, pricing, scope of work, and contract terms before hiring any provider.</p>';
     }
 
-    h += '<div class="err" id="err"></div>'+
-      '<div class="trustcues">'+
-        '<span>'+LOCK+' 256-bit SSL secured</span>'+
-        '<span>'+SHIELD+' Your info is private</span>'+
-        '<span>'+CK+' No spam — ever</span>'+
-        (TRUSTEDFORM?'<span>'+CK+' TrustedForm&reg; verified</span>':'')+
-      '</div>';
+    h += '<div class="err" id="err"></div>'+trustCuesHtml();
     card.innerHTML = h;
     // TrustedForm "offer" wraps the consent area + submit — only on the contact step.
     if(step.type==="contact"){ card.setAttribute("data-tf-element-role","offer"); }
@@ -429,7 +501,12 @@
 
     if(step.type==="single"){
       Array.prototype.forEach.call(card.querySelectorAll("[data-pick]"), function(b){
-        b.onclick=function(){ var v=step.options[+b.getAttribute("data-pick")]; var nd={}; nd[step.id]=v; setTimeout(function(){ next(nd); },140); b.classList.add("sel"); };
+        b.onclick=function(){
+          var v=step.options[+b.getAttribute("data-pick")]; var nd={}; nd[step.id]=v; b.classList.add("sel");
+          // Disqualifying answer (e.g. "No, I rent"): stop here, nothing is posted or counted.
+          if(step.dq && step.dq.match===v){ document.body.classList.add("quiz-engaged"); setTimeout(function(){ renderDQ(cfg, idx, data, step, step.dq.msg); },140); return; }
+          setTimeout(function(){ next(nd); },140);
+        };
       });
     }
     if(step.type==="multi"){
@@ -450,7 +527,8 @@
         var first=val("f_first"), last=val("f_last"), email=val("f_email");
         if(!first){ document.getElementById("f_first").classList.add("bad"); return errEl("Please enter your first name."); }
         if(!last){ document.getElementById("f_last").classList.add("bad"); return errEl("Please enter your last name."); }
-        if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ document.getElementById("f_email").classList.add("bad"); return errEl("Please enter a valid email address."); }
+        if(!/^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$/.test(email)){ document.getElementById("f_email").classList.add("bad"); return errEl("Please enter a valid email address."); }
+        if(emailTypo(email)){ document.getElementById("f_email").classList.add("bad"); return errEl("That email looks mistyped. Please double-check it."); }
         next({first:first,last:last,email:email});
       };
     }
@@ -460,11 +538,12 @@
   }
 
   function submitContact(cfg, idx, data, btn){
-    var phone=val("f_phone"), addr=val("f_addr");
+    var phoneRaw=val("f_phone"), addr=val("f_addr");
     var first=data.first||"", last=data.last||"", email=data.email||"";  // captured on the name page
     var err=function(m,id){ var e=document.getElementById("err"); if(e)e.textContent=m; if(id){var x=document.getElementById(id); if(x)x.classList.add("bad");} };
     document.getElementById("err").textContent="";
-    if(phone.replace(/\D/g,"").length<10){ return err("Please enter a valid phone number.","f_phone"); }
+    var phone=normPhone(phoneRaw);
+    if(!phone){ return err("Please enter a valid 10-digit mobile or home phone number.","f_phone"); }
     if(addr.length<5){ return err("Please enter your street address.","f_addr"); }
     if(btn.dataset.busy==="1") return; // double-submit guard
     btn.dataset.busy="1"; btn.disabled=true; btn.textContent="Submitting…";
@@ -474,6 +553,7 @@
     lead.universal_leadid = val("leadid_token"); // Jornaya LeadiD token
     lead.consentText = "By submitting, I consent to receive calls, texts, and emails from Renue Home and/or its home improvement partners (up to "+BUYER_CAP+" companies)...";
     lead.pageUrl = location.href;
+    lead.referrer = document.referrer || "";
     lead.city = lead.city || _geo.city || (window.RENUE_CITY?window.RENUE_CITY.name:"");
     lead.state = lead.state || _geo.state || "";
     doSubmit(cfg, lead, btn);
@@ -482,16 +562,24 @@
   function doSubmit(cfg, lead, btn){
     var finish=function(callNumber, resp){
       RF.active=false;
+      document.body.classList.add("quiz-done");
       var quiz=document.getElementById("quiz");
       quiz.innerHTML='<div class="card"><div class="thanks show"><div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'+
         '<div class="q">You’re all set'+(lead.first?', '+esc(lead.first):'')+'!</div>'+
         '<p class="qsub">Your request has been received. A trusted local pro will reach out shortly to discuss your '+cfg.word+' project.</p>'+
         (callNumber?'<div class="callrow"><a class="btn btn-grad btn-lg" href="'+telHref(callNumber)+'">📞 Call now to speak to a specialist</a></div>':'')+
         '<div class="trustcues" style="margin-top:16px"><span>Local pros. Free. No obligation.</span></div></div></div>';
-      try{ if(window.gtag) gtag('event','generate_lead',{items:[{item_category:window.RENUE_VERTICAL}]}); }catch(e){}
-      // Google Ads conversion (form submit). Value = accepted buyer bid from Twyne if returned, else fallback.
+      // Did the lead actually sell? The server relays Twyne's verdict (HTTP is always 200 there, the
+      // JSON `status` is the truth). Accepted / Queued = sold. Anything else = no revenue.
+      var tw = (resp && resp.twyne) ? resp.twyne : null;
+      var st = (tw && tw.status) ? String(tw.status).toLowerCase() : "";
+      var sold = !!(tw && tw.attempted && (st.indexOf("accept")===0 || st.indexOf("queue")===0));
+      var why = sold ? "sold" : (tw ? (tw.blocked || tw.error || st || "not-attempted") : "no-response");
+      try{ if(window.gtag) gtag('event','generate_lead',{items:[{item_category:window.RENUE_VERTICAL}],lead_sold:sold?"yes":"no",lead_status:why}); }catch(e){}
+      // Google Ads conversion (form submit) — only for sold leads (see ADS_FIRE_ONLY_ON_SALE).
+      // Value = buyer payout from Twyne if returned, else the CPL fallback.
       try{
-        if(window.gtag && ADS_ID){
+        if(window.gtag && ADS_ID && (sold || !ADS_FIRE_ONLY_ON_SALE)){
           var cv = (resp && resp.value!=null && Number(resp.value)>0) ? Number(resp.value) : ADS_DEFAULT_VALUE;
           var txn = (resp && resp.transaction_id) ? String(resp.transaction_id) : String(lead.universal_leadid||lead.ts);
           // Enhanced Conversions for Leads — gtag hashes the email/phone client-side.
@@ -499,12 +587,12 @@
           gtag('event','conversion',{ send_to:ADS_CONVERSION, value:cv, currency:'USD', transaction_id:txn });
         }
       }catch(e){}
-      try{ if(window.fbq) fbq('track','Lead'); }catch(e){}
+      try{ if(window.fbq && sold) fbq('track','Lead'); }catch(e){}
       window.scrollTo({top:0,behavior:"smooth"});
     };
     var fail=function(){
       var e=document.getElementById("err");
-      if(e) e.textContent="Sorry — something went wrong submitting your request. Please try again.";
+      if(e) e.textContent="Sorry, something went wrong submitting your request. Please try again.";
       if(btn){ btn.disabled=false; btn.dataset.busy=""; btn.textContent="Get My Free Quote ›"; }
     };
     fetch(SUBMIT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lead)})
