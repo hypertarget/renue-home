@@ -72,12 +72,17 @@
   }
 
   // Jornaya / LeadiD snippet — loads on every page so it can certify the full session.
+  // ⚠️ The campaign UUID is CASE-SENSITIVE on Jornaya's CDN: the uppercase form returns a 0-byte file
+  // (root cause of the dead token, found 2026-09-22), so it is always lowercased here. Ids mirror
+  // Jornaya's standard snippet (anchor "LeadiDscript", loaded script "LeadiDscript_campaign").
   function injectLeadiD(){
     if(!JORNAYA || window.__rf_leadid) return; window.__rf_leadid = true;
     try{
-      var s=document.createElement("script"); s.id="LeadiDscript"; s.type="text/javascript"; s.async=true;
-      s.src=(("https:"===document.location.protocol)?"https://":"http://")+"create.lidstatic.com/campaign/"+JORNAYA+".js?snippet_version=2";
-      var p=document.getElementsByTagName("script")[0]; p.parentNode.insertBefore(s,p);
+      var anchor=document.getElementById("LeadiDscript");
+      if(!anchor){ anchor=document.createElement("script"); anchor.id="LeadiDscript"; anchor.type="text/javascript"; var p=document.getElementsByTagName("script")[0]; p.parentNode.insertBefore(anchor,p); }
+      var s=document.createElement("script"); s.id="LeadiDscript_campaign"; s.type="text/javascript"; s.async=true;
+      s.src="https://create.lidstatic.com/campaign/"+String(JORNAYA).toLowerCase()+".js?snippet_version=2";
+      anchor.parentNode.insertBefore(s,anchor);
     }catch(e){}
   }
 
