@@ -25,7 +25,7 @@
     windows:{
       name:"Windows", word:"window", title:"Window Replacement Quotes | Renue Home",
       headline:"Compare quotes for new windows in your area",
-      sub:"Answer a few quick questions to see your local window replacement options, free and no obligation.",
+      sub:"Answer a few quick questions to see your local window replacement options. Free quotes, no obligation.",
       benefitsHead:"A smarter way to shop for replacement windows",
       steps:[
         {id:"nature", type:"single", q:"What kind of window project is this?", options:["Replace existing windows","Install new windows","Repair existing windows","Not sure yet"]},
@@ -62,8 +62,8 @@
 
     bathroom:{
       name:"Bathroom", word:"bathroom", title:"Bathroom Remodel Quotes | Renue Home",
-      headline:"Get Free Bathroom Remodel Quotes",
-      sub:"Walk-in showers, tub-to-shower conversions and full remodels. Compare local pros in about 60 seconds. Free and no obligation.",
+      headline:"Get Free Quotes for Your Bathroom Remodel",
+      sub:"Walk-in showers, tub-to-shower conversions and full remodels. Compare local pros in about 60 seconds. Free quotes, no obligation.",
       benefitsHead:"Compare bathroom remodel options with confidence",
       steps:[
         {id:"project", type:"single", q:"What type of bathroom project are you considering?", options:["Tub-to-shower conversion","Walk-in shower","Full bathroom remodel","Safety / mobility upgrade","Not sure yet"]},

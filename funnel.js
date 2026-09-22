@@ -308,7 +308,7 @@
     var city = window.RENUE_CITY || null; // {name:"Austin, TX", metro:"Austin", state:"TX"}
 
     var headline = cfg.headline, sub = cfg.sub, title = cfg.title;
-    var eyebrow = 'Local Pros · Free · No Obligation';
+    var eyebrow = 'Local Pros · Free Quotes · No Obligation';
     if(city){
       headline = cfg.name+' Pros in '+city.metro+', '+city.state;
       sub = 'Compare free, no-obligation '+cfg.word+' quotes from '+city.metro+'-area professionals serving your area. Takes under a minute.';
@@ -380,7 +380,7 @@
       '<section><div class="wrap"><div class="center"><div class="seclabel">Questions</div><h2 class="sec-h">'+cfg.name+(city?' FAQs in '+city.metro:' FAQs')+'</h2></div>'+
         '<div class="faq" style="margin-top:24px">'+faqs+'</div></div></section>'+
       '<section class="band cta-band"><div class="wrap"><h2 class="sec-h">Ready to compare your '+cfg.word+' options'+(city?' in '+city.metro:'')+'?</h2>'+
-        '<p class="sec-sub">Free, no-obligation, and takes under a minute.</p>'+
+        '<p class="sec-sub">Free quotes, no obligation, and takes under a minute.</p>'+
         '<a class="btn btn-grad btn-lg" href="#quiz">Get My Free Quote</a></div></section>';
   }
 
@@ -573,7 +573,7 @@
         '<div class="q">You’re all set'+(lead.first?', '+esc(lead.first):'')+'!</div>'+
         '<p class="qsub">Your request has been received. A trusted local pro will reach out shortly to discuss your '+cfg.word+' project.</p>'+
         (callNumber?'<div class="callrow"><a class="btn btn-grad btn-lg" href="'+telHref(callNumber)+'">📞 Call now to speak to a specialist</a></div>':'')+
-        '<div class="trustcues" style="margin-top:16px"><span>Local pros. Free. No obligation.</span></div></div></div>';
+        '<div class="trustcues" style="margin-top:16px"><span>Local pros. Free quotes. No obligation.</span></div></div></div>';
       // Did the lead actually sell? The server relays Twyne's verdict (HTTP is always 200 there, the
       // JSON `status` is the truth). Accepted / Queued = sold. Anything else = no revenue.
       var tw = (resp && resp.twyne) ? resp.twyne : null;
