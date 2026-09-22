@@ -11,19 +11,21 @@
   ];
   // Tighter first question = single low-commitment tap. Contact is always last.
   var TIMELINE = {id:"timeline", type:"single", q:"When are you looking to start?", options:["As soon as possible","Within 1–3 months","3–6 months","Just researching"]};
-  var OWNER = {id:"owner", type:"single", q:"Are you the homeowner?", options:["Yes, I own the home","No, I rent"]};
+  // Renters disqualify (dq): every buyer requires a homeowner. The funnel stops politely, nothing is posted, no conversion fires.
+  var OWNER = {id:"owner", type:"single", q:"Are you the homeowner?", options:["Yes, I own the home","No, I rent"],
+    dq:{match:"No, I rent", msg:"Right now our partner pros only take on projects for homeowners, so we can’t match a rental. If you own the home (or are buying it), tap back and update your answer."}};
   // Credit rating — buyers (e.g. BlueInk) use this for placement/payout. Skippable via "Not sure".
   var CREDIT = {id:"credit", type:"single", q:"How would you rate your credit?", options:["Excellent","Good","Fair","Poor","Not sure"]};
   // Contact split into two pages (like mrremodel): name + email first, then phone + address with the TCPA opt-in.
   var NAME = {id:"name", type:"name", q:"Where should we send your free quotes?", sub:"Your information is secure & confidential."};
-  var CONTACT = {id:"contact", type:"contact", q:"Last step — how can a local pro reach you?", sub:"Add your phone and address so a pro can follow up with your quote."};
+  var CONTACT = {id:"contact", type:"contact", q:"Last step. How can a local pro reach you?", sub:"Add your phone and address so a pro can follow up with your quote."};
   function zip(t){ return {id:"zip", type:"zip", q:t||"Where would this project take place?", sub:"Enter your ZIP code & we will match you with local pros."}; }
 
   window.RENUE_VERTICALS = {
     windows:{
-      name:"Windows", word:"window", title:"Window Replacement Quotes — Renue Home",
+      name:"Windows", word:"window", title:"Window Replacement Quotes | Renue Home",
       headline:"Compare quotes for new windows in your area",
-      sub:"Answer a few quick questions to see your local window replacement options — free and no obligation.",
+      sub:"Answer a few quick questions to see your local window replacement options, free and no obligation.",
       benefitsHead:"A smarter way to shop for replacement windows",
       steps:[
         {id:"nature", type:"single", q:"What kind of window project is this?", options:["Replace existing windows","Install new windows","Repair existing windows","Not sure yet"]},
@@ -59,9 +61,9 @@
     },
 
     bathroom:{
-      name:"Bathroom", word:"bathroom", title:"Bathroom Remodel Quotes — Renue Home",
-      headline:"Thinking about a bathroom upgrade?",
-      sub:"Compare local remodel options — including walk-in showers, tub-to-shower conversions, and safety features.",
+      name:"Bathroom", word:"bathroom", title:"Bathroom Remodel Quotes | Renue Home",
+      headline:"Get Free Bathroom Remodel Quotes",
+      sub:"Walk-in showers, tub-to-shower conversions and full remodels. Compare local pros in about 60 seconds. Free and no obligation.",
       benefitsHead:"Compare bathroom remodel options with confidence",
       steps:[
         {id:"project", type:"single", q:"What type of bathroom project are you considering?", options:["Tub-to-shower conversion","Walk-in shower","Full bathroom remodel","Safety / mobility upgrade","Not sure yet"]},
@@ -75,8 +77,8 @@
       seo:{
         label:"Bathroom remodel guide", heading:"Bathroom remodeling: options, costs & timelines",
         lead:[
-          "A bathroom remodel can range from a fast, one-to-two-day tub-to-shower conversion to a full gut renovation with new layout, tile, vanity, and fixtures. Knowing which type of project fits your needs — and your budget — is the first step to getting accurate quotes.",
-          "Local pricing in {area} depends on materials, the size of the space, and how much plumbing changes. Comparing a few local quotes through Renue Home helps you see realistic numbers and timelines before you commit — with zero obligation."
+          "A bathroom remodel can range from a fast, one-to-two-day tub-to-shower conversion to a full gut renovation with new layout, tile, vanity, and fixtures. Knowing which type of project fits your needs and your budget is the first step to getting accurate quotes.",
+          "Local pricing in {area} depends on materials, the size of the space, and how much plumbing changes. Comparing a few local quotes through Renue Home helps you see realistic numbers and timelines before you commit, with zero obligation."
         ],
         factors:[
           {h:"Scope of work", p:"A surface refresh costs far less than a full remodel that moves plumbing or changes the layout."},
@@ -85,7 +87,7 @@
           {h:"Labor & permits", p:"Skilled labor and any required permits factor into the total, especially for plumbing changes."}
         ],
         types:[
-          {h:"Tub-to-shower conversion", p:"Swap an unused tub for a modern, easy-access shower — often a quick project."},
+          {h:"Tub-to-shower conversion", p:"Swap an unused tub for a modern, easy-access shower, often a quick project."},
           {h:"Walk-in shower", p:"Sleek, low-maintenance, and great for accessibility."},
           {h:"Full remodel", p:"New layout, tile, vanity, lighting, and fixtures from the studs out."},
           {h:"Safety & mobility upgrade", p:"Walk-in tubs, grab bars, and anti-slip flooring for aging in place."}

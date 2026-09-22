@@ -1,10 +1,11 @@
 // Cloudflare Pages Function — POST /api/submit  [canonical Twyne version — do not overwrite from a stale clone]
+// 2026-09-22: renter backstop (never posted) + NANP phone validation mirroring funnel.js.
 // Receives the lead, validates it, posts it to Twyne (HTM's lead platform),
 // and returns a pay-per-call number for the thank-you screen.
 //
 // Two campaign kinds:
 //   kind "fpi"   = classic ping-post FPI mapping (cq1=credit, cq2=homeowner, cq3=project). e.g. #550.
-//   kind "ws554" = WestShore API campaign (#554, CPL). cq1 = category hard-coded per funnel
+//   kind "ws554" = WestShore API direct post (#554, CPL). cq1 = category hard-coded per funnel
 //                  ("bathroom"/"window") — NEVER derived from user input (no server-side validation
 //                  on Twyne's end; correctness lives here). trustedform is REQUIRED: if the cert is
 //                  missing the lead is NOT posted (consumer still sees the thank-you screen).
@@ -41,10 +42,11 @@ export async function onRequestPost({ request, env }) {
   let lead = {};
   try { lead = await request.json(); } catch (_) {}
 
-  // basic server-side validation
-  const phoneDigits = (lead.phone || "").replace(/\D/g, "");
+  // basic server-side validation (phone rules mirror funnel.js normPhone: 10 NANP digits, leading 1 dropped,
+  // area code + exchange start 2-9, not all one digit, not the 555-01XX fictional block)
+  const phoneDigits = normPhone(lead.phone);
   const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(lead.email || "");
-  if (!emailOk || phoneDigits.length < 10 || !/^\d{5}$/.test(lead.zip || "")) {
+  if (!emailOk || !phoneDigits || !/^\d{5}$/.test(lead.zip || "")) {
     return json({ ok: false, message: "Missing or invalid required fields" }, 400);
   }
 
@@ -76,10 +78,15 @@ export async function onRequestPost({ request, env }) {
 
   // ---- Post to Twyne ----------------------------------------------------------
   let twyne = { attempted: false };
+  const renter = /rent/i.test(String(lead.owner || ""));
   if (camp) {
+    // Renters never post: no buyer takes them, so a post would only burn dedupe/quality stats.
+    // (funnel.js also stops renters at the question; this is the server-side backstop.)
+    if (renter) {
+      twyne = { attempted: false, blocked: "renter", cid: camp.cid };
     // WestShore #554 hard gate: no TrustedForm cert, no post. Twyne would Accept a
     // cert-less lead (no server-side validation) — we refuse instead, per HTM policy.
-    if (camp.kind === "ws554" && !record.trustedFormCertUrl) {
+    } else if (camp.kind === "ws554" && !record.trustedFormCertUrl) {
       twyne = { attempted: false, blocked: "trustedform-missing", cid: camp.cid };
     } else {
       const isTest = forceTest || (env && env.TWYNE_TEST === "true") || lead.istest === true || lead.istest === "true";
@@ -188,6 +195,17 @@ function buildTwyneParams(lead, record, camp, opt) {
   return p.toString();
 }
 
+// 10 NANP digits or "" (see funnel.js normPhone for the client twin).
+function normPhone(raw) {
+  let d = String(raw || "").replace(/\D/g, "");
+  if (d.length === 11 && d[0] === "1") d = d.slice(1);
+  if (d.length !== 10) return "";
+  if (/^(\d)\1{9}$/.test(d)) return "";
+  if (!/^[2-9]/.test(d) || !/^[2-9]/.test(d.slice(3))) return "";
+  if (d[1] === "1" && d[2] === "1") return "";
+  if (/^\d{3}55501\d{2}$/.test(d)) return "";
+  return d;
+}
 function homeowner(v) {
   if (!v) return "";
   return /own|yes/i.test(v) ? "Yes" : "No";

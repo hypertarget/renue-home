@@ -46,6 +46,8 @@ header.site{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.94);ba
 .site nav a.navlink:hover{color:var(--ink)}
 .site .phone{font-weight:800;color:var(--navy);font-size:15px;white-space:nowrap}
 .site .phone small{display:block;font-weight:600;font-size:10px;color:var(--muted);letter-spacing:.5px}
+/* Landing-page mode (window.RENUE_LP): logo is not a link */
+.site.lp .logo{cursor:default}
 @media(max-width:880px){
   /* On phones the bottom sticky bar carries Call + Quote, so keep the header to just the logo (prevents the top-right overflow). */
   .site nav .navlink{display:none}
@@ -81,10 +83,15 @@ h1.head{font-size:clamp(32px,5.2vw,54px);line-height:1.04;font-weight:600;margin
 .hero-chip.c1{top:16px;left:16px}
 .hero-chip.c2{bottom:18px;right:16px}
 @media(max-width:880px){
-  .hero-grid{display:flex;flex-direction:column;gap:18px}
-  .hero-grid #quiz{order:-1}            /* quiz first / above the fold on mobile */
-  .hero-grid>div:not(#quiz){order:2}    /* hero copy moves below the quiz */
-  .hero{padding:14px 0 6px}
+  .hero-grid{display:flex;flex-direction:column;gap:12px}
+  /* Vertical pages on mobile/tablet: compact headline + trust label ABOVE the quiz, then the card.
+     The sub copy and checklist hide here (the card carries its own trust cues) so question 1 stays in the fold. */
+  .hero-grid .hcopy{order:1}
+  .hero-grid #quiz{order:2}
+  .hero{padding:12px 0 6px}
+  .hcopy .eyebrow{font-size:11px;letter-spacing:2px}
+  .hcopy h1.head{font-size:23px;line-height:1.15;margin:6px 0 0}
+  .hcopy .lead,.hcopy .trustline{display:none}
   h1.head{font-size:30px;line-height:1.08}
   .lead{font-size:16px}
   .card{padding:20px 18px}
@@ -117,15 +124,21 @@ h1.head{font-size:clamp(32px,5.2vw,54px);line-height:1.04;font-weight:600;margin
 .err{color:#e23b3b;font-size:13.5px;text-align:center;min-height:18px;margin-top:8px;font-weight:600}
 .trustcues{display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;margin-top:16px;color:#7c8690;font-size:12.5px;font-weight:600}
 .trustcues span{display:inline-flex;align-items:center;gap:6px}
+.trustcues svg{width:14px;height:14px;flex:none} /* explicit size: unsized inline SVGs render huge on some mobile browsers */
 .consent{font-size:11px;line-height:1.55;color:#9aa3ac;margin-top:14px}
 .consent a{color:var(--teal)}
 .consent.disclaim{margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 @media(max-width:520px){ .two{grid-template-columns:1fr} }
+@media(max-width:880px){
+  .trustcues{font-size:11px;gap:5px 12px;margin-top:12px}
+  .trustcues svg{width:12px;height:12px}
+}
 
 /* Thank-you (hidden until submit) */
 .thanks{display:none;text-align:center}
 .thanks.show{display:block}
 .thanks .big{width:72px;height:72px;border-radius:99px;background:var(--grad);display:flex;align-items:center;justify-content:center;margin:4px auto 14px}
+.thanks .big.dq{background:#e0a23a} /* disqualified (e.g. renter): amber, not a success check */
 .thanks .callrow{margin-top:18px}
 
 /* Category grid */
@@ -197,12 +210,14 @@ footer .dom{color:var(--green);font-weight:800;letter-spacing:1px}
 
 /* Sticky mobile CTA */
 .sticky{position:fixed;left:0;right:0;bottom:0;z-index:60;display:none;gap:10px;padding:10px 12px;background:rgba(255,255,255,.97);backdrop-filter:blur(8px);border-top:1px solid var(--line);box-shadow:0 -8px 24px rgba(15,26,35,.08)}
-.sticky .btn{flex:1;padding:14px 10px;font-size:15px}
+.sticky .btn{flex:1;padding:13px 8px;font-size:14px;white-space:nowrap}
 .sticky .btn-call{background:#fff;border:1.5px solid var(--teal);color:var(--teal)}
-/* Once the user engages with the quiz, hide the hovering CTA bar so it doesn't block the form */
-body.quiz-engaged .sticky{display:none!important}
-body.quiz-engaged{padding-bottom:0!important}
-@media(max-width:780px){ .sticky{display:flex} body{padding-bottom:74px} section{padding:40px 0} .sec-h{font-size:24px} .hero .eyebrow{font-size:11px} }
+/* Once the quiz starts, the quote button drops (the quiz IS the page) and a single call button stays on every step.
+   The bar hides only while an input has focus (keyboard up) and on the thank-you screen, so it never covers a field. */
+body.quiz-engaged .sticky .btn-grad{display:none}
+body.quiz-typing .sticky,body.quiz-done .sticky{display:none!important}
+body.quiz-typing,body.quiz-done{padding-bottom:0!important}
+@media(max-width:780px){ .sticky{display:flex} body{padding-bottom:70px} section{padding:40px 0} .sec-h{font-size:24px} .hero .eyebrow{font-size:11px} }
 
 /* Conversational quiz framing (avatar + helper bubble) */
 .qrow{display:flex;align-items:flex-start;gap:10px;margin:2px 0 12px}
