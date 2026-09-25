@@ -1,6 +1,7 @@
 /* Renue Home — shared engine: header/footer/sticky injection + config-driven quiz. */
 /* canonical version: includes Google Ads form + call conversions, EC, Twyne/Jornaya cert wiring. Do not overwrite from a stale clone. */
-/* 2026-09-22 CRO pass: LP mode (logo-only header, legal-only footer), persistent call bar that hides only while typing,
+/* 2026-09-25: funnel telemetry (quiz_step_N, quiz_submit_attempt, lead_result_<status>) for GA4 drop-off reads.
+   2026-09-22 CRO pass: LP mode (logo-only header, legal-only footer), persistent call bar that hides only while typing,
    Ads conversion fires ONLY when Twyne reports the lead sold (Accepted/Queued), renter disqualify, real phone/email validation. */
 (function(){
   "use strict";
@@ -462,6 +463,12 @@
     var total = steps.length;
     var pctNum = Math.round((idx/total)*100);
     var step = steps[idx];
+    // Funnel telemetry: quiz_step_N fires the first time a visitor reaches step N (Back does not re-fire),
+    // so GA4's Events report reads as a drop-off table with no custom dimensions needed.
+    try{
+      RF.reached = RF.reached || {};
+      if(!RF.reached[idx]){ RF.reached[idx] = true; if(window.gtag) gtag('event','quiz_step_'+(idx+1),{step_id:step.id, step_type:step.type, vertical:(window.RENUE_VERTICAL||"")}); }
+    }catch(e){}
     var h = '<div class="progress"><div class="ptrack"><div class="pfill" style="width:'+pctNum+'%"></div></div><div class="pct">Step '+(idx+1)+' of '+total+'</div></div>';
     if(idx>0) h += '<button class="back" type="button" data-back="1">&lsaquo; Back</button>';
     h += '<div class="qrow">'+AVATAR+'<div class="qbubble">'+helperFor(step, idx, total)+'</div></div>';
@@ -552,6 +559,7 @@
     if(addr.length<5){ return err("Please enter your street address.","f_addr"); }
     if(btn.dataset.busy==="1") return; // double-submit guard
     btn.dataset.busy="1"; btn.disabled=true; btn.textContent="Submitting…";
+    try{ if(window.gtag) gtag('event','quiz_submit_attempt',{vertical:(window.RENUE_VERTICAL||"")}); }catch(e){}
     var lead = Object.assign({}, data, {first:first,last:last,email:email,phone:phone,address:addr,vertical:window.RENUE_VERTICAL,consent:true,ts:Date.now()});
     lead.xxTrustedFormCertUrl = val("xxTrustedFormCertUrl");
     lead.xxTrustedFormPingUrl = val("xxTrustedFormPingUrl");
@@ -581,6 +589,8 @@
       var sold = !!(tw && tw.attempted && (st.indexOf("accept")===0 || st.indexOf("queue")===0));
       var why = sold ? "sold" : (tw ? (tw.blocked || tw.error || st || "not-attempted") : "no-response");
       try{ if(window.gtag) gtag('event','generate_lead',{items:[{item_category:window.RENUE_VERTICAL}],lead_sold:sold?"yes":"no",lead_status:why}); }catch(e){}
+      // Outcome as a distinct event name so the GA4 Events report shows sold vs rejected vs blocked without setup.
+      try{ if(window.gtag) gtag('event','lead_result_'+String(why).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,28),{vertical:(window.RENUE_VERTICAL||""), twyne_leadid:(tw&&tw.leadid)?String(tw.leadid):""}); }catch(e){}
       // Google Ads conversion (form submit) — only for sold leads (see ADS_FIRE_ONLY_ON_SALE).
       // Value = buyer payout from Twyne if returned, else the CPL fallback.
       try{
@@ -598,6 +608,7 @@
     var fail=function(){
       var e=document.getElementById("err");
       if(e) e.textContent="Sorry, something went wrong submitting your request. Please try again.";
+      try{ if(window.gtag) gtag('event','lead_result_submit_error',{vertical:(window.RENUE_VERTICAL||"")}); }catch(_){}
       if(btn){ btn.disabled=false; btn.dataset.busy=""; btn.textContent="Get My Free Quote ›"; }
     };
     fetch(SUBMIT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(lead)})
