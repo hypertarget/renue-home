@@ -588,5 +588,35 @@
     "caption": "a real quote is more than a number. before you compare, make sure each one spells out 👇\n\n✔ the full scope of work\n✔ materials and labor\n✔ a start date\n✔ payment terms\n\ncompare apples to apples at renuehome.com.",
     "alt": "What a real quote includes checklist.",
     "status": "pending"
+  },
+  {
+    "id": "tip-permits-59",
+    "bank_id": "tip-permits",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-permits-59.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-permits-59-pin.png",
+    "caption": "boring but important. on a big remodel, make sure your contractor actually pulls permits. unpermitted work can come back to bite you when you sell.\n\nwant pros who do it right? compare local quotes at renuehome.com.",
+    "alt": "Tip, make sure your contractor pulls permits on a big remodel.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-roof-60",
+    "bank_id": "stat-roof",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-roof-60.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-roof-60-pin.png",
+    "caption": "quick gut check. most asphalt shingle roofs last about 20 to 30 years. if yours is creeping up there, it's worth a look before the next storm.\n\ncompare free quotes from local roofers at renuehome.com.\n\n#roofing #homemaintenance",
+    "alt": "A typical asphalt shingle roof lasts about 20 to 30 years.",
+    "status": "pending"
+  },
+  {
+    "id": "spring-refresh-61",
+    "bank_id": "spring-refresh",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/spring-refresh-61.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/spring-refresh-61-pin.png",
+    "caption": "new season, good excuse 🌱 whether it's paint, a new bathroom, or finally redoing the floors, spring is a great time to start.\n\ncompare free quotes from local pros at renuehome.com.",
+    "alt": "Spring is for fresh starts at home.",
+    "status": "pending"
   }
 ]
