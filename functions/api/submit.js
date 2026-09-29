@@ -1,5 +1,6 @@
 // Cloudflare Pages Function — POST /api/submit  [canonical Twyne version — do not overwrite from a stale clone]
 // 2026-09-22: renter backstop (never posted) + NANP phone validation mirroring funnel.js.
+// 2026-09-29: hvac -> Twyne #555 (PX HVAC) branch: PX enum transforms, Jornaya + SessionLength gates, istest forced until confirmed.
 // Receives the lead, validates it, posts it to Twyne (HTM's lead platform),
 // and returns a pay-per-call number for the thank-you screen.
 //
@@ -28,6 +29,11 @@ const TWYNE = {
     bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
     windows:  { cid: "554", kind: "ws554", category: "window" },
     // Retired 2026-09-15: bathroom -> { cid: "550", kind: "fpi", projectField: "project" } (FPI #550).
+    // PX HVAC Ping Post Exclusive via Twyne #555 (spec: shared brain sops/campaigns/px-hvac-555-renuehome-integration).
+    // The site sends PX-format enum values (cq1-cq3 transform tables below), cq4 Own, cq5 credit, cq6 SessionLength.
+    // testUntilConfirmed: every post is istest=true until Sergio confirms PX payouts + SessionLength look right,
+    // then flip this to false (one-line change).
+    hvac: { cid: "555", kind: "px555", testUntilConfirmed: true },
   },
   // Test-only #554 route. Reachable ONLY when the request carries x-rnh-test:1 AND the payload
   // sets testCampaign:"ws554". Posts through here are ALWAYS istest=true regardless of payload.
@@ -86,12 +92,19 @@ export async function onRequestPost({ request, env }) {
       twyne = { attempted: false, blocked: "renter", cid: camp.cid };
     // WestShore #554 hard gate: no TrustedForm cert, no post. Twyne would Accept a
     // cert-less lead (no server-side validation) — we refuse instead, per HTM policy.
-    } else if (camp.kind === "ws554" && !record.trustedFormCertUrl) {
+    } else if ((camp.kind === "ws554" || camp.kind === "px555") && !record.trustedFormCertUrl) {
       twyne = { attempted: false, blocked: "trustedform-missing", cid: camp.cid };
+    // PX requires JornayaLeadId: a post without it fails at PX, so refuse it here (spec gotcha: the token
+    // populates a few seconds after page load — a real visitor who reached step 9 always has one).
+    } else if (camp.kind === "px555" && !record.jornayaLeadiD) {
+      twyne = { attempted: false, blocked: "jornaya-missing", cid: camp.cid };
+    // PX rejects a missing/zero SessionLength; the funnel stamps it client-side (funnel.js v20260929+).
+    } else if (camp.kind === "px555" && !(sessionSeconds(lead) > 0)) {
+      twyne = { attempted: false, blocked: "sessionlength-missing", cid: camp.cid };
     } else {
-      const isTest = forceTest || (env && env.TWYNE_TEST === "true") || lead.istest === true || lead.istest === "true";
+      const isTest = forceTest || camp.testUntilConfirmed === true || (env && env.TWYNE_TEST === "true") || lead.istest === true || lead.istest === "true";
       const subid1 = (env && env.TWYNE_SUBID1) ||
-        (camp.kind === "ws554" ? trafficSource(record.pageUrl, record.referrer) : "renuehome");
+        ((camp.kind === "ws554" || camp.kind === "px555") ? trafficSource(record.pageUrl, record.referrer) : "renuehome");
       const params = buildTwyneParams(lead, record, camp, { ip, ua, subid1, isTest });
       try {
         const r = await fetch(TWYNE.endpoint, {
@@ -181,6 +194,20 @@ function buildTwyneParams(lead, record, camp, opt) {
       const g = new URL(record.pageUrl || "https://renuehome.com").searchParams.get("gclid");
       if (g) p.set("subid2", g);
     } catch (_) {}
+  } else if (camp.kind === "px555") {
+    // PX HVAC via Twyne #555 — PX-format enum values, per the #555 SOP transform tables.
+    p.set("country", "US");
+    const airType = pxAirType(lead.system);
+    p.set("cq1", airType);                                   // PX AirType
+    p.set("cq2", pxProjectType(lead.nature));                // PX ProjectType
+    p.set("cq3", pxAirSubType(lead.system_type, airType));   // PX AirSubType
+    p.set("cq4", "Own");                                     // homeowner (renters never reach here)
+    if (lead.credit) p.set("cq5", String(lead.credit));      // credit rating, raw label, optional
+    p.set("cq6", String(sessionSeconds(lead)));              // PX SessionLength, integer seconds
+    try {
+      const g = new URL(record.pageUrl || "https://renuehome.com").searchParams.get("gclid");
+      if (g) p.set("subid2", g);
+    } catch (_) {}
   } else {
     // Classic FPI mapping (e.g. #550): address + custom questions from the funnel.
     const projectType = lead[camp.projectField] || lead.project || lead.nature || "";
@@ -193,6 +220,34 @@ function buildTwyneParams(lead, record, camp, opt) {
     p.set("cq3", projectType);                        // Project Type
   }
   return p.toString();
+}
+
+// ---- PX HVAC (#555) transforms — site option label -> PX enum. Unknown labels fall back to the
+// "Not sure" row of each table (never send a raw label; PX rejects unknown enums). ----
+function pxAirType(v) {
+  const s = String(v || "").trim().toLowerCase();
+  if (s === "air conditioning") return "Cooling";
+  if (s === "heating") return "Heating";
+  return "Heating and Cooling"; // "Both heating & cooling", "Not sure", anything else
+}
+function pxProjectType(v) {
+  const s = String(v || "").trim().toLowerCase();
+  if (s === "repair") return "Repair";
+  if (s === "replacement" || s === "new installation") return "New Unit Installed";
+  return "Service"; // "Not sure yet", anything else
+}
+function pxAirSubType(v, airType) {
+  const s = String(v || "").trim().toLowerCase();
+  if (s === "central ac") return "Central Air";
+  if (s === "ductless / mini-split" || s === "heat pump") return "Heat Pump";
+  if (s === "furnace") return "Furnace";
+  if (s === "boiler") return "Boiler";
+  return airType === "Cooling" ? "Central Air" : "Furnace"; // "Not sure", anything else
+}
+// Integer seconds from quiz start to submit (funnel.js stamps `sessionLength`); 0 when absent.
+function sessionSeconds(lead) {
+  const n = Math.round(Number(lead.sessionLength));
+  return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
 // 10 NANP digits or "" (see funnel.js normPhone for the client twin).
