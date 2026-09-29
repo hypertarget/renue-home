@@ -1,6 +1,7 @@
 /* Renue Home — shared engine: header/footer/sticky injection + config-driven quiz. */
 /* canonical version: includes Google Ads form + call conversions, EC, Twyne/Jornaya cert wiring. Do not overwrite from a stale clone. */
-/* 2026-09-25: funnel telemetry (quiz_step_N, quiz_submit_attempt, lead_result_<status>) for GA4 drop-off reads.
+/* 2026-09-29: sessionLength (quiz start -> submit, seconds) + consentText = the exact on-page consent paragraph (PX #555 needs both).
+   2026-09-25: funnel telemetry (quiz_step_N, quiz_submit_attempt, lead_result_<status>) for GA4 drop-off reads.
    2026-09-22 CRO pass: LP mode (logo-only header, legal-only footer), persistent call bar that hides only while typing,
    Ads conversion fires ONLY when Twyne reports the lead sold (Accepted/Queued), renter disqualify, real phone/email validation. */
 (function(){
@@ -337,7 +338,7 @@
       '</div></section>'+
       supportHtml(cfg, city);
 
-    RF.active = true; RF.cfg = cfg;
+    RF.active = true; RF.cfg = cfg; RF.started = Date.now(); // quiz start (SessionLength for buyers that require it)
     injectTrustedForm();
     injectLeadiD();
     ensureCertFields();
@@ -564,7 +565,11 @@
     lead.xxTrustedFormCertUrl = val("xxTrustedFormCertUrl");
     lead.xxTrustedFormPingUrl = val("xxTrustedFormPingUrl");
     lead.universal_leadid = val("leadid_token"); // Jornaya LeadiD token
-    lead.consentText = "By submitting, I consent to receive calls, texts, and emails from Renue Home and/or its home improvement partners (up to "+BUYER_CAP+" companies)...";
+    // The exact consent language the visitor saw (buyers mirror it as TcpaText), not a summary.
+    var consentEl = document.querySelector('#quizcard .consent[data-tf-element-role="consent-language"]');
+    lead.consentText = (consentEl && consentEl.textContent ? consentEl.textContent.replace(/\s+/g," ").trim() : "") ||
+      "By submitting, I consent to receive calls, texts, and emails from Renue Home and/or its home improvement partners (up to "+BUYER_CAP+" companies).";
+    lead.sessionLength = Math.max(1, Math.round((Date.now() - (RF.started || lead.ts)) / 1000)); // seconds from quiz start
     lead.pageUrl = location.href;
     lead.referrer = document.referrer || "";
     lead.city = lead.city || _geo.city || (window.RENUE_CITY?window.RENUE_CITY.name:"");
