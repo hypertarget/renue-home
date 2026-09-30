@@ -23,9 +23,8 @@ const TWYNE = {
   pid: "139",
   sid: "310",
   campaigns: {
-    // WestShore API campaign #554 — Twyne runs its ping-post auction on every post (WestShore =
-    // the anchor API buyer; highest bidder wins). cq1 category hard-coded per funnel.
-    // ACTIVE 2026-09-15 per Eric, after istest verification (leadids 6253630/6253631).
+    // WestShore API campaign #554. Delivery is controlled by Twyne's campaign configuration.
+    // cq1 category is hard-coded per funnel. Test acceptance is not proof of payable delivery.
     bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
     windows:  { cid: "554", kind: "ws554", category: "window" },
     // Retired 2026-09-15: bathroom -> { cid: "550", kind: "fpi", projectField: "project" } (FPI #550).
