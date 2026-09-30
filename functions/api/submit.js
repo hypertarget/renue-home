@@ -23,9 +23,8 @@ const TWYNE = {
   pid: "139",
   sid: "310",
   campaigns: {
-    // WestShore API campaign #554 — Twyne runs its ping-post auction on every post (WestShore =
-    // the anchor API buyer; highest bidder wins). cq1 category hard-coded per funnel.
-    // ACTIVE 2026-09-15 per Eric, after istest verification (leadids 6253630/6253631).
+    // WestShore API campaign #554. Delivery is controlled by Twyne's campaign configuration.
+    // cq1 category is hard-coded per funnel. Test acceptance is not proof of payable delivery.
     bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
     windows:  { cid: "554", kind: "ws554", category: "window" },
     // Retired 2026-09-15: bathroom -> { cid: "550", kind: "fpi", projectField: "project" } (FPI #550).
@@ -76,14 +75,16 @@ export async function onRequestPost({ request, env }) {
 
   // ---- Campaign selection -------------------------------------------------------
   let camp = TWYNE.campaigns[record.vertical];
-  let forceTest = false;
+  // Any diagnostic request stays in test mode, including the normal campaign route.
+  let forceTest = isTestReq;
   if (isTestReq && lead.testCampaign === "ws554" && TWYNE.ws554Test[record.vertical]) {
     camp = TWYNE.ws554Test[record.vertical];
     forceTest = true; // staging route never posts a non-test lead
   }
 
   // ---- Post to Twyne ----------------------------------------------------------
-  let twyne = { attempted: false };
+  const isTest = forceTest || camp?.testUntilConfirmed === true || env?.TWYNE_TEST === "true" || lead.istest === true || lead.istest === "true";
+  let twyne = { attempted: false, isTest };
   const renter = /rent/i.test(String(lead.owner || ""));
   if (camp) {
     // Renters never post: no buyer takes them, so a post would only burn dedupe/quality stats.
@@ -102,7 +103,6 @@ export async function onRequestPost({ request, env }) {
     } else if (camp.kind === "px555" && !(sessionSeconds(lead) > 0)) {
       twyne = { attempted: false, blocked: "sessionlength-missing", cid: camp.cid };
     } else {
-      const isTest = forceTest || camp.testUntilConfirmed === true || (env && env.TWYNE_TEST === "true") || lead.istest === true || lead.istest === "true";
       const subid1 = (env && env.TWYNE_SUBID1) ||
         ((camp.kind === "ws554" || camp.kind === "px555") ? trafficSource(record.pageUrl, record.referrer) : "renuehome");
       const params = buildTwyneParams(lead, record, camp, { ip, ua, subid1, isTest });
@@ -122,19 +122,42 @@ export async function onRequestPost({ request, env }) {
     }
   }
 
-  // Conversion value for Google Ads = accepted buyer payout from Twyne (if any), else null (client falls back).
-  const payoutRaw = twyne && twyne.body ? twyne.body.publisher_payout : undefined;
-  const payout = payoutRaw != null ? parseFloat(payoutRaw) : NaN;
-  const txnId = (twyne && twyne.leadid) ? String(twyne.leadid) : (record.jornayaLeadiD || "");
+  twyne.isTest = isTest || isTestResponse(twyne);
+  const outcome = classifyOutcome(twyne);
 
   const callNumber = (env && env.CALL_NUMBER) || "";
   return json({
     ok: true,
     callNumber,
-    value: payout > 0 ? payout : null,
-    transaction_id: txnId,
+    value: outcome.value,
+    transaction_id: outcome.transaction_id,
+    outcome,
     twyne,
   });
+}
+
+// Explicit submission outcomes. Accepted is not proof of downstream sale or payment.
+// A positive returned payout is a provisional conversion value, never a fallback estimate.
+function isTestResponse(twyne) {
+  const body = twyne.body || {};
+  const truthyTest = value => value === true || /^(true|y|yes|1)$/i.test(String(value ?? ""));
+  return [body.istest, body.isTest, body.is_test].some(truthyTest) ||
+    /\btest[ -](lead|mode|request)\b|\bistest\s*=\s*n\b/i.test(`${twyne.status || ""} ${twyne.reason || ""}`);
+}
+
+function classifyOutcome(twyne) {
+  const test = twyne.isTest === true || isTestResponse(twyne);
+  const rawStatus = String(twyne.status || "").trim().toLowerCase();
+  let status = "not_attempted";
+  if (test) status = "test";
+  else if (twyne.blocked) status = "blocked";
+  else if (twyne.error || (twyne.attempted && !(twyne.httpStatus >= 200 && twyne.httpStatus < 300))) status = "error";
+  else if (twyne.attempted) status = ["accepted", "queued", "rejected", "error"].includes(rawStatus) ? rawStatus : "unknown";
+  const rawPayout = twyne.body?.publisher_payout;
+  const payout = typeof rawPayout === "number" || typeof rawPayout === "string" ? Number(rawPayout) : NaN;
+  const transaction_id = twyne.leadid ? String(twyne.leadid).trim() : "";
+  const conversion_eligible = status === "accepted" && Number.isFinite(payout) && payout > 0 && transaction_id !== "";
+  return { status, test, conversion_eligible, value: conversion_eligible ? payout : null, transaction_id };
 }
 
 // Derive subid1 (publisher main traffic source) for #554 so results break out by source.

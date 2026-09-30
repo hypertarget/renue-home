@@ -10,7 +10,8 @@
     "test:mobile:live": "node mobile-test.mjs https://renuehome.com",
     "serve": "node serve.mjs",
     "build:seo": "node build-sitemap.mjs && node validate-seo.mjs",
-    "test:seo": "node --test seo.test.mjs && node validate-seo.mjs"
+    "test:seo": "node --test seo.test.mjs && node validate-seo.mjs",
+    "test:leads": "node --test lead-outcome.test.mjs"
   },
   "devDependencies": {
     "playwright": "^1.60.0"
