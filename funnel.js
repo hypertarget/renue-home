@@ -3,7 +3,7 @@
 /* 2026-09-29: sessionLength (quiz start -> submit, seconds) + consentText = the exact on-page consent paragraph (PX #555 needs both).
    2026-09-25: funnel telemetry (quiz_step_N, quiz_submit_attempt, lead_result_<status>) for GA4 drop-off reads.
    2026-09-22 CRO pass: LP mode (logo-only header, legal-only footer), persistent call bar that hides only while typing,
-   Ads conversion fires ONLY when Twyne reports the lead sold (Accepted/Queued), renter disqualify, real phone/email validation. */
+   Ads conversion requires non-test acceptance, a returned positive payout and a transaction ID. */
 (function(){
   "use strict";
 
@@ -22,20 +22,15 @@
   // generating a LeadiD token on every lead (alongside TrustedForm). Empty = off until set.
   var JORNAYA = window.RENUE_JORNAYA_CAMPAIGN || "48EE243A-8FC1-3FD8-F71B-AE0FF3D94A70"; // Renue Home Jornaya campaign
   // Analytics / ads — OFF until an ID is set (set the global in each page head, or fill in below).
-  // GA4 is the hub: page_view (auto on load), generate_lead (on submit), call_click (on tel: taps).
-  // Link GA4 -> Google Ads and import those key events as conversions (no separate Ads snippet needed).
+  // GA4 generate_lead means a non-test accepted/queued inquiry, not a paid lead.
+  // Ads form conversions are sent directly below. Do not also import the same event from GA4.
   var GA4_ID     = window.RENUE_GA4 || "G-7YCT9CPCVN";  // Renue Home GA4 (account Erio); override via window.RENUE_GA4
   var ADS_ID     = window.RENUE_ADS_ID || "AW-18253863009";      // Renue Home Google Ads (loads gtag for Ads too)
   // Google Ads conversion action for a form submit ("RNH Lead Form Submit"). send_to = AW id / label.
   var ADS_CONVERSION = window.RENUE_ADS_CONVERSION || "AW-18253863009/Jhf8CNKasMQcEOGwj4BE";
   // Google Ads click-to-call conversion ("RNH Click-to-Call", Contact category, secondary/observational).
   var ADS_CALL_CONVERSION = window.RENUE_ADS_CALL_CONVERSION || "AW-18253863009/bfThCOfXucQcEOGwj4BE";
-  // Fallback conversion value when Twyne sells the lead but returns no payout (WestShore #554 CPL = $60).
-  var ADS_DEFAULT_VALUE = 60;
-  // Fire the Ads form conversion ONLY when the server reports the lead actually sold (Twyne status
-  // Accepted/Queued). Rejected / blocked / errored posts still show the thank-you but send no conversion,
-  // so Smart Bidding learns from revenue, not from form fills. Set window.RENUE_ADS_FIRE_ALWAYS=true to revert.
-  var ADS_FIRE_ONLY_ON_SALE = (window.RENUE_ADS_FIRE_ALWAYS !== true);
+  // Values are provisional returned payouts, not confirmed payments. No default CPL or always-fire override.
   var META_PIXEL = window.RENUE_META_PIXEL || "";  // Meta/Facebook pixel id (optional)
   // Retreaver Dynamic Number Insertion: each visitor gets a unique tracking number that carries
   // their gclid (call attribution). Campaign 01a27245 (Bathroom Remodel Zip IVR) / pool 5583,
@@ -584,30 +579,31 @@
       var quiz=document.getElementById("quiz");
       quiz.innerHTML='<div class="card"><div class="thanks show"><div class="big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>'+
         '<div class="q">You’re all set'+(lead.first?', '+esc(lead.first):'')+'!</div>'+
-        '<p class="qsub">Your request has been received. A trusted local pro will reach out shortly to discuss your '+cfg.word+' project.</p>'+
+        '<p class="qsub">Your request has been received. Matching depends on service availability in your area. If matched, a provider may contact you about your '+cfg.word+' project.</p>'+
         (callNumber?'<div class="callrow"><a class="btn btn-grad btn-lg" href="'+telHref(callNumber)+'">📞 Call now to speak to a specialist</a></div>':'')+
         '<div class="trustcues" style="margin-top:16px"><span>Local pros. Free quotes. No obligation.</span></div></div></div>';
-      // Did the lead actually sell? The server relays Twyne's verdict (HTTP is always 200 there, the
-      // JSON `status` is the truth). Accepted / Queued = sold. Anything else = no revenue.
+      // Use the server's explicit outcome. Older/unclassified responses cannot trigger conversions.
       var tw = (resp && resp.twyne) ? resp.twyne : null;
-      var st = (tw && tw.status) ? String(tw.status).toLowerCase() : "";
-      var sold = !!(tw && tw.attempted && (st.indexOf("accept")===0 || st.indexOf("queue")===0));
-      var why = sold ? "sold" : (tw ? (tw.blocked || tw.error || st || "not-attempted") : "no-response");
-      try{ if(window.gtag) gtag('event','generate_lead',{items:[{item_category:window.RENUE_VERTICAL}],lead_sold:sold?"yes":"no",lead_status:why}); }catch(e){}
-      // Outcome as a distinct event name so the GA4 Events report shows sold vs rejected vs blocked without setup.
-      try{ if(window.gtag) gtag('event','lead_result_'+String(why).toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,28),{vertical:(window.RENUE_VERTICAL||""), twyne_leadid:(tw&&tw.leadid)?String(tw.leadid):""}); }catch(e){}
-      // Google Ads conversion (form submit) — only for sold leads (see ADS_FIRE_ONLY_ON_SALE).
-      // Value = buyer payout from Twyne if returned, else the CPL fallback.
+      var outcome = (resp && resp.outcome) || {};
+      var allowedStatuses = ['test','accepted','queued','rejected','blocked','error','not_attempted','unknown'];
+      var why = allowedStatuses.indexOf(outcome.status)>=0 ? outcome.status : 'unknown';
+      var isTest = outcome.test === true || why === 'test';
+      if(isTest) why = 'test';
+      var inquiry = !isTest && (why === 'accepted' || why === 'queued');
+      var eligible = !isTest && why === 'accepted' && outcome.conversion_eligible === true &&
+        typeof outcome.value === 'number' && isFinite(outcome.value) && outcome.value > 0 && !!outcome.transaction_id;
+      try{ if(window.gtag && !isTest) gtag('event','quiz_submit_received',{vertical:(window.RENUE_VERTICAL||""),lead_status:why}); }catch(e){}
+      try{ if(window.gtag && inquiry) gtag('event','generate_lead',{items:[{item_category:window.RENUE_VERTICAL}],lead_status:why}); }catch(e){}
+      try{ if(window.gtag) gtag('event','lead_result_'+why,{vertical:(window.RENUE_VERTICAL||""), twyne_leadid:(tw&&tw.leadid)?String(tw.leadid):""}); }catch(e){}
+      // Only an accepted, non-test response with an explicit payout can carry an Ads value.
       try{
-        if(window.gtag && ADS_ID && (sold || !ADS_FIRE_ONLY_ON_SALE)){
-          var cv = (resp && resp.value!=null && Number(resp.value)>0) ? Number(resp.value) : ADS_DEFAULT_VALUE;
-          var txn = (resp && resp.transaction_id) ? String(resp.transaction_id) : String(lead.universal_leadid||lead.ts);
+        if(window.gtag && ADS_ID && eligible){
           // Enhanced Conversions for Leads — gtag hashes the email/phone client-side.
           gtag('set','user_data',{ email:(lead.email||"").trim().toLowerCase(), phone_number:'+1'+(lead.phone||"").replace(/\D/g,'') });
-          gtag('event','conversion',{ send_to:ADS_CONVERSION, value:cv, currency:'USD', transaction_id:txn });
+          gtag('event','conversion',{ send_to:ADS_CONVERSION, value:outcome.value, currency:'USD', transaction_id:outcome.transaction_id });
         }
       }catch(e){}
-      try{ if(window.fbq && sold) fbq('track','Lead'); }catch(e){}
+      try{ if(window.fbq && inquiry) fbq('track','Lead'); }catch(e){}
       window.scrollTo({top:0,behavior:"smooth"});
     };
     var fail=function(){
