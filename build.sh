@@ -3,4 +3,5 @@
 set -e
 node build-cities.mjs
 node build-sitemap.mjs
+node validate-seo.mjs
 echo "Done. Commit the new/updated *.html, sitemap.xml, robots.txt."
