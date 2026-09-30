@@ -32,3 +32,9 @@ python3 -m http.server 8080 &  node mobile-test.mjs http://localhost:8080
 Screenshots land in `./mobile-shots/`. Run it before each deploy (or wire into CI) — it would have caught the header overflow and the sticky-bar-over-form issues automatically.
 
 Fresh Starts. Better Homes.
+
+## Search discovery checks
+
+After adding or changing a public page, run `npm run build:seo` and `npm run test:seo`. Root pages and nested `guides/*.html` are included in the sitemap, except redirects, noindex pages and alternate canonicals. Modification dates are omitted until reliable editorial dates are tracked. Each guide must have its own canonical URL, one H1, working local links and a link from `/guides`. A root `404.html` prevents unpublished routes from serving the homepage with HTTP 200.
+
+The SEO workflow checks pull requests and main. Cloudflare deploys independently of GitHub Actions, so check the workflow before merging and verify the live HTTP status and canonical after deployment.
