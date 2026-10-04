@@ -618,5 +618,35 @@
     "caption": "new season, good excuse 🌱 whether it's paint, a new bathroom, or finally redoing the floors, spring is a great time to start.\n\ncompare free quotes from local pros at renuehome.com.",
     "alt": "Spring is for fresh starts at home.",
     "status": "pending"
+  },
+  {
+    "id": "tip-deposit-62",
+    "bank_id": "tip-deposit",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-deposit-62.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-deposit-62-pin.png",
+    "caption": "rule of thumb worth saving. a reasonable deposit is normal. paying for the whole job before it starts is not. 🚩\n\ncompare quotes from local pros at renuehome.com and pay as the work gets done.",
+    "alt": "Tip, never pay 100 percent up front.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-exterior-63",
+    "bank_id": "stat-exterior",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-exterior-63.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-exterior-63-pin.png",
+    "caption": "here's a pattern worth knowing. 8 of the 10 best ROI home projects in 2025 are exterior replacements (doors, siding, windows, roof). curb appeal really does pay.\n\nplanning one? renuehome.com gets you free local quotes.\n\n#curbappeal #homevalue",
+    "alt": "Eight of the top ten ROI home projects in 2025 are exterior replacements.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-hvac-64",
+    "bank_id": "stat-hvac",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-hvac-64.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-hvac-64-pin.png",
+    "caption": "about HALF of your home's energy bill goes to heating and cooling, per the EIA. which is exactly why a tune-up or a more efficient system can pay for itself.\n\ncompare free HVAC quotes near you at renuehome.com.\n\n#hvac #energysavings",
+    "alt": "About half of home energy use goes to heating and cooling.",
+    "status": "pending"
   }
 ]

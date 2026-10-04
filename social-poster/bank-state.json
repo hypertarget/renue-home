@@ -11,7 +11,10 @@
     "quote-checklist",
     "tip-permits",
     "stat-roof",
-    "spring-refresh"
+    "spring-refresh",
+    "tip-deposit",
+    "stat-exterior",
+    "stat-hvac"
   ],
-  "gen": 62
+  "gen": 65
 }
