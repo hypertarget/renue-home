@@ -5,6 +5,9 @@
 // 3. The visitor's US state (from Cloudflare edge geo) so funnel.js can personalize the
 //    hero. Relevance only — no fabricated "state program/rebate" claims. Falls back
 //    silently when geo is missing/non-US/low-confidence.
+// 4. The visitor's edge postal code (US only, 5 digits) as window.RENUE_GEO_ZIP. funnel.js tags the
+//    Retreaver DNI number with it as a provisional caller_zip so web callers skip the keypad zip IVR
+//    (a zip typed in the quiz replaces it). Never rendered on the page.
 export async function onRequest(context) {
   const response = await context.next();
 
@@ -34,6 +37,10 @@ export async function onRequest(context) {
     snippet +=
       "<script>window.RENUE_GEO_REGION=" + JSON.stringify(clean(cf.region)) +
       ";window.RENUE_GEO_REGION_CODE=" + JSON.stringify(clean(cf.regionCode || "")) + ";<\/script>";
+  }
+  // Edge postal code (approximate IP geo). Only a clean 5-digit US zip is exposed; anything else is skipped.
+  if (cf.country === "US" && /^\d{5}$/.test(String(cf.postalCode || ""))) {
+    snippet += "<script>window.RENUE_GEO_ZIP=" + JSON.stringify(String(cf.postalCode)) + ";<\/script>";
   }
 
   return new HTMLRewriter()
