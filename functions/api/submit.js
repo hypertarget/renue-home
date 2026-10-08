@@ -250,6 +250,10 @@ function buildMultiBody(lead, record, camp, opt) {
     customquestions: cq,
     click: {
       useragent: opt.ua, subid1: opt.subid1, trustedform: record.trustedFormCertUrl,
+      // REQUIRED on 556/560 (SOP v4, 2026-10-08): Twyne's buyer ping forwards {submitdate} verbatim because its own
+      // {utccsubmitdate(...)} merge field never populated. ISO-8601 UTC, 24-hour, seconds precision, trailing Z,
+      // stamped server-side at post time — never from the browser clock.
+      submitdate: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
       ip: opt.ip, leadid: record.jornayaLeadiD, externalid,
       domain_url: record.pageUrl || "https://renuehome.com",
       subid2: gclid, devicetype: deviceType(opt.ua), os: osCode(opt.ua),
