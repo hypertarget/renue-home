@@ -233,6 +233,10 @@ function buildMultiBody(lead, record, camp, opt) {
     cq.cq4 = camp.category;          // "bathroom"
   }
   const body = {
+    // Live /multi/post reads `pid` / `sid` (verified 2026-10-08: `publisherid`/`sourceid` alone => "Invalid pid").
+    // The FPI documents publisherid/sourceid, so both spellings are sent; extra root keys are ignored.
+    pid: TWYNE.multi.pid,
+    sid: TWYNE.multi.sid,
     publisherid: TWYNE.multi.pid,
     sourceid: TWYNE.multi.sid,
     cid: camp.cid,
