@@ -1,11 +1,21 @@
 // Cloudflare Pages Function — POST /api/submit  [canonical Twyne version — do not overwrite from a stale clone]
 // 2026-09-22: renter backstop (never posted) + NANP phone validation mirroring funnel.js.
 // 2026-09-29: hvac -> Twyne #555 (PX HVAC) branch: PX enum transforms, Jornaya + SessionLength gates, istest forced until confirmed.
+// 2026-10-08: bathroom -> Twyne #556, windows -> Twyne #560 (multi-buyer, JSON, pid 140 / sid 312). Raw site labels
+//             in every cq slot, server-side zip->city/state fallback, state hard gate. #554 retired for these two verticals only.
+// 2026-10-10: #556/#560 are PING -> POST (source 312 switched to Ping/Post; a direct-post source can't auction a dynamic
+//             bidder). One body: POST /multi/ping, and only on Accepted POST /multi/post with pingid + bids. No site-side
+//             timestamp (Twyne stamps it). Spec: shared brain sops/campaigns/renuehome-multibuyer-556-560--v9.
 // Receives the lead, validates it, posts it to Twyne (HTM's lead platform),
 // and returns a pay-per-call number for the thank-you screen.
 //
 // Two campaign kinds:
 //   kind "fpi"   = classic ping-post FPI mapping (cq1=credit, cq2=homeowner, cq3=project). e.g. #550.
+//   kind "multi" = Twyne multi-buyer ping/post (#556 bathroom / #560 windows). JSON body to /multi/ping, then the
+//                  same body + pingid + bids to /multi/post. Twyne runs the Blue Ink / WestShore auction. cq slots carry the
+//                  site's RAW option labels (Twyne conditions map them per buyer); Category is cq4 on bathroom
+//                  and cq5 on windows. address1/city/state are REQUIRED (server fills city/state from zip if the
+//                  browser lookup was empty; no state = no post). TrustedForm + Jornaya are hard gates.
 //   kind "ws554" = WestShore API direct post (#554, CPL). cq1 = category hard-coded per funnel
 //                  ("bathroom"/"window") — NEVER derived from user input (no server-side validation
 //                  on Twyne's end; correctness lives here). trustedform is REQUIRED: if the cert is
@@ -22,11 +32,24 @@ const TWYNE = {
   endpoint: "https://htm.api.twyne.io/lead/submit",
   pid: "139",
   sid: "310",
+  // Multi-buyer campaigns use a different API + publisher/source ids (JSON, not form-encoded).
+  multi: {
+    ping: "https://htm.api.twyne.io/multi/ping",
+    post: "https://htm.api.twyne.io/multi/post",
+    pid: "140", sid: "312",
+    // Shape of `bids` on the post: array of NUMERIC bidids (IEnumerable<Int64>, verified 2026-10-11). "auto" tries
+    // all bidids (highest first) then the top bidid alone, moving on only when Twyne's reply is a schema complaint
+    // about bids; pin to "ids" or "topid" once confirmed.
+    bidsShape: "auto",
+  },
   campaigns: {
-    // WestShore API campaign #554. Delivery is controlled by Twyne's campaign configuration.
-    // cq1 category is hard-coded per funnel. Test acceptance is not proof of payable delivery.
-    bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
-    windows:  { cid: "554", kind: "ws554", category: "window" },
+    // Multi-buyer campaigns #556 (bathroom) / #560 (windows): Twyne auctions Blue Ink vs WestShore and delivers
+    // to the winner. category = hard-coded literal (same as #554). testUntilConfirmed: every post is istest=true
+    // until Sergio confirms cq slots + winning buyers in Twyne, then flip to false (one-line change).
+    bathroom: { cid: "556", kind: "multi", category: "bathroom", testUntilConfirmed: true },
+    windows:  { cid: "560", kind: "multi", category: "window",   testUntilConfirmed: true },
+    // Retired 2026-10-08 (multi-buyer replaces it): bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
+    //                                               windows:  { cid: "554", kind: "ws554", category: "window" },
     // Retired 2026-09-15: bathroom -> { cid: "550", kind: "fpi", projectField: "project" } (FPI #550).
     // PX HVAC Ping Post Exclusive via Twyne #555 (spec: shared brain sops/campaigns/px-hvac-555-renuehome-integration).
     // The site sends PX-format enum values (cq1-cq3 transform tables below), cq4 Own, cq5 credit, cq6 SessionLength.
@@ -38,8 +61,9 @@ const TWYNE = {
   // sets testCampaign:"ws554". Posts through here are ALWAYS istest=true regardless of payload.
   // The real funnel never sends the header, so production traffic cannot reach this route.
   ws554Test: {
-    bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
-    windows:  { cid: "554", kind: "ws554", category: "window" },
+    // Retired 2026-10-08 with the #554 route for these verticals (restore both lines to re-verify #554):
+    // bathroom: { cid: "554", kind: "ws554", category: "bathroom" },
+    // windows:  { cid: "554", kind: "ws554", category: "window" },
   },
 };
 
@@ -82,6 +106,11 @@ export async function onRequestPost({ request, env }) {
     forceTest = true; // staging route never posts a non-test lead
   }
 
+  // Multi-buyer campaigns require city + 2-letter state. The browser fills them from a non-blocking zip
+  // lookup that may not have returned by submit (and its city fallback can be "Austin, TX"), so clean
+  // what arrived and fall back to a server-side zip lookup when either is still empty.
+  if (camp && camp.kind === "multi") await fillGeoFromZip(record);
+
   // ---- Post to Twyne ----------------------------------------------------------
   const isTest = forceTest || camp?.testUntilConfirmed === true || env?.TWYNE_TEST === "true" || lead.istest === true || lead.istest === "true";
   let twyne = { attempted: false, isTest };
@@ -93,15 +122,23 @@ export async function onRequestPost({ request, env }) {
       twyne = { attempted: false, blocked: "renter", cid: camp.cid };
     // WestShore #554 hard gate: no TrustedForm cert, no post. Twyne would Accept a
     // cert-less lead (no server-side validation) — we refuse instead, per HTM policy.
-    } else if ((camp.kind === "ws554" || camp.kind === "px555") && !record.trustedFormCertUrl) {
+    } else if ((camp.kind === "ws554" || camp.kind === "px555" || camp.kind === "multi") && !record.trustedFormCertUrl) {
       twyne = { attempted: false, blocked: "trustedform-missing", cid: camp.cid };
     // PX requires JornayaLeadId: a post without it fails at PX, so refuse it here (spec gotcha: the token
     // populates a few seconds after page load — a real visitor who reached step 9 always has one).
-    } else if (camp.kind === "px555" && !record.jornayaLeadiD) {
+    // The multi-buyer campaigns keep the same gate (#556/#560 SOP verification: Jornaya-less = blocked pre-Twyne).
+    } else if ((camp.kind === "px555" || camp.kind === "multi") && !record.jornayaLeadiD) {
       twyne = { attempted: false, blocked: "jornaya-missing", cid: camp.cid };
+    // #556/#560 require address1 + city + state; a lead whose state is still unknown after the zip fallback
+    // would be Rejected (and burn its dedupe key), so refuse it here instead.
+    } else if (camp.kind === "multi" && !/^[A-Z]{2}$/.test(record.state || "")) {
+      twyne = { attempted: false, blocked: "state-missing", cid: camp.cid };
     // PX rejects a missing/zero SessionLength; the funnel stamps it client-side (funnel.js v20260929+).
     } else if (camp.kind === "px555" && !(sessionSeconds(lead) > 0)) {
       twyne = { attempted: false, blocked: "sessionlength-missing", cid: camp.cid };
+    } else if (camp.kind === "multi") {
+      const subid1 = (env && env.TWYNE_SUBID1) || trafficSource(record.pageUrl, record.referrer);
+      twyne = await pingPostMulti(lead, record, camp, { ip, ua, subid1, isTest });
     } else {
       const subid1 = (env && env.TWYNE_SUBID1) ||
         ((camp.kind === "ws554" || camp.kind === "px555") ? trafficSource(record.pageUrl, record.referrer) : "renuehome");
@@ -148,12 +185,17 @@ function isTestResponse(twyne) {
 function classifyOutcome(twyne) {
   const test = twyne.isTest === true || isTestResponse(twyne);
   const rawStatus = String(twyne.status || "").trim().toLowerCase();
+  const knownStatus = ["accepted", "queued", "rejected", "error"].includes(rawStatus);
   let status = "not_attempted";
   if (test) status = "test";
   else if (twyne.blocked) status = "blocked";
+  // A parsed JSON status wins over the HTTP code: the multi-buyer API returns Rejected/Error as HTTP 400.
+  else if (twyne.attempted && knownStatus) status = rawStatus;
   else if (twyne.error || (twyne.attempted && !(twyne.httpStatus >= 200 && twyne.httpStatus < 300))) status = "error";
-  else if (twyne.attempted) status = ["accepted", "queued", "rejected", "error"].includes(rawStatus) ? rawStatus : "unknown";
-  const rawPayout = twyne.body?.publisher_payout;
+  else if (twyne.attempted) status = "unknown";
+  // Payout: #554/#555 return publisher_payout; the multi-buyer POST returns price (publisher payout, Dynamic 100%).
+  // A multi lead that stopped at the ping (Rejected/Error) never reaches here as accepted, so no value is attached.
+  const rawPayout = twyne.body?.publisher_payout ?? twyne.body?.price;
   const payout = typeof rawPayout === "number" || typeof rawPayout === "string" ? Number(rawPayout) : NaN;
   const transaction_id = twyne.leadid ? String(twyne.leadid).trim() : "";
   const conversion_eligible = status === "accepted" && Number.isFinite(payout) && payout > 0 && transaction_id !== "";
@@ -179,6 +221,160 @@ function trafficSource(pageUrl, referrer) {
     if (r) return "referral";
     return "direct";
   } catch (_) { return "renuehome"; }
+}
+
+// ---- Twyne multi-buyer (#556 / #560) — JSON ping -> post ------------------------------------
+// Two calls per lead (SOP v9): the full body goes on /multi/ping; only an Accepted ping is followed by
+// /multi/post carrying the identical body plus pingid + bids. Twyne runs the auction (Blue Ink dynamic bid
+// vs WestShore fixed bid, Highest Bid wins) and delivers to the winner. Every cq slot carries the site's RAW
+// option label (no normalization — Twyne's per-buyer conditions use "contains"). Slot map:
+//   #556 bathroom: cq1 credit · cq2 homeowner · cq3 project · cq4 Category("bathroom")
+//   #560 windows:  cq1 credit · cq2 homeowner · cq3 nature  · cq4 Number of Windows (qty) · cq5 Category("window")
+// Credit skipped -> "" (slot is Required: send empty, never omit). Ping-required: first/last/email/phone/zip,
+// every cq, click useragent/subid1/trustedform/ip. address1/city/state are post-only but sent on both.
+function buildMultiBody(lead, record, camp, opt) {
+  const raw = v => (v === undefined || v === null) ? "" : String(v);
+  const externalid = "rh-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+  let gclid = "";
+  try { gclid = new URL(record.pageUrl || "https://renuehome.com").searchParams.get("gclid") || ""; } catch (_) {}
+  const cq = { cq1: raw(lead.credit), cq2: raw(lead.owner), cq3: "", cq4: "" };
+  if (record.vertical === "windows") {
+    cq.cq3 = raw(lead.nature);
+    cq.cq4 = raw(lead.qty);          // e.g. "2–3 windows" — en dash kept on purpose
+    cq.cq5 = camp.category;          // "window"
+  } else {
+    cq.cq3 = raw(lead.project);
+    cq.cq4 = camp.category;          // "bathroom"
+  }
+  const body = {
+    // Live /multi/* reads `pid` / `sid` (verified 2026-10-08: `publisherid`/`sourceid` alone => "Invalid pid").
+    // The FPI documents publisherid/sourceid, so both spellings are sent on ping AND post; extra root keys are ignored.
+    pid: TWYNE.multi.pid,
+    sid: TWYNE.multi.sid,
+    publisherid: TWYNE.multi.pid,
+    sourceid: TWYNE.multi.sid,
+    cid: camp.cid,
+    clickid: externalid,
+    consumer: {
+      first: record.first || "", last: record.last || "", email: record.email || "",
+      phone: record.phone || "",                 // 10 digits, no formatting
+      address1: record.address || "", city: record.city || "", state: record.state || "",
+      zip: record.zip || "",
+    },
+    customquestions: cq,
+    click: {
+      // ping-required: useragent, subid1, trustedform, ip (SOP v9). No timestamp from the site — Twyne stamps
+      // Blue Ink's originally_created itself on a ping/post source (the submitdate detour of v4–v8 is gone).
+      useragent: opt.ua, subid1: opt.subid1, trustedform: record.trustedFormCertUrl,
+      ip: opt.ip, leadid: record.jornayaLeadiD, externalid,
+      domain_url: record.pageUrl || "https://renuehome.com",
+      subid2: gclid, devicetype: deviceType(opt.ua), os: osCode(opt.ua),
+    },
+  };
+  if (opt.isTest) body.istest = "true"; // root-level per FPI; omitted in production
+  return body;
+}
+
+// One JSON call to a /multi/* endpoint. Twyne's FPI says "always 200" but its own Rejected/Error examples
+// are HTTP 400 — parse the JSON status regardless of the HTTP code and never branch on the code alone.
+async function twyneMultiCall(url, payload) {
+  const r = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const text = await r.text();
+  let body = {};
+  try { body = text ? JSON.parse(text) : {}; } catch (_) { body = { raw: text.slice(0, 500) }; }
+  return {
+    httpStatus: r.status, status: body.status || "", reason: body.reason || "", errors: body.errors || [],
+    pingid: body.pingid || "", clickid: body.clickid || "", price: body.price,
+    bids: Array.isArray(body.bids) ? body.bids : [], body,
+  };
+}
+
+// Shape of `bids` on the post. Verified against the live endpoint 2026-10-11: Twyne deserializes `bids` as
+// IEnumerable<Int64> — an ARRAY OF NUMERIC bidids ("Error converting value \"6276602\" to type
+// System.Collections.Generic.IEnumerable`1[System.Int64]" for a bare string; "Cannot deserialize the current JSON
+// object ... into type System.Int64 ... Path bids[0].bidid" for objects). The ping returns bidid as a STRING, so
+// it is converted. Candidates: (a) every bidid from the ping, highest bid first (Twyne's Distribution = Highest
+// Bid picks the winner); (b) only the highest bidid.
+function bidsCandidates(bids) {
+  const sorted = bids.slice().sort((a, b) => Number(b.bid || 0) - Number(a.bid || 0));
+  const ids = sorted.map(b => Number(b.bidid)).filter(n => Number.isFinite(n));
+  return [
+    { shape: "ids",   bids: ids },
+    { shape: "topid", bids: ids.slice(0, 1) },
+  ];
+}
+// A reply that reads like Twyne complaining about the `bids` field itself (not a buyer decision).
+function looksLikeBidsShapeComplaint(res) {
+  const txt = `${res.status} ${res.reason} ${(res.errors || []).join(" ")}`.toLowerCase();
+  return /bid/.test(txt) && !/no buyer|no winning|out of area|duplicat/.test(txt);
+}
+
+async function pingPostMulti(lead, record, camp, opt) {
+  const payload = buildMultiBody(lead, record, camp, opt);
+  const out = { attempted: true, stage: "ping", cid: camp.cid, clickid: payload.clickid, bids: [], attempts: [] };
+  // ---- 1. ping ----
+  let ping;
+  try {
+    ping = await twyneMultiCall(TWYNE.multi.ping, payload);
+  } catch (e) {
+    return Object.assign(out, { error: String(e && e.message || e) });
+  }
+  out.ping = ping;
+  Object.assign(out, { httpStatus: ping.httpStatus, status: ping.status, reason: ping.reason, errors: ping.errors,
+    pingid: ping.pingid, leadid: ping.pingid, bids: ping.bids, price: ping.price, body: ping.body });
+  if (!/^accepted$/i.test(ping.status || "")) return out;   // Rejected/Error: no post, no retry (same PII = Duplicated ping)
+
+  // ---- 2. post (same body + pingid + bids) ----
+  out.stage = "post";
+  const shapes = bidsCandidates(ping.bids);
+  const order = TWYNE.multi.bidsShape === "auto" ? shapes : shapes.filter(c => c.shape === TWYNE.multi.bidsShape);
+  let post = null;
+  for (const cand of order) {
+    const postBody = Object.assign({}, payload, { pingid: ping.pingid, bids: cand.bids });
+    try {
+      post = await twyneMultiCall(TWYNE.multi.post, postBody);
+    } catch (e) {
+      out.attempts.push({ shape: cand.shape, error: String(e && e.message || e) });
+      continue;
+    }
+    out.attempts.push({ shape: cand.shape, httpStatus: post.httpStatus, status: post.status, reason: post.reason });
+    out.bidsShape = cand.shape;
+    if (/^accepted$/i.test(post.status || "") || !looksLikeBidsShapeComplaint(post)) break;
+  }
+  if (!post) return Object.assign(out, { error: out.attempts.map(a => a.error).filter(Boolean).join("; ") || "post failed" });
+  out.post = post;
+  const winning = post.bids.length ? post.bids : ping.bids;
+  return Object.assign(out, {
+    httpStatus: post.httpStatus, status: post.status, reason: post.reason, errors: post.errors,
+    // pingid is Twyne's lead key for multi-buyer leads; keep it in leadid so GA4/Ads plumbing is unchanged.
+    pingid: ping.pingid, leadid: post.pingid || ping.pingid, clickid: post.clickid || payload.clickid,
+    price: post.price, bids: winning, body: post.body,
+  });
+}
+
+// city/state cleanup + server-side zip fallback (zippopotam.us, same source funnel.js uses client-side).
+// Mutates record: strips a trailing ", ST" from city, uppercases state, fills blanks from the zip.
+async function fillGeoFromZip(record) {
+  record.city = String(record.city || "").replace(/\s*,\s*[A-Za-z]{2}\s*$/, "").trim();
+  record.state = String(record.state || "").trim().toUpperCase().slice(0, 2);
+  if (record.city && /^[A-Z]{2}$/.test(record.state)) return;
+  if (!/^\d{5}$/.test(record.zip || "")) return;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 2500);
+    const r = await fetch("https://api.zippopotam.us/us/" + record.zip, { signal: ctrl.signal, headers: { "Accept": "application/json" } });
+    clearTimeout(t);
+    if (!r.ok) return;
+    const j = await r.json();
+    const p = j && j.places && j.places[0];
+    if (!p) return;
+    if (!record.city) record.city = String(p["place name"] || "").trim();
+    if (!/^[A-Z]{2}$/.test(record.state)) record.state = String(p["state abbreviation"] || "").trim().toUpperCase().slice(0, 2);
+  } catch (_) { /* leave as-is; the state gate decides */ }
 }
 
 // Build the x-www-form-urlencoded body Twyne expects.
