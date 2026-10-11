@@ -648,5 +648,35 @@
     "caption": "about HALF of your home's energy bill goes to heating and cooling, per the EIA. which is exactly why a tune-up or a more efficient system can pay for itself.\n\ncompare free HVAC quotes near you at renuehome.com.\n\n#hvac #energysavings",
     "alt": "About half of home energy use goes to heating and cooling.",
     "status": "pending"
+  },
+  {
+    "id": "which-room-first-65",
+    "bank_id": "which-room-first",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/which-room-first-65.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/which-room-first-65-pin.png",
+    "caption": "settle a debate for us 😅 you've got $10k to put into ONE part of your home. where's it going, kitchen, bath, windows, or roof?\n\ndrop your pick below. and if you're actually planning one, renuehome.com gets you free quotes from local pros.",
+    "alt": "You have 10 thousand dollars, which room gets it?",
+    "status": "pending"
+  },
+  {
+    "id": "fix-or-replace-66",
+    "bank_id": "fix-or-replace",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/fix-or-replace-66.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/fix-or-replace-66-pin.png",
+    "caption": "the eternal homeowner question. that aging water heater, roof, or AC, do you patch it one more time or just replace it? 🤔\n\nnot sure which makes sense? a free quote helps you decide. renuehome.com",
+    "alt": "Fix it or replace it, what would you do?",
+    "status": "pending"
+  },
+  {
+    "id": "drafty-windows-67",
+    "bank_id": "drafty-windows",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/drafty-windows-67.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/drafty-windows-67-pin.png",
+    "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com",
+    "alt": "Drafty windows are heating the whole street.",
+    "status": "pending"
   }
 ]

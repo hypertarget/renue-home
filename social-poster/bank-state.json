@@ -14,7 +14,10 @@
     "spring-refresh",
     "tip-deposit",
     "stat-exterior",
-    "stat-hvac"
+    "stat-hvac",
+    "which-room-first",
+    "fix-or-replace",
+    "drafty-windows"
   ],
-  "gen": 65
+  "gen": 68
 }
