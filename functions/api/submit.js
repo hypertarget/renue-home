@@ -37,9 +37,9 @@ const TWYNE = {
     ping: "https://htm.api.twyne.io/multi/ping",
     post: "https://htm.api.twyne.io/multi/post",
     pid: "140", sid: "312",
-    // Shape of `bids` on the post (SOP v9 Flow step 3 — unconfirmed by Twyne as of 2026-10-10). "auto" probes in order
-    // array -> object -> id, moving on only when Twyne's reply looks like a schema complaint about bids; once Sergio
-    // confirms which one works, pin it here ("array" | "object" | "id").
+    // Shape of `bids` on the post: array of NUMERIC bidids (IEnumerable<Int64>, verified 2026-10-11). "auto" tries
+    // all bidids (highest first) then the top bidid alone, moving on only when Twyne's reply is a schema complaint
+    // about bids; pin to "ids" or "topid" once confirmed.
     bidsShape: "auto",
   },
   campaigns: {
@@ -293,15 +293,18 @@ async function twyneMultiCall(url, payload) {
   };
 }
 
-// Candidate shapes for `bids` on the post (SOP v9 Flow step 3): (a) the ping's bids[] echoed verbatim,
-// (b) the highest bid as a one-element array of {bidid}, (c) the bare highest bidid.
+// Shape of `bids` on the post. Verified against the live endpoint 2026-10-11: Twyne deserializes `bids` as
+// IEnumerable<Int64> — an ARRAY OF NUMERIC bidids ("Error converting value \"6276602\" to type
+// System.Collections.Generic.IEnumerable`1[System.Int64]" for a bare string; "Cannot deserialize the current JSON
+// object ... into type System.Int64 ... Path bids[0].bidid" for objects). The ping returns bidid as a STRING, so
+// it is converted. Candidates: (a) every bidid from the ping, highest bid first (Twyne's Distribution = Highest
+// Bid picks the winner); (b) only the highest bidid.
 function bidsCandidates(bids) {
   const sorted = bids.slice().sort((a, b) => Number(b.bid || 0) - Number(a.bid || 0));
-  const top = sorted[0] || {};
+  const ids = sorted.map(b => Number(b.bidid)).filter(n => Number.isFinite(n));
   return [
-    { shape: "array",  bids },
-    { shape: "object", bids: top.bidid ? [{ bidid: top.bidid }] : [] },
-    { shape: "id",     bids: top.bidid || "" },
+    { shape: "ids",   bids: ids },
+    { shape: "topid", bids: ids.slice(0, 1) },
   ];
 }
 // A reply that reads like Twyne complaining about the `bids` field itself (not a buyer decision).
