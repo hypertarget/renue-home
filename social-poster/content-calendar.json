@@ -678,5 +678,35 @@
     "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com",
     "alt": "Drafty windows are heating the whole street.",
     "status": "pending"
+  },
+  {
+    "id": "small-fixes-68",
+    "bank_id": "small-fixes",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/small-fixes-68.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/small-fixes-68-pin.png",
+    "caption": "the cheapest home repair is the one you catch early. that little leak or soft spot only gets pricier the longer it waits.\n\nget a free quote from a local pro before it grows. renuehome.com",
+    "alt": "Small fixes now beat big repairs later.",
+    "status": "pending"
+  },
+  {
+    "id": "dream-project-69",
+    "bank_id": "dream-project",
+    "layout": "question",
+    "image_url": "https://renuehome.com/assets/social-posts/dream-project-69.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/dream-project-69-pin.png",
+    "caption": "let's daydream for a sec ✨ money no object, what's the home project you'd do first?\n\ntell us below. when you're ready to price the real version, renuehome.com gets you free local quotes.",
+    "alt": "Money aside, what is your dream home project?",
+    "status": "pending"
+  },
+  {
+    "id": "myth-comparing-70",
+    "bank_id": "myth-comparing",
+    "layout": "myth",
+    "image_url": "https://renuehome.com/assets/social-posts/myth-comparing-70.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/myth-comparing-70-pin.png",
+    "caption": "the \"i'll get around to it\" home project, meet the 2 minute version.\n\nthe myth is that comparing contractors is a pain. the reality is one short form on renuehome.com and local pros reach out to you. you compare on your own time.\n\nno obligation, ever.",
+    "alt": "Myth, comparing home pros is a hassle. Truth, one short form and pros reach out.",
+    "status": "pending"
   }
 ]
