@@ -237,3 +237,16 @@ body.shower-options{font-size:18px;--muted:#47594f}
   .shower-options #quizcard.so-project-step .opt{grid-template-columns:52px minmax(0,1fr) 20px;column-gap:9px;padding-right:10px}
   .so-choice-image{width:52px}
 }
+
+/* Compact only the initial phone screen; retain the offer and matcher disclosure above choices. */
+@media(max-width:520px){
+  .shower-options:not(.so-after-start) .so-hero{padding-top:8px}
+  .shower-options:not(.so-after-start) .so-hero-grid{gap:8px}
+  .shower-options:not(.so-after-start) .so-intro h1{margin-bottom:0}
+  .shower-options:not(.so-after-start) .so-lead{display:none}
+  .shower-options:not(.so-after-start) .so-offer-note{margin-bottom:10px}
+  .shower-options #quizcard.so-project-step{padding-top:16px}
+  .shower-options #quizcard.so-project-step .progress,
+  .shower-options #quizcard.so-project-step .qsub{display:none}
+  .shower-options #quizcard.so-project-step .q{margin-bottom:12px}
+}
