@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
-import { onRequestPost } from './functions/api/submit.js';
+import { onRequestPost, onRequestGet } from './functions/api/submit.js';
 
 // No live submissions. Every buyer call is intercepted by a scoped mock.
 const lead = {
@@ -143,4 +143,237 @@ for (const [status, testFlag, eligible, value, leadEvent, adsEvent] of [
 test('legacy response without normalized outcome never creates a conversion', async () => {
   const { events } = await emitted({ twyne: { attempted: true, status: 'Accepted' }, value: 60 });
   assert.equal(events.some(e => e[1] === 'generate_lead' || e[1] === 'conversion'), false);
+});
+
+// Bathroom multi-buyer integration: every ping, post and geo lookup is mocked.
+const multiLead = {
+  ...lead, owner: 'Yes, I own the home', project: 'Tub-to-shower conversion', credit: 'Good',
+  address: '123 Fixture Street', city: 'Washington', state: 'DC', consentText: 'Fixture consent text',
+  pageUrl: 'https://renuehome.com/shower-options?angle=tub&gclid=fixture-click',
+};
+const pingAccepted = { status: 'Accepted', pingid: 'fixture-ping', price: 999,
+  bids: [{ bidid: '123', bid: 10 }, { bidid: '456', bid: 60 }] };
+const postAccepted = { status: 'Accepted', pingid: 'fixture-ping', price: '60.00' };
+async function multiSubmit(t, {
+  ping = pingAccepted, post = postAccepted, pingStatus = 200, postStatus = 200,
+  input = {}, env = {}, headers = {}, handler, geoHandler,
+  geo = { places: [{ 'place name': 'Washington', 'state abbreviation': 'DC' }] },
+} = {}) {
+  // Buyer calls and ZIP lookups are separate so retry/fallback assertions count delivery traffic.
+  const calls = [], geoCalls = [];
+  t.mock.method(globalThis, 'fetch', async (url, init) => {
+    assert.ok(['https://htm.api.twyne.io/multi/ping', 'https://htm.api.twyne.io/multi/post', 'https://api.zippopotam.us/us/20001'].includes(url), 'unexpected endpoint / fallback');
+    assert.equal(init.redirect, 'manual');
+    assert.ok(init.signal instanceof AbortSignal);
+    const call = { url, payload: init.body ? JSON.parse(init.body) : null, signal: init.signal };
+    if (url.includes('zippopotam')) {
+      geoCalls.push(call);
+      return geoHandler ? geoHandler(url, init) : new Response(JSON.stringify(geo));
+    }
+    calls.push(call);
+    if (handler) return handler(url, init, call);
+    return new Response(JSON.stringify(url.endsWith('/ping') ? ping : post), { status: url.endsWith('/ping') ? pingStatus : postStatus });
+  });
+  const request = new Request('https://renuehome.com/api/submit', {
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'CF-Connecting-IP': '192.0.2.1', 'User-Agent': 'FixtureAgent', ...headers },
+    body: JSON.stringify({ ...multiLead, ...input }),
+  });
+  const response = await onRequestPost({ request, env: { RNH_BATHROOM_ROUTE: 'multi556', ...env } });
+  return { response, result: await response.json(), calls, geoCalls };
+}
+test('multi route sends exact buyer fields, stable IDs, numeric bids and final payout only', async t => {
+  const { result, calls } = await multiSubmit(t);
+  assert.equal(calls.length, 2);
+  const [ping, post] = calls.map(c => c.payload);
+  assert.equal(ping.pid, '140'); assert.equal(ping.sid, '312'); assert.equal(ping.cid, '556');
+  assert.deepEqual(ping.customquestions, { cq1: 'Good', cq2: 'Yes, I own the home', cq3: 'Tub-to-shower conversion', cq4: 'bathroom' });
+  assert.equal(ping.click.domain_url, multiLead.pageUrl);
+  assert.equal(ping.click.subid1, 'google-cpc'); assert.equal(ping.click.subid2, 'fixture-click');
+  assert.equal(ping.click.trustedform, multiLead.xxTrustedFormCertUrl);
+  assert.equal(ping.click.leadid, multiLead.universal_leadid);
+  assert.equal(ping.click.ip, '192.0.2.1'); assert.equal(ping.click.useragent, 'FixtureAgent');
+  assert.equal(ping.istest, undefined);
+  assert.deepEqual(post, { ...ping, pingid: 'fixture-ping', bids: [456, 123] });
+  assert.deepEqual(result.outcome, { status: 'accepted', test: false, conversion_eligible: true, value: 60, transaction_id: 'fixture-ping' });
+  assert.equal(result.twyne.finalPostAccepted, true);
+  assert.equal((await emitted(result)).events.filter(e => e[1] === 'conversion').length, 1);
+});
+test('final publisher payout overrides final price; ping value is never used', async t => {
+  const { result } = await multiSubmit(t, { post: { ...postAccepted, publisher_payout: '42.50' } });
+  assert.equal(result.value, 42.5);
+});
+for (const [name, options, status, count] of [
+  ['post network failure', { handler: async url => { if (url.endsWith('/ping')) return new Response(JSON.stringify(pingAccepted)); throw new Error('private upstream failure'); } }, 'error', 2],
+  ['ping network failure', { handler: async () => { throw new Error('private upstream failure'); } }, 'error', 1],
+  ['ping rejected', { ping: { ...pingAccepted, status: 'Rejected' } }, 'rejected', 1],
+  ['ping queued', { ping: { ...pingAccepted, status: 'Queued' } }, 'unknown', 1],
+  ['ping accepted HTTP500', { pingStatus: 500 }, 'error', 1],
+  ['post rejected', { post: { ...postAccepted, status: 'Rejected' } }, 'rejected', 2],
+  ['post rejected HTTP400', { post: { ...postAccepted, status: 'Rejected' }, postStatus: 400 }, 'rejected', 2],
+  ['post queued', { post: { ...postAccepted, status: 'Queued' } }, 'queued', 2],
+  ['post accepted HTTP500', { postStatus: 500 }, 'error', 2],
+  ['post accepted HTTP400', { postStatus: 400 }, 'error', 2],
+  ['post schema complaint is not retried', { post: { status: 'Error', reason: 'Invalid bids' } }, 'error', 2],
+  ['post unexpected status', { post: { ...postAccepted, status: 'Accepted-ish' } }, 'unknown', 2],
+  ['post ID mismatch', { post: { ...postAccepted, pingid: 'other-ping' } }, 'error', 2],
+]) {
+  test(`multi ${name}: no false conversion or fallback`, async t => {
+    const { result, calls } = await multiSubmit(t, options);
+    assert.equal(calls.length, count);
+    assert.equal(result.outcome.status, status);
+    assert.equal(result.outcome.conversion_eligible, false);
+    assert.equal(result.value, null);
+    assert.equal((await emitted(result)).events.some(e => e[1] === 'conversion'), false);
+  });
+}
+for (const [name, patch] of [
+  ['no final ID', { pingid: undefined }], ['invalid final ID', { pingid: 0 }],
+  ['no price', { price: undefined }], ['zero price', { price: 0 }], ['negative price', { price: -1 }],
+  ['invalid price', { price: 'private text' }], ['boolean price', { price: true }],
+  ['zero publisher payout with positive price', { publisher_payout: 0 }],
+]) {
+  test(`multi ${name}: no estimated conversion value`, async t => {
+    const { result } = await multiSubmit(t, { post: { ...postAccepted, ...patch } });
+    assert.equal(result.outcome.conversion_eligible, false);
+    assert.equal(result.value, null);
+  });
+}
+for (const ping of [
+  { ...pingAccepted, pingid: '' }, { ...pingAccepted, bids: [] },
+  { ...pingAccepted, bids: [{ bidid: 'abc' }] }, { ...pingAccepted, bids: [{ bidid: '123.5' }] },
+  { ...pingAccepted, bids: [{ bidid: true }] }, { ...pingAccepted, bids: [{ bidid: '9007199254740993' }] },
+]) {
+  test(`multi invalid ping does not post: ${JSON.stringify(ping)}`, async t => {
+    const { result, calls } = await multiSubmit(t, { ping });
+    assert.equal(calls.length, 1); assert.equal(result.value, null);
+    assert.equal(result.outcome.conversion_eligible, false);
+  });
+}
+for (const input of [
+  { owner: 'No, I rent' }, { owner: '' }, { xxTrustedFormCertUrl: '' }, { universal_leadid: '' },
+  { consent: false }, { consentText: '' }, { first: '' }, { address: '' },
+  { project: 'Unsupported project' }, { credit: 'Invented' },
+]) {
+  test(`multi required-data gate prevents buyer traffic: ${JSON.stringify(input)}`, async t => {
+    const { result, calls } = await multiSubmit(t, { input });
+    assert.equal(calls.length, 0); assert.equal(result.outcome.status, 'blocked');
+  });
+}
+for (const [name, options] of [
+  ['diagnostic header', { headers: { 'x-rnh-test': '1' } }],
+  ['environment test', { env: { TWYNE_TEST: 'true' } }],
+  ['payload test', { input: { istest: true } }],
+  ['final response test', { post: { ...postAccepted, istest: true } }],
+  ['final reason test', { post: { ...postAccepted, reason: 'Test lead' } }],
+]) {
+  test(`multi ${name} never produces a conversion`, async t => {
+    const { result, calls } = await multiSubmit(t, options);
+    assert.equal(result.outcome.status, 'test'); assert.equal(result.value, null);
+    if (!name.startsWith('final')) for (const call of calls) assert.equal(call.payload.istest, 'true');
+  });
+}
+test('unexpected test ping is never turned into a live final post', async t => {
+  const { result, calls } = await multiSubmit(t, { ping: { ...pingAccepted, istest: true } });
+  assert.equal(calls.length, 1); assert.equal(result.outcome.status, 'test');
+});
+test('server ZIP lookup fills city/state before ping and post', async t => {
+  const { result, calls, geoCalls } = await multiSubmit(t, { input: { city: '', state: '' } });
+  assert.equal(calls.length, 2); assert.equal(geoCalls.length, 1); assert.equal(result.value, 60);
+  assert.equal(calls[0].payload.consumer.city, 'Washington'); assert.equal(calls[0].payload.consumer.state, 'DC');
+});
+test('failed server ZIP lookup does not trust otherwise valid client geo', async t => {
+  const { result, calls, geoCalls } = await multiSubmit(t, { geoHandler: async () => { throw new Error('geo unavailable'); } });
+  assert.equal(calls.length, 0); assert.equal(geoCalls.length, 1); assert.equal(result.twyne.blocked, 'geo-missing');
+});
+test('temporary multi CA guard prevents all buyer traffic without exposing contact data', async t => {
+  const { result, calls } = await multiSubmit(t, { input: { city: 'San Diego', state: 'CA' },
+    geo: { places: [{ 'place name': 'San Diego', 'state abbreviation': 'CA' }] } });
+  assert.equal(calls.length, 0); assert.equal(result.outcome.status, 'blocked');
+  assert.equal(result.twyne.blocked, 'area-unavailable'); assert.equal(result.value, null);
+  assert.ok(!JSON.stringify(result).includes(multiLead.email));
+});
+test('CA ZIP with stale Texas client geo is blocked before ping', async t => {
+  const { result, calls, geoCalls } = await multiSubmit(t, { input: { city: 'Austin', state: 'TX' },
+    geo: { places: [{ 'place name': 'San Diego', 'state abbreviation': 'CA' }] } });
+  assert.equal(calls.length, 0); assert.equal(geoCalls.length, 1);
+  assert.equal(result.twyne.blocked, 'area-unavailable'); assert.equal(result.value, null);
+});
+test('malformed post response is uncertain and is never retried or reflected', async t => {
+  const { result, calls } = await multiSubmit(t, { handler: async url => url.endsWith('/ping') ? new Response(JSON.stringify(pingAccepted)) : new Response('<private upstream HTML>') });
+  assert.equal(calls.length, 2); assert.equal(result.value, null);
+  assert.equal(result.twyne.deliveryUncertain, true);
+  assert.equal(result.twyne.error, 'invalid-response');
+  assert.ok(!JSON.stringify(result).includes('private upstream'));
+});
+test('oversized streamed post response is bounded, uncertain and never retried', async t => {
+  const { result, calls } = await multiSubmit(t, { handler: async url => url.endsWith('/ping') ? new Response(JSON.stringify(pingAccepted)) : new Response('x'.repeat(65537)) });
+  assert.equal(calls.length, 2); assert.equal(result.value, null);
+  assert.equal(result.twyne.error, 'response-too-large'); assert.equal(result.twyne.deliveryUncertain, true);
+});
+test('post timeout aborts the request, never retries and cannot count the ping', async t => {
+  const originalSetTimeout = globalThis.setTimeout;
+  const durations = [];
+  t.mock.method(globalThis, 'setTimeout', (fn, ms, ...args) => { durations.push(ms); return originalSetTimeout(fn, 10, ...args); });
+  const { result, calls } = await multiSubmit(t, { handler: async (url, init) => {
+    if (url.endsWith('/ping')) return new Response(JSON.stringify(pingAccepted));
+    return new Promise((_, reject) => init.signal.addEventListener('abort', () => reject(new Error('abort')), { once: true }));
+  } });
+  assert.deepEqual(durations, [2500, 20000, 35000]);
+  assert.equal(calls.length, 2); assert.equal(calls[1].signal.aborted, true);
+  assert.equal(result.twyne.error, 'upstream-timeout'); assert.equal(result.twyne.deliveryUncertain, true);
+  assert.equal(result.outcome.conversion_eligible, false);
+});
+test('post timeout also covers a stalled response body', async t => {
+  const originalSetTimeout = globalThis.setTimeout;
+  t.mock.method(globalThis, 'setTimeout', (fn, ms, ...args) => originalSetTimeout(fn, 10, ...args));
+  const { result, calls } = await multiSubmit(t, { handler: async (url, init) => {
+    if (url.endsWith('/ping')) return new Response(JSON.stringify(pingAccepted));
+    return new Response(new ReadableStream({ start(controller) {
+      init.signal.addEventListener('abort', () => controller.error(new Error('body aborted')), { once: true });
+    } }));
+  } });
+  assert.equal(calls.length, 2); assert.equal(result.value, null);
+  assert.equal(result.twyne.error, 'upstream-timeout'); assert.equal(result.twyne.deliveryUncertain, true);
+});
+test('all actual bathroom choices preserve their raw cq3 value and optional credit', async t => {
+  const context = { window: {} };
+  vm.createContext(context);
+  vm.runInContext(readFileSync(new URL('./verticals.js', import.meta.url), 'utf8'), context);
+  const projects = context.window.RENUE_VERTICALS.bathroom.steps.find(step => step.id === 'project').options;
+  for (const project of projects) {
+    const { result, calls } = await multiSubmit(t, { input: { project, credit: undefined } });
+    assert.equal(result.value, 60);
+    assert.equal(calls[0].payload.customquestions.cq3, project);
+    assert.equal(calls[0].payload.customquestions.cq1, '');
+  }
+});
+test('redirect response cannot forward lead data to another destination', async t => {
+  const { result, calls } = await multiSubmit(t, { handler: async () => new Response('', { status: 307, headers: { Location: 'https://example.com' } }) });
+  assert.equal(calls.length, 1); assert.equal(result.value, null); assert.equal(result.twyne.error, 'upstream-redirect');
+});
+test('multi route emits only whitelisted metadata, not raw upstream fields or reasons', async t => {
+  const { result } = await multiSubmit(t, { post: { ...postAccepted, reason: 'private reason', consumer: { email: 'private@example.com' }, bids: [{ dba: 'private business' }] } });
+  assert.equal(result.value, 60); assert.ok(!JSON.stringify(result).includes('private'));
+});
+test('bathroom activation leaves windows on554 and HVAC555 in forced-test mode', async t => {
+  for (const vertical of ['windows', 'hvac']) {
+    const { posts } = await submit(t, accepted, { input: { vertical }, env: { RNH_BATHROOM_ROUTE: 'multi556' } });
+    assert.equal(posts[0].get('cid'), vertical === 'windows' ? '554' : '555');
+    assert.equal(posts[0].get('istest'), vertical === 'windows' ? 'false' : 'true');
+  }
+});
+test('direct WestShore route allows its30-second buyer timeout plus response overhead', async t => {
+  const originalSetTimeout = globalThis.setTimeout;
+  const durations = [];
+  t.mock.method(globalThis, 'setTimeout', (fn, ms, ...args) => { durations.push(ms); return originalSetTimeout(fn, ms, ...args); });
+  const { result } = await submit(t, accepted);
+  assert.deepEqual(durations, [35000]); assert.equal(result.outcome.conversion_eligible, true);
+});
+test('unknown route flag fails closed without any upstream call', async t => {
+  const { response, calls } = await multiSubmit(t, { env: { RNH_BATHROOM_ROUTE: 'typo' } });
+  assert.equal(response.status, 503); assert.equal(calls.length, 0);
+});
+test('read-only endpoint reports effective route without a lead submission', async () => {
+  assert.equal((await (await onRequestGet()).json()).bathroomRoute, 'ws554');
+  assert.equal((await (await onRequestGet({ env: { RNH_BATHROOM_ROUTE: 'multi556' } })).json()).bathroomRoute, 'multi556');
 });
