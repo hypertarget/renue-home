@@ -228,3 +228,5 @@ body.shower-options{--so-paper:#f7f5f0;--so-line:#dce3de;--so-green:#176451;--br
   .so-offer-note{font-size:11px;line-height:1.6;margin-bottom:13px;max-width:330px}
   .shower-options #quizcard .q{font-size:24px}
 }
+
+.shower-options #quizcard .so-project-location{font-size:12px;font-weight:600;line-height:1.5;color:#387958;margin:0 0 10px}
