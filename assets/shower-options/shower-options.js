@@ -103,6 +103,22 @@
     });
   }
 
+  // These 95 pilot ZIP labels were checked on 2026-10-21 against West Shore's
+  // 2026-08-13 coverage file (identical September 23 resend). This map personalizes
+  // the page only; it does not establish current provider capacity or acceptance.
+  var pilotCityZips = {
+    Austin: "78701 78702 78703 78704 78705 78712 78717 78719 78721 78722 78723 78724 78725 78726 78727 78728 78729 78730 78731 78732 78733 78734 78735 78736 78737 78738 78739 78741 78742 78744 78745 78746 78747 78748 78749 78750 78751 78752 78753 78754 78756 78757 78758 78759".split(" "),
+    Dallas: "75201 75202 75203 75204 75205 75206 75207 75208 75209 75210 75211 75212 75214 75215 75216 75217 75218 75219 75220 75223 75224 75225 75226 75227 75228 75229 75230 75231 75232 75233 75234 75235 75236 75237 75238 75240 75241 75242 75243 75244 75246 75247 75248 75249 75251 75252 75253 75254 75270 75287 75390".split(" ")
+  };
+  function projectCityForZip(zip) {
+    if (!/^\d{5}$/.test(zip)) return "";
+    var cities = Object.keys(pilotCityZips);
+    for (var i = 0; i < cities.length; i++) {
+      if (pilotCityZips[cities[i]].indexOf(zip) !== -1) return cities[i];
+    }
+    return "";
+  }
+
   function enhance() {
     var app = document.getElementById("app");
     var card = document.getElementById("quizcard");
@@ -119,6 +135,14 @@
     var hiddenCopy = app.querySelector(".hcopy");
     if (hiddenCopy) hiddenCopy.remove();
     var previousStep = null;
+    var projectCity = "";
+    // Read only the visitor's explicit ZIP submission before shared rendering.
+    // This listener never alters answers, validation, routing or form submission.
+    card.addEventListener("click", function (event) {
+      if (!event.target.closest("[data-zip]")) return;
+      var zipInput = card.querySelector("#f_zip");
+      projectCity = projectCityForZip(zipInput ? zipInput.value.trim() : "");
+    }, true);
     var imageChoices = [
       { image: "tub-to-shower.webp", detail: "Replace a tub with a shower" },
       { image: "shower-replacement.webp", detail: "New or replacement shower" },
@@ -170,6 +194,15 @@
         input.parentNode.insertBefore(label, input);
       });
       var heading = card.querySelector(".q");
+      if (step === 1 || step === 2) projectCity = "";
+      var locationNote = card.querySelector(".so-project-location");
+      if (locationNote) locationNote.remove();
+      if (heading && step > 2 && step <= config.steps.length && projectCity) {
+        locationNote = document.createElement("p");
+        locationNote.className = "so-project-location";
+        locationNote.textContent = "Your bathroom project in " + projectCity + ", TX";
+        card.insertBefore(locationNote, heading);
+      }
       if (heading) {
         heading.setAttribute("role", "heading");
         heading.setAttribute("aria-level", "2");
