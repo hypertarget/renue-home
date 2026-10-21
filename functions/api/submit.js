@@ -186,17 +186,20 @@ function classifyOutcome(twyne) {
   return { status, test, conversion_eligible, value: conversion_eligible ? payout : null, transaction_id };
 }
 
-// Derive subid1 (publisher main traffic source) for #554 so results break out by source.
-// Order: paid click ids -> utm_source[-medium] -> referrer engine -> direct.
+// Derive subid1 for direct and multi-buyer routes so results break out by source.
+// Recognize the YouTube pilot's explicit UTM pair even when Google auto-tags it.
+// Otherwise preserve paid click ID precedence, then UTMs, referrer and direct.
 function trafficSource(pageUrl, referrer) {
   try {
     const u = new URL(pageUrl || "https://renuehome.com");
     const q = u.searchParams;
-    if (q.get("gclid") || q.get("gbraid") || q.get("wbraid")) return "google-cpc";
-    if (q.get("msclkid")) return "bing-cpc";
-    if (q.get("fbclid")) return "facebook-cpc";
     const us = (q.get("utm_source") || "").toLowerCase();
     const um = (q.get("utm_medium") || "").toLowerCase();
+    const youtubePilot = us === "youtube" && um === "paid_video";
+    if (q.get("gclid") || q.get("gbraid") || q.get("wbraid")) return youtubePilot ? "youtube-paid-video" : "google-cpc";
+    if (q.get("msclkid")) return "bing-cpc";
+    if (q.get("fbclid")) return "facebook-cpc";
+    if (youtubePilot) return "youtube-paid-video";
     if (us) return (us + (um ? "-" + um : "")).replace(/[^a-z0-9-]/g, "").slice(0, 40);
     const r = (referrer || "").toLowerCase();
     if (r.indexOf("google.") > -1) return "google-organic";
