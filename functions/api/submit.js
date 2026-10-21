@@ -4,7 +4,8 @@
 // Receives the lead, validates it, posts it to Twyne (HTM's lead platform),
 // and returns a pay-per-call number for the thank-you screen.
 //
-// Two campaign kinds:
+// Campaign kinds:
+//   kind "multi556" = opt-in bathroom-only ping/post auction; never count a ping as a sale.
 //   kind "fpi"   = classic ping-post FPI mapping (cq1=credit, cq2=homeowner, cq3=project). e.g. #550.
 //   kind "ws554" = WestShore API direct post (#554, CPL). cq1 = category hard-coded per funnel
 //                  ("bathroom"/"window") — NEVER derived from user input (no server-side validation
@@ -16,12 +17,21 @@
 //   CALL_NUMBER       static pay-per-call number shown on the thank-you screen
 //   TWYNE_SUBID1      overrides the derived traffic source for subid1 (fpi default "renuehome")
 //   TWYNE_TEST        "true" forces istest=true on every post (use on staging)
+//   RNH_BATHROOM_ROUTE unset or "ws554" preserves the direct route; "multi556" opts
+//                      bathroom only into the verified multi-buyer configuration.
+//                      Never enable on production until buyer mapping/consent and final payout are verified.
 
 // ---- Twyne campaign map -------------------------------------------------------
 const TWYNE = {
   endpoint: "https://htm.api.twyne.io/lead/submit",
   pid: "139",
   sid: "310",
+  multi: {
+    ping: "https://htm.api.twyne.io/multi/ping",
+    post: "https://htm.api.twyne.io/multi/post",
+    pid: "140", sid: "312",
+  },
+  bathroomMulti: { cid: "556", kind: "multi556", category: "bathroom" },
   campaigns: {
     // WestShore API campaign #554. Delivery is controlled by Twyne's campaign configuration.
     // cq1 category is hard-coded per funnel. Test acceptance is not proof of payable delivery.
@@ -75,6 +85,14 @@ export async function onRequestPost({ request, env }) {
 
   // ---- Campaign selection -------------------------------------------------------
   let camp = TWYNE.campaigns[record.vertical];
+  const bathroomRoute = env?.RNH_BATHROOM_ROUTE || "ws554";
+  if (record.vertical === "bathroom") {
+    if (bathroomRoute === "multi556") camp = TWYNE.bathroomMulti;
+    else if (bathroomRoute !== "ws554") {
+      // A typo cannot silently select a buyer or force real consumers into test mode.
+      return json({ ok: false, message: "Submission route unavailable" }, 503);
+    }
+  }
   // Any diagnostic request stays in test mode, including the normal campaign route.
   let forceTest = isTestReq;
   if (isTestReq && lead.testCampaign === "ws554" && TWYNE.ws554Test[record.vertical]) {
@@ -93,36 +111,39 @@ export async function onRequestPost({ request, env }) {
       twyne = { attempted: false, blocked: "renter", cid: camp.cid };
     // WestShore #554 hard gate: no TrustedForm cert, no post. Twyne would Accept a
     // cert-less lead (no server-side validation) — we refuse instead, per HTM policy.
-    } else if ((camp.kind === "ws554" || camp.kind === "px555") && !record.trustedFormCertUrl) {
+    } else if ((camp.kind === "ws554" || camp.kind === "px555" || camp.kind === "multi556") && !record.trustedFormCertUrl) {
       twyne = { attempted: false, blocked: "trustedform-missing", cid: camp.cid };
     // PX requires JornayaLeadId: a post without it fails at PX, so refuse it here (spec gotcha: the token
     // populates a few seconds after page load — a real visitor who reached step 9 always has one).
-    } else if (camp.kind === "px555" && !record.jornayaLeadiD) {
+    } else if ((camp.kind === "px555" || camp.kind === "multi556") && !record.jornayaLeadiD) {
       twyne = { attempted: false, blocked: "jornaya-missing", cid: camp.cid };
     // PX rejects a missing/zero SessionLength; the funnel stamps it client-side (funnel.js v20260929+).
     } else if (camp.kind === "px555" && !(sessionSeconds(lead) > 0)) {
       twyne = { attempted: false, blocked: "sessionlength-missing", cid: camp.cid };
+    } else if (camp.kind === "multi556") {
+      twyne = await submitBathroomMulti(lead, record, camp, {
+        ip, ua, isTest, subid1: env?.TWYNE_SUBID1 || trafficSource(record.pageUrl, record.referrer),
+      });
     } else {
       const subid1 = (env && env.TWYNE_SUBID1) ||
         ((camp.kind === "ws554" || camp.kind === "px555") ? trafficSource(record.pageUrl, record.referrer) : "renuehome");
       const params = buildTwyneParams(lead, record, camp, { ip, ua, subid1, isTest });
       try {
-        const r = await fetch(TWYNE.endpoint, {
+        const { httpStatus, body } = await fetchBoundedJson(TWYNE.endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded", "Accept": "application/json" },
           body: params,
-        });
+        }, camp.kind === "ws554" ? MULTI_POST_TIMEOUT_MS : UPSTREAM_TIMEOUT_MS);
         // Twyne answers HTTP 200 on everything — the JSON body's `status` is the truth
         // (Accepted / Queued / Rejected / Error). Never treat 200 as success.
-        const body = await r.json().catch(() => ({}));
-        twyne = { attempted: true, httpStatus: r.status, status: body.status || "", reason: body.reason || "", errors: body.errors || [], leadid: body.leadid || "", cid: camp.cid, body };
+        twyne = { attempted: true, httpStatus, status: body.status || "", reason: body.reason || "", errors: body.errors || [], leadid: body.leadid || "", cid: camp.cid, body };
       } catch (e) {
-        twyne = { attempted: true, error: String(e && e.message || e), cid: camp.cid };
+        twyne = { attempted: true, error: upstreamError(e), cid: camp.cid };
       }
     }
   }
 
-  twyne.isTest = isTest || isTestResponse(twyne);
+  twyne.isTest = isTest || twyne.isTest === true || isTestResponse(twyne);
   const outcome = classifyOutcome(twyne);
 
   const callNumber = (env && env.CALL_NUMBER) || "";
@@ -151,12 +172,17 @@ function classifyOutcome(twyne) {
   let status = "not_attempted";
   if (test) status = "test";
   else if (twyne.blocked) status = "blocked";
+  else if (twyne.kind === "multi556" && rawStatus === "rejected" && twyne.httpStatus === 400) status = "rejected";
   else if (twyne.error || (twyne.attempted && !(twyne.httpStatus >= 200 && twyne.httpStatus < 300))) status = "error";
   else if (twyne.attempted) status = ["accepted", "queued", "rejected", "error"].includes(rawStatus) ? rawStatus : "unknown";
-  const rawPayout = twyne.body?.publisher_payout;
+  // Multi-buyer value comes ONLY from the final POST response, never a ping bid.
+  const rawPayout = twyne.kind === "multi556"
+    ? (twyne.body?.publisher_payout ?? twyne.body?.price)
+    : twyne.body?.publisher_payout;
   const payout = typeof rawPayout === "number" || typeof rawPayout === "string" ? Number(rawPayout) : NaN;
   const transaction_id = twyne.leadid ? String(twyne.leadid).trim() : "";
-  const conversion_eligible = status === "accepted" && Number.isFinite(payout) && payout > 0 && transaction_id !== "";
+  const finalDelivery = twyne.kind !== "multi556" || twyne.finalPostAccepted === true;
+  const conversion_eligible = finalDelivery && status === "accepted" && Number.isFinite(payout) && payout > 0 && transaction_id !== "";
   return { status, test, conversion_eligible, value: conversion_eligible ? payout : null, transaction_id };
 }
 
@@ -179,6 +205,182 @@ function trafficSource(pageUrl, referrer) {
     if (r) return "referral";
     return "direct";
   } catch (_) { return "renuehome"; }
+}
+
+// Fixed upper bounds cover both headers and response-body reads. No retry occurs here:
+// a timeout after a POST may mean the buyer received it but the response was lost.
+const UPSTREAM_TIMEOUT_MS = 20000;
+// WestShore's Twyne delivery step has a 30-second timeout (inspected 2026-10-21).
+const MULTI_POST_TIMEOUT_MS = 35000;
+const GEO_TIMEOUT_MS = 2500;
+const MAX_UPSTREAM_BYTES = 65536;
+async function fetchBoundedJson(url, init = {}, timeoutMs = UPSTREAM_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let reader;
+  try {
+    const response = await fetch(url, { ...init, signal: controller.signal, redirect: "manual" });
+    if (response.status >= 300 && response.status < 400) throw new Error("upstream-redirect");
+    if (Number(response.headers.get("content-length")) > MAX_UPSTREAM_BYTES) throw new Error("response-too-large");
+    reader = response.body?.getReader();
+    let text = "", bytes = 0;
+    const decoder = new TextDecoder();
+    if (reader) {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        bytes += value.byteLength;
+        if (bytes > MAX_UPSTREAM_BYTES) throw new Error("response-too-large");
+        text += decoder.decode(value, { stream: true });
+      }
+    }
+    text += decoder.decode();
+    let body;
+    try { body = JSON.parse(text); } catch (_) { throw new Error("invalid-response"); }
+    if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error("invalid-response");
+    return { httpStatus: response.status, body };
+  } catch (error) {
+    if (controller.signal.aborted) throw new Error("upstream-timeout");
+    throw error;
+  } finally {
+    clearTimeout(timer);
+    // Cancel an incomplete/oversized response and release its connection. Do not log bodies or PII.
+    controller.abort();
+    if (reader) {
+      try { await reader.cancel(); } catch (_) {}
+      reader.releaseLock();
+    }
+  }
+}
+function upstreamError(error) {
+  return ["upstream-timeout", "response-too-large", "invalid-response", "upstream-redirect"].includes(error?.message)
+    ? error.message : "upstream-unavailable";
+}
+
+const BATHROOM_PROJECTS = ["Tub-to-shower conversion", "Walk-in shower", "Full bathroom remodel", "Safety / mobility upgrade", "Not sure yet"];
+const CREDIT_LABELS = ["", "Excellent", "Good", "Fair", "Poor", "Not sure"];
+const US_STATES = new Set("AL AK AZ AR CA CO CT DE DC FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY".split(" "));
+
+async function submitBathroomMulti(lead, record, camp, opt) {
+  const base = { kind: "multi556", cid: camp.cid, attempted: false, finalPostAccepted: false };
+  const blocked = reason => ({ ...base, blocked: reason });
+  // Keep raw option labels: Twyne's per-buyer conditions consume these exact cq values.
+  if (lead.owner !== "Yes, I own the home") return blocked("homeowner-required");
+  if (!record.consent || typeof record.consentText !== "string" || !record.consentText.trim()) return blocked("consent-missing");
+  if (!BATHROOM_PROJECTS.includes(lead.project)) return blocked("project-invalid");
+  const credit = lead.credit == null ? "" : lead.credit;
+  if (!CREDIT_LABELS.includes(credit)) return blocked("credit-invalid");
+  if (![record.first, record.last].every(value => typeof value === "string" && value.trim()) ||
+      typeof record.address !== "string" || record.address.trim().length < 5) return blocked("contact-missing");
+  await fillMultiGeo(record);
+  if (!record.city || !US_STATES.has(record.state)) return blocked("geo-missing");
+  // Temporary route guard: signed WestShore IO excludes California and this auction's
+  // WestShore bidder has no verified CA filter. Lift only after buyer-level eligibility
+  // is enforced and any alternate buyer's CA acceptance has been confirmed.
+  if (record.state === "CA") return blocked("area-unavailable");
+
+  const externalid = "rh-" + crypto.randomUUID();
+  let gclid = "";
+  try { gclid = new URL(record.pageUrl).searchParams.get("gclid") || ""; } catch (_) {}
+  const payload = {
+    // pid/sid are required by the live API; long spellings retained from the FPI.
+    pid: TWYNE.multi.pid, sid: TWYNE.multi.sid,
+    publisherid: TWYNE.multi.pid, sourceid: TWYNE.multi.sid, cid: camp.cid, clickid: externalid,
+    consumer: {
+      first: record.first, last: record.last, email: record.email, phone: record.phone,
+      address1: record.address, city: record.city, state: record.state, zip: record.zip,
+    },
+    customquestions: { cq1: credit, cq2: lead.owner, cq3: lead.project, cq4: camp.category },
+    click: {
+      useragent: opt.ua, ip: opt.ip, subid1: opt.subid1, subid2: gclid, externalid,
+      trustedform: record.trustedFormCertUrl, leadid: record.jornayaLeadiD,
+      domain_url: record.pageUrl || "https://renuehome.com", devicetype: deviceType(opt.ua), os: osCode(opt.ua),
+    },
+  };
+  if (opt.isTest) payload.istest = "true";
+  let ping;
+  try { ping = await multiCall(TWYNE.multi.ping, payload); }
+  catch (error) { return { ...base, attempted: true, stage: "ping", error: upstreamError(error) }; }
+  const pingTest = isTestResponse({ ...ping.body, body: ping.body });
+  const pingStatus = String(ping.body.status || "").trim().toLowerCase();
+  // An accepted ping is only a bid. Never copy its status, price or lead ID into a delivery result.
+  const pingBase = { ...base, attempted: true, stage: "ping", isTest: pingTest, httpStatus: ping.httpStatus };
+  if (ping.httpStatus < 200 || ping.httpStatus >= 300) return { ...pingBase, status: pingStatus === "rejected" ? "Rejected" : "Error", error: "ping-http-error" };
+  if (pingStatus !== "accepted") return { ...pingBase, status: ["rejected", "error"].includes(pingStatus) ? ping.body.status : "Unknown" };
+  const pingid = multiId(ping.body.pingid);
+  const bids = numericBidIds(ping.body.bids);
+  if (!pingid || !bids.length) return { ...pingBase, status: "Error", error: "invalid-ping-bids" };
+  // If a supposedly live ping identifies itself as a test, do not turn it into a live POST.
+  if (pingTest && !opt.isTest) return { ...pingBase, status: "Test" };
+
+  const postBase = { ...base, attempted: true, stage: "post", isTest: pingTest, pingid };
+  let post;
+  try {
+    // One final POST. Twyne owns exclusive winner selection; no second buyer/site fallback here.
+    post = await multiCall(TWYNE.multi.post, { ...payload, pingid, bids });
+  } catch (error) {
+    return { ...postBase, error: upstreamError(error), deliveryUncertain: true };
+  }
+  const body = post.body;
+  const postTest = isTestResponse({ ...body, body });
+  const status = String(body.status || "").trim().toLowerCase();
+  const responseId = multiId(body.leadid) || multiId(body.pingid);
+  const mismatchedPing = body.pingid != null && multiId(body.pingid) !== pingid;
+  const httpOk = post.httpStatus >= 200 && post.httpStatus < 300;
+  const finalPostAccepted = httpOk && status === "accepted" && !mismatchedPing;
+  const returnedPayout = body.publisher_payout ?? body.price;
+  const payoutNumber = typeof returnedPayout === "number" || typeof returnedPayout === "string" ? Number(returnedPayout) : NaN;
+  // Whitelist returned metadata. Never reflect upstream raw bodies, reason text, buyer PII or error stacks.
+  return {
+    ...postBase, httpStatus: post.httpStatus, isTest: pingTest || postTest,
+    status: mismatchedPing ? "Error" : body.status === undefined ? "Unknown" :
+      ["accepted", "queued", "rejected", "error"].includes(status) ? status : "Unknown",
+    ...(!httpOk ? { error: "post-http-error", deliveryUncertain: status !== "rejected" } : {}),
+    ...(mismatchedPing ? { error: "post-id-mismatch", deliveryUncertain: true } : {}),
+    leadid: responseId, finalPostAccepted,
+    body: { publisher_payout: Number.isFinite(payoutNumber) ? payoutNumber : null },
+  };
+}
+
+async function multiCall(url, payload) {
+  return fetchBoundedJson(url, {
+    method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+    body: JSON.stringify(payload),
+  }, url === TWYNE.multi.post ? MULTI_POST_TIMEOUT_MS : UPSTREAM_TIMEOUT_MS);
+}
+function multiId(value) {
+  if (typeof value === "number") return Number.isSafeInteger(value) && value > 0 ? String(value) : "";
+  if (typeof value !== "string") return "";
+  const id = value.trim();
+  if (/^\d+$/.test(id)) return Number.isSafeInteger(Number(id)) && Number(id) > 0 ? id : "";
+  return /^[A-Za-z0-9_-]{1,128}$/.test(id) ? id : "";
+}
+function numericBidIds(bids) {
+  if (!Array.isArray(bids) || !bids.length || bids.length > 100) return [];
+  const sorted = bids.slice().sort((a, b) => Number(b?.bid || 0) - Number(a?.bid || 0));
+  const ids = [];
+  for (const bid of sorted) {
+    const raw = bid?.bidid;
+    if (!((typeof raw === "string" && /^\d+$/.test(raw)) || typeof raw === "number")) return [];
+    const id = Number(raw);
+    if (!Number.isSafeInteger(id) || id <= 0) return [];
+    if (!ids.includes(id)) ids.push(id);
+  }
+  return ids;
+}
+async function fillMultiGeo(record) {
+  // Client geo may belong to an earlier ZIP after back/edit or a failed/racing lookup.
+  // Resolve the final ZIP server-side; never route on stale client city/state.
+  record.city = "";
+  record.state = "";
+  try {
+    const { httpStatus, body } = await fetchBoundedJson("https://api.zippopotam.us/us/" + record.zip, {}, GEO_TIMEOUT_MS);
+    if (httpStatus < 200 || httpStatus >= 300) return;
+    const place = body.places?.[0];
+    if (!place) return;
+    record.city = String(place["place name"] || "").trim();
+    record.state = String(place["state abbreviation"] || "").trim().toUpperCase();
+  } catch (_) { /* no buyer request unless required geo is present */ }
 }
 
 // Build the x-www-form-urlencoded body Twyne expects.
@@ -301,8 +503,11 @@ function osCode(ua) {
 }
 
 // Optional: respond to non-POST so the route exists
-export async function onRequestGet() {
-  return json({ ok: true, service: "renue-home lead endpoint", method: "POST" });
+export async function onRequestGet({ env } = {}) {
+  const route = env?.RNH_BATHROOM_ROUTE || "ws554";
+  return json({ ok: true, service: "renue-home lead endpoint", method: "POST",
+    bathroomRoute: ["ws554", "multi556"].includes(route) ? route : "unavailable",
+    testMode: env?.TWYNE_TEST === "true" });
 }
 
 function json(obj, status = 200) {

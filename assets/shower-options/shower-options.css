@@ -205,3 +205,26 @@ body.shower-options{--so-paper:#f7f5f0;--so-line:#dce3de;--so-green:#176451;--br
   .so-planning-art img{height:240px}.so-planning-art figcaption{font-size:11px}.so-faq summary{font-size:15px}.so-faq p{font-size:14px}.so-last-step .btn{font-size:15px}
   .shower-options footer nav a{font-size:12px}.shower-options footer .disc{font-size:12px}.shower-options footer .copy{font-size:11px}
 }
+
+/* Quote-led offer: readable before the first choice without adding another CTA. */
+.so-intro h1{font-size:clamp(36px,3.8vw,50px);line-height:1.1;max-width:550px}
+.so-lead{max-width:460px}
+.so-lead strong{font-weight:700;color:#244e3c}
+.so-form-intro{margin-bottom:5px}
+.so-offer-note{font-size:12px;line-height:1.7;color:#637265;text-align:center;margin:0 auto 16px;max-width:390px}
+.so-form-explainer{max-width:430px}
+.so-last-step h2{max-width:660px}
+@media(max-width:880px){
+  .so-intro h1{font-size:38px;max-width:none}
+  .so-offer-note{font-size:12px;margin-bottom:16px}
+  .shower-options.so-after-start .so-form-intro{margin-bottom:5px}
+}
+@media(max-width:520px){
+  .so-hero-grid{gap:14px}
+  .so-intro h1{font-size:30px;line-height:1.12;letter-spacing:-.7px;margin-bottom:11px;max-width:none}
+  .so-intro h1 br{display:none}
+  .so-lead{font-size:15px;line-height:1.65}
+  .so-form-intro{font-size:11px;margin-bottom:5px}
+  .so-offer-note{font-size:11px;line-height:1.6;margin-bottom:13px;max-width:330px}
+  .shower-options #quizcard .q{font-size:24px}
+}
