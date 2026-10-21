@@ -1,6 +1,6 @@
 // Cloudflare Pages edge middleware. Injects into every HTML page:
-// 1. Google Tag Manager (GTM-TPBNQW4L) — head loader (top of <head>) + <body> noscript.
-//    Container is owned/managed by the media-buying team (installed Aug 2026 per their spec).
+// 1. Legacy Google Tag Manager (GTM-TPBNQW4L), except on /shower-options.
+//    The new variant uses funnel.js native GA4/Ads events and Retreaver DNI only.
 // 2. The Pinterest domain-verify meta tag (always) — for claiming renuehome.com.
 // 3. The visitor's US state (from Cloudflare edge geo) so funnel.js can personalize the
 //    hero. Relevance only — no fabricated "state program/rebate" claims. Falls back
@@ -11,6 +11,11 @@ export async function onRequest(context) {
   // Only touch HTML documents — leave JS/CSS/images and the /api/* JSON responses alone.
   const ct = response.headers.get("content-type") || "";
   if (!ct.includes("text/html")) return response;
+
+  // Keep one measurement path on the isolated variant. The legacy container also
+  // sends generate_lead and swaps phone numbers; the native funnel already owns both.
+  const pathname = new URL(context.request.url).pathname.replace(/\/$/, "");
+  const nativeTrackingOnly = pathname === "/shower-options" || pathname === "/shower-options.html";
 
   // Google Tag Manager — loader goes at the TOP of <head> per Google's install spec.
   const GTM_ID = "GTM-TPBNQW4L";
@@ -39,13 +44,13 @@ export async function onRequest(context) {
   return new HTMLRewriter()
     .on("head", {
       element(el) {
-        el.prepend(gtmHead, { html: true });
+        if (!nativeTrackingOnly) el.prepend(gtmHead, { html: true });
         el.append(snippet, { html: true });
       },
     })
     .on("body", {
       element(el) {
-        el.prepend(gtmBody, { html: true });
+        if (!nativeTrackingOnly) el.prepend(gtmBody, { html: true });
       },
     })
     .transform(response);
