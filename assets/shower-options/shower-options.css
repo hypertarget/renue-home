@@ -1,0 +1,207 @@
+/* Isolated presentation for /shower-options. Shared funnel behavior stays in funnel.js. */
+body.shower-options{--so-paper:#f7f5f0;--so-line:#dce3de;--so-green:#176451;--brand:#176451;--grad:#176451;--muted:#5a665f;background:var(--so-paper);color:#19342c;padding-bottom:0}
+.shower-options .so-wrap,.shower-options header .wrap,.shower-options footer .wrap{width:min(100%,1220px);max-width:1220px;margin:0 auto;padding:0 36px}
+.shower-options header.site{background:rgba(255,255,255,.97);border-color:#e1e6df}
+.shower-options header .bar{height:76px}
+.shower-options header .phone{color:#214438}
+.shower-options header .phone small{color:#607168;letter-spacing:1.1px;font-size:9px}
+.shower-options .sticky{display:none!important}
+.shower-options :focus-visible{outline:3px solid #10775e;outline-offset:4px}
+.so-skip{position:absolute;top:6px;left:12px;z-index:100;padding:10px 15px;background:#fff;transform:translateY(-200%);border:2px solid #176451}
+.so-skip:focus{transform:none}
+.so-hero{padding:42px 0 54px}
+.so-hero-grid{display:grid;grid-template-columns:1.06fr 1fr;column-gap:54px;row-gap:26px;align-items:start}
+.so-intro{grid-area:1/1}
+.so-kicker{margin:0 0 13px;font-size:10px;font-weight:800;line-height:1.5;letter-spacing:1.8px;text-transform:uppercase;color:#426e5c}
+.so-intro .so-kicker{display:flex;align-items:center;gap:8px}
+.so-kicker span{width:6px;height:6px;border-radius:50%;background:#4c8b6d}
+.so-intro h1{font-size:clamp(36px,4.5vw,54px);font-weight:500;line-height:1.06;letter-spacing:-1.8px;margin:0 0 17px;color:#19392e}
+.so-intro h1 em{font-style:normal;color:#5b7564}
+.so-lead{font-size:14px;line-height:1.8;max-width:470px;margin:0;color:#56645b}
+.so-hero-art{position:relative;grid-area:2/1;margin:0;overflow:hidden;border-radius:4px}
+.so-hero-art>img{display:block;width:100%;height:300px;object-fit:cover;object-position:57% center;background:#e2dbcb}
+.so-image-tag{position:absolute;left:18px;bottom:47px;background:rgba(255,255,255,.94);font-size:11px;font-weight:600;letter-spacing:.15px;padding:10px 13px;color:#2e4b3e}
+.so-hero-art figcaption{font-size:9px;line-height:1.6;letter-spacing:.05px;color:#6c766e;padding-top:9px}
+.so-form-column{grid-area:1/2/3/3;padding-top:3px}
+.so-form-intro{display:flex;gap:9px;justify-content:center;align-items:center;color:#466251;font-size:10px;font-weight:700;margin-bottom:13px;letter-spacing:.15px}
+.so-check{font-size:13px;color:#176451}
+.shower-options #app>.hero{padding:0;overflow:visible;background:none}
+.shower-options #app>.hero:before,.shower-options #app .hcopy,.shower-options #app>section:not(.hero){display:none}
+.shower-options #app .hero-grid{display:block;padding:0;max-width:none}
+.shower-options #quiz{scroll-margin-top:94px}
+.shower-options #quizcard{padding:26px 26px 20px;border:1px solid #dce3dd;border-radius:7px;box-shadow:0 8px 32px rgba(40,57,42,.055);color:#203c30;min-height:360px}
+.shower-options #quizcard .progress{margin:0 0 21px;gap:18px}
+.shower-options #quizcard .ptrack{height:4px;background:#e8eee9}
+.shower-options #quizcard .pfill{background:#387958}
+.shower-options #quizcard .pct{font-size:10px;letter-spacing:.3px;color:#69786d;min-width:61px}
+.shower-options #quizcard .qrow,.shower-options #quizcard .trustcues{display:none}
+.shower-options #quizcard .q{text-align:left;font-size:27px;font-weight:500;line-height:1.2;margin:0 0 9px;letter-spacing:-.5px;color:#19392e}
+.shower-options #quizcard .qsub{text-align:left;font-size:12px;line-height:1.7;color:#677368;margin:0 0 20px}
+.shower-options #quizcard .back{font-size:11px;color:#557361;padding:0 0 11px;margin:0}
+.shower-options #quizcard .opts{gap:9px}
+.shower-options #quizcard .opt{border:1px solid #dce4de;border-radius:5px;font-size:13px;font-weight:600;padding:14px;color:#284535;min-height:52px;transition:background .15s,border-color .15s,box-shadow .15s}
+.shower-options #quizcard .opt:hover{transform:none;background:#f6f9f5;border-color:#619279;box-shadow:0 2px 8px rgba(25,57,46,.05)}
+.shower-options #quizcard .opt.sel{background:#e5f0e6;border-color:#387958;color:#19392e}
+.shower-options #quizcard .opt .dot{width:17px;height:17px;border-width:1px;border-color:#bdcec0}
+.shower-options #quizcard .opt.sel .dot{background:#176451;border-color:#176451;box-shadow:inset 0 0 0 4px #fff}
+.shower-options #quizcard.so-project-step .opts{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.shower-options #quizcard.so-project-step .opt{grid-column:span 2;position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:0;padding:0;overflow:hidden;text-align:left;min-width:0}
+.shower-options #quizcard.so-project-step .opt>span:first-child{font-size:11px;line-height:1.45;padding:11px 9px 3px;min-height:46px;order:1}
+.shower-options #quizcard.so-project-step .opt .dot{display:none}
+.so-choice-image{display:block;width:100%;height:92px;object-fit:cover;order:0;border-bottom:1px solid #e4e9e2;background:#e9e4db}
+.so-choice-detail{display:block;font-size:9px;line-height:1.5;color:#708072;font-weight:500;padding:0 9px 10px;order:2}
+.shower-options #quizcard.so-project-step .opt:nth-child(n+4){grid-column:span 3;display:flex;flex-direction:row;align-items:center;padding:12px 11px;gap:9px;min-height:48px}
+.shower-options #quizcard.so-project-step .opt:nth-child(n+4)>span:first-child{order:1;min-height:0;padding:0;font-size:10px}
+.shower-options #quizcard.so-project-step .opt:nth-child(n+4) .dot{display:block;order:0;flex:none;width:15px;height:15px}
+.so-choice-note{margin:11px 0 0;font-size:9px;line-height:1.6;color:#7a847b}
+.shower-options #quizcard .field{margin-bottom:13px}
+.shower-options #quizcard .field input{border-radius:4px;border:1px solid #d5dfd6;font-size:16px;padding:14px;color:#233d2e;background:#fff}
+.shower-options #quizcard .field label{font-size:11px;color:#526556;margin-bottom:5px;font-weight:600}
+.shower-options #quizcard .btn{border-radius:4px;box-shadow:none}
+.shower-options #quizcard .btn-lg{font-size:14px;padding:15px;line-height:1.5}
+.shower-options #quizcard .btn-grad:hover{transform:none;background:#104d3e}
+.shower-options #quizcard .err{font-size:11px;line-height:1.55;min-height:0;margin:0}
+.shower-options #quizcard .err:not(:empty){margin-top:12px}
+.shower-options #quizcard .consent{font-size:10px;line-height:1.75;color:#58655b;margin-top:10px}
+.shower-options #quizcard .consent a{color:#175d49;text-decoration:underline;text-underline-offset:2px}
+.shower-options #quizcard .consent.disclaim{font-size:9px;color:#738075;margin-top:15px;padding-top:12px}
+.so-form-explainer{font-size:10px;line-height:1.8;text-align:center;color:#68766b;margin:16px auto 0;max-width:420px;padding:0 9px}
+.so-call{text-align:center;font-size:11px;color:#748074;margin:12px 0 0;line-height:1.7}
+.so-call a{font-weight:700;color:#315b45;white-space:nowrap;text-decoration:underline;text-underline-offset:3px}
+.shower-options h2{font-size:34px;line-height:1.16;font-weight:500;letter-spacing:-.7px;color:#19392e;margin:0}
+.so-process{padding:55px 0 62px;background:#fff;border-top:1px solid #e5e9e2;border-bottom:1px solid #e5e9e2}
+.so-process>.so-wrap{display:grid;grid-template-columns:1fr 2.05fr;gap:50px}
+.so-process h2{font-size:29px}
+.so-process-list{list-style:none;padding:0;margin:3px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:27px}
+.so-number{display:block;font-family:Georgia,serif;color:#80a18c;font-size:25px;line-height:1;margin-bottom:18px}
+.so-process-list h3{font-family:inherit;font-size:12px;font-weight:700;line-height:1.5;letter-spacing:-.1px;margin:0 0 10px}
+.so-process-list p{font-size:11px;line-height:1.85;color:#6c776d;margin:0}
+.so-planning{padding:76px 0}
+.so-planning-grid{display:grid;grid-template-columns:1.06fr 1fr;gap:66px;align-items:center}
+.so-planning-art{margin:0;position:relative;border-radius:4px;overflow:hidden}
+.so-planning-art img{display:block;width:100%;height:460px;object-fit:cover;object-position:44% center;background:#e3ddcf}
+.so-planning-art figcaption{position:absolute;left:14px;bottom:12px;color:#fff;background:rgba(30,46,35,.65);padding:5px 8px;font-size:8px;letter-spacing:.1px}
+.so-planning-copy h2{margin-bottom:25px}
+.so-priorities{margin:0}
+.so-priorities>div{padding:16px 0;border-top:1px solid #dce3d9}
+.so-priorities dt{font-size:12px;font-weight:700;margin-bottom:6px}
+.so-priorities dd{font-size:11px;line-height:1.9;color:#6a766c;margin:0;max-width:380px}
+.so-text-link{display:inline-block;font-size:12px;font-weight:700;border-bottom:1px solid #71927c;padding:0 0 5px;margin-top:16px;color:#2d684c}
+.so-text-link span{padding-left:13px}
+.so-questions{padding:63px 0 68px;background:#edf1e9;border-top:1px solid #dfe6db}
+.so-questions-grid{display:grid;grid-template-columns:1fr 1.65fr;gap:70px}
+.so-questions h2{font-size:31px;max-width:260px}
+.so-questions-note{font-size:11px;line-height:1.85;color:#6c786d;margin:17px 0 0;max-width:240px}
+.so-faq details{border-bottom:1px solid #ccd8cc;padding:0;margin:0}
+.so-faq details:first-child{border-top:1px solid #ccd8cc}
+.so-faq summary{font-size:12px;font-weight:600;line-height:1.7;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 0;cursor:pointer}
+.so-faq summary::-webkit-details-marker{display:none}
+.so-faq summary:after{content:"+";font-size:20px;font-weight:400;color:#5d7964;line-height:1}
+.so-faq details[open] summary:after{content:"−"}
+.so-faq p{font-size:11px;line-height:1.9;color:#617064;padding:0 28px 21px 0;margin:0}
+.so-last-step{padding:45px 0;background:#fff}
+.so-last-step .so-wrap{display:flex;align-items:center;justify-content:space-between;gap:35px}
+.so-last-step .so-kicker{margin-bottom:8px}
+.so-last-step h2{font-size:26px}
+.so-last-step .btn{white-space:nowrap;border-radius:4px;font-size:12px;padding:17px 24px;box-shadow:none}
+.so-last-step .btn span{padding-left:18px}
+.shower-options footer.site{margin-top:0;background:#203c32;padding:37px 0 28px}
+.shower-options footer .disc,.shower-options footer .copy{color:#c0cdc3}
+.shower-options footer nav a{font-size:10px}
+.shower-options footer .disc{font-size:10px;line-height:1.85}
+.shower-options footer .copy{font-size:9px}
+.so-noscript{padding:30px;text-align:center;font-size:14px;background:#fff}
+.so-noscript a{text-decoration:underline}
+@media(min-width:881px){.so-form-column{position:sticky;top:103px}}
+@media(max-width:1100px) and (min-width:881px){.so-hero-grid{gap:25px}.shower-options #quizcard{padding:23px 19px}.so-choice-image{height:78px}.so-process>.so-wrap{gap:26px}.so-process-list{gap:16px}.so-planning-grid{gap:40px}.so-questions-grid{gap:40px}}
+@media(max-width:880px){
+  .shower-options .so-wrap,.shower-options header .wrap,.shower-options footer .wrap{padding:0 22px}
+  .shower-options header .bar{height:59px}
+  .shower-options header .logo svg{width:31px;height:31px}.shower-options header .logo{gap:8px}.shower-options header .logo .r{font-size:16px;letter-spacing:2px}.shower-options header .logo .h{font-size:7px;letter-spacing:3px}
+  .shower-options header .phone{display:block;font-size:11px}.shower-options header .phone small{font-size:8px;text-align:right}
+  .so-hero{padding:23px 0 34px}.so-hero-grid{display:flex;flex-direction:column;gap:16px;max-width:620px!important}.so-intro,.so-hero-art,.so-form-column{width:100%}
+  .so-kicker{font-size:9px;letter-spacing:1.4px;margin-bottom:10px}.so-intro h1{font-size:38px;margin:0 0 12px;letter-spacing:-1.2px}.so-intro h1 br{display:none}.so-intro h1 em{display:inline}
+  .so-lead{font-size:12px;line-height:1.8;max-width:none}.so-hero-art>img{height:190px;object-position:center 55%}.so-image-tag{font-size:10px;left:12px;bottom:39px;padding:8px 10px}.so-hero-art figcaption{font-size:8px;padding-top:7px}
+  .so-form-column{padding-top:0}.so-form-intro{margin-bottom:10px;font-size:9px}.shower-options #quiz{scroll-margin-top:73px}.shower-options #quizcard{min-height:0;padding:23px 22px 20px}.shower-options #quizcard .q{font-size:25px}.shower-options #quizcard .qsub{font-size:11px;margin-bottom:16px}.shower-options #quizcard .progress{margin-bottom:18px}
+  .shower-options #quizcard.so-project-step .opt>span:first-child{font-size:11px}.so-choice-image{height:105px}.so-choice-detail{font-size:9px}.shower-options #quizcard.so-project-step .opt:nth-child(n+4)>span:first-child{font-size:10px}
+  .shower-options.so-after-start .so-intro,.shower-options.so-after-start .so-hero-art{display:none}.shower-options.so-after-start .so-hero{padding-top:19px}.shower-options.so-after-start .so-form-intro{margin-bottom:13px}
+  .so-form-explainer{font-size:10px}.so-call{font-size:11px;margin-top:10px}
+  .so-process{padding:38px 0}.so-process>.so-wrap{grid-template-columns:1fr;gap:26px}.so-process h2{font-size:27px}.so-process h2 br{display:none}.so-process-list{gap:20px}.so-number{font-size:23px;margin-bottom:13px}.so-process-list h3{font-size:11px}.so-process-list p{font-size:10px}
+  .so-planning{padding:42px 0}.so-planning-grid{grid-template-columns:1fr 1.1fr;gap:28px}.so-planning-art img{height:410px}.shower-options h2{font-size:28px}.so-planning-copy h2 br{display:none}.so-priorities dt{font-size:11px}.so-priorities dd{font-size:10px}.so-priorities>div{padding:13px 0}
+  .so-questions{padding:38px 0 43px}.so-questions-grid{grid-template-columns:1fr;gap:25px}.so-questions h2{max-width:none}.so-questions-note{max-width:none;margin-top:11px}.so-faq summary{font-size:12px;padding:17px 0}
+  .so-last-step{padding:32px 0}.so-last-step .so-wrap{align-items:flex-start}.so-last-step h2{font-size:22px}.so-last-step .btn{font-size:11px;padding:14px 18px}.so-last-step .btn span{padding-left:8px}
+}
+@media(max-width:520px){
+  .shower-options .so-wrap,.shower-options header .wrap,.shower-options footer .wrap{padding:0 18px}
+  .so-hero{padding-top:18px}.so-hero-grid{gap:13px}.so-intro .so-kicker{font-size:8px;margin-bottom:8px}.so-intro h1{font-size:31px;margin-bottom:9px;letter-spacing:-.9px;max-width:360px}.so-intro h1 br{display:block}.so-lead{font-size:11px;line-height:1.7}
+  .so-hero-art>img{height:141px;object-position:center 60%}.so-image-tag{display:none}.so-hero-art figcaption{font-size:7px;padding-top:5px;line-height:1.5}
+  .so-form-intro{font-size:8px;gap:7px;margin-bottom:9px}.shower-options #quizcard{padding:20px 15px 17px}.shower-options #quizcard .q{font-size:23px;line-height:1.23}.shower-options #quizcard .qsub{font-size:10px;margin-bottom:15px}.shower-options #quizcard .progress{margin-bottom:17px;gap:14px}.shower-options #quizcard .pct{font-size:9px}
+  .shower-options #quizcard.so-project-step .opts{gap:7px}.shower-options #quizcard.so-project-step .opt>span:first-child{font-size:9px;line-height:1.45;min-height:40px;padding:8px 7px 2px}.so-choice-image{height:73px}.so-choice-detail{font-size:8px;padding:0 7px 8px;line-height:1.45}.shower-options #quizcard.so-project-step .opt:nth-child(n+4){padding:10px 8px;min-height:44px;gap:7px}.shower-options #quizcard.so-project-step .opt:nth-child(n+4)>span:first-child{font-size:9px}.shower-options #quizcard.so-project-step .opt:nth-child(n+4) .dot{width:13px;height:13px}
+  .so-choice-note{font-size:8px;margin-top:9px}.so-form-explainer{font-size:9px;line-height:1.8;padding:0;margin-top:13px}.so-call{font-size:10px;margin-top:9px}.shower-options #quizcard .two{grid-template-columns:1fr}.shower-options #quizcard .consent{font-size:10px}.shower-options #quizcard .consent.disclaim{font-size:9px}
+  .so-process-list{grid-template-columns:1fr;gap:23px}.so-process-list li{position:relative;padding-left:43px}.so-number{position:absolute;left:0;top:1px}.so-process-list h3{font-size:12px;margin-bottom:5px}.so-process-list p{font-size:11px}.so-process h2 br{display:block}
+  .so-planning-grid{grid-template-columns:1fr;gap:27px}.so-planning-art img{height:230px;object-position:center 50%}.so-planning-copy h2{font-size:29px;margin-bottom:22px}.so-priorities dt{font-size:12px}.so-priorities dd{font-size:11px}.so-priorities>div{padding:16px 0}.so-text-link{font-size:11px}
+  .so-last-step .so-wrap{flex-direction:column;gap:21px}.so-last-step h2{font-size:25px}.so-last-step .btn{width:100%;font-size:12px;padding:16px}.shower-options footer .ftop{gap:24px}.shower-options footer nav{gap:12px 18px}.shower-options footer .disc{font-size:9px}.shower-options footer .copy{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.shower-options *{transition:none!important}}
+
+/* Readable on a phone and at normal browser zoom; preserve breathing room instead of shrinking copy. */
+.so-kicker{font-size:11px}
+.so-lead{font-size:16px;line-height:1.75}
+.so-image-tag{font-size:13px}
+.so-hero-art figcaption,.so-planning-art figcaption{font-size:11px}
+.so-form-intro{font-size:12px;line-height:1.7}
+.shower-options #quizcard .pct{font-size:12px;min-width:75px}
+.shower-options #quizcard .qsub{font-size:14px;line-height:1.65}
+.shower-options #quizcard .back{font-size:13px}
+.shower-options #quizcard .opt{font-size:15px;min-height:55px}
+.shower-options #quizcard .field label{font-size:13px}
+.shower-options #quizcard .btn-lg{font-size:16px}
+.shower-options #quizcard .err{font-size:13px}
+.shower-options #quizcard .consent{font-size:12px;line-height:1.75}
+.shower-options #quizcard .consent.disclaim{font-size:11px;line-height:1.75}
+.so-form-explainer{font-size:12px;line-height:1.8;max-width:450px}
+.so-call{font-size:13px}
+.so-choice-note{font-size:11px}
+.shower-options #quizcard.so-project-step .opts{display:flex;flex-direction:column;gap:10px}
+.shower-options #quizcard.so-project-step .opt{display:grid;grid-template-columns:83px 1fr 17px;grid-template-rows:auto auto;column-gap:14px;row-gap:1px;align-items:center;min-height:78px;padding:0 14px 0 0}
+.shower-options #quizcard.so-project-step .opt>span:first-child{grid-area:1/2;min-height:0;padding:11px 0 0;align-self:end;font-size:14px;line-height:1.45}
+.shower-options #quizcard.so-project-step .opt .dot{display:block;grid-area:1/3/3/4}
+.so-choice-image{grid-area:1/1/3/2;width:83px;height:78px;object-fit:cover;border-bottom:0;align-self:stretch}
+.so-choice-detail{grid-area:2/2;align-self:start;padding:0 0 10px;font-size:12px;line-height:1.5}
+.shower-options #quizcard.so-project-step .opt:nth-child(n+4){display:flex;flex-direction:row-reverse;justify-content:space-between;min-height:53px;padding:13px 14px}
+.shower-options #quizcard.so-project-step .opt:nth-child(n+4)>span:first-child{font-size:14px;padding:0}
+.shower-options #quizcard.so-project-step .opt:nth-child(n+4) .dot{width:17px;height:17px}
+.so-process-list h3,.so-priorities dt{font-size:15px}
+.so-process-list p,.so-priorities dd{font-size:14px;line-height:1.8}
+.so-text-link{font-size:14px}
+.so-questions-note{font-size:14px;line-height:1.8}
+.so-faq summary{font-size:15px}
+.so-faq p{font-size:14px;line-height:1.8}
+.so-last-step .btn{font-size:15px}
+.shower-options footer nav a{font-size:12px}
+.shower-options footer .disc{font-size:12px}
+.shower-options footer .copy{font-size:11px}
+@media(max-width:880px){
+  .shower-options header .phone{font-size:13px}.shower-options header .phone small{font-size:9px}
+  .so-process-list{grid-template-columns:1fr;gap:24px}.so-process-list li{position:relative;padding-left:45px}.so-number{position:absolute;left:0;top:1px}
+  .so-planning-grid{grid-template-columns:1fr;gap:30px}.so-planning-art img{height:330px;object-position:center}.so-priorities dd{max-width:none}
+  .shower-options #quizcard.so-project-step .opt>span:first-child{font-size:15px}
+  .shower-options #quizcard.so-project-step .opt:nth-child(n+4)>span:first-child{font-size:15px}
+}
+@media(max-width:520px){
+  .so-hero{padding-top:16px}.so-hero-grid{gap:16px}
+  .so-intro .so-kicker{display:none}.so-intro h1{font-size:31px;line-height:1.06;margin-bottom:10px}.so-lead{font-size:15px;line-height:1.6}
+  .so-hero-art{display:none}.so-form-intro{font-size:11px;margin-bottom:10px;gap:7px}
+  .shower-options #quizcard{padding:22px 16px 18px}.shower-options #quizcard .q{font-size:25px}.shower-options #quizcard .qsub{font-size:13px;margin-bottom:18px}.shower-options #quizcard .pct{font-size:11px}
+  .shower-options #quizcard.so-project-step .opts{gap:9px}
+  .shower-options #quizcard.so-project-step .opt{grid-template-columns:69px 1fr 16px;column-gap:11px;min-height:78px;padding-right:11px}
+  .shower-options #quizcard.so-project-step .opt>span:first-child{font-size:14px;padding-top:10px;line-height:1.45}
+  .so-choice-image{width:69px;height:78px}.so-choice-detail{font-size:12px;padding-bottom:10px;line-height:1.45}
+  .shower-options #quizcard.so-project-step .opt:nth-child(n+4){padding:13px 12px;min-height:52px}
+  .shower-options #quizcard.so-project-step .opt:nth-child(n+4)>span:first-child{font-size:14px}
+  .so-choice-note{font-size:11px;margin-top:13px;line-height:1.6}.so-form-explainer{font-size:12px;margin-top:15px}.so-call{font-size:13px;line-height:1.7}
+  .shower-options #quizcard .consent{font-size:12px}.shower-options #quizcard .consent.disclaim{font-size:11px}
+  .so-kicker{font-size:11px}.so-process-list h3,.so-priorities dt{font-size:15px}.so-process-list p,.so-priorities dd{font-size:14px}.so-text-link{font-size:14px}
+  .so-planning-art img{height:240px}.so-planning-art figcaption{font-size:11px}.so-faq summary{font-size:15px}.so-faq p{font-size:14px}.so-last-step .btn{font-size:15px}
+  .shower-options footer nav a{font-size:12px}.shower-options footer .disc{font-size:12px}.shower-options footer .copy{font-size:11px}
+}
