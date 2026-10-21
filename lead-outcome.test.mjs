@@ -202,6 +202,57 @@ test('final publisher payout overrides final price; ping value is never used', a
   const { result } = await multiSubmit(t, { post: { ...postAccepted, publisher_payout: '42.50' } });
   assert.equal(result.value, 42.5);
 });
+for (const clickId of ['gclid', 'gbraid', 'wbraid']) {
+  for (const [name, utms, expected] of [
+    ['explicit YouTube pilot', 'utm_source=youtube&utm_medium=paid_video', 'youtube-paid-video'],
+    ['Search pilot', 'utm_source=google&utm_medium=cpc', 'google-cpc'],
+    ['unlabeled Google traffic', '', 'google-cpc'],
+    ['unrelated UTMs cannot override Google', 'utm_source=facebook&utm_medium=paid_social', 'google-cpc'],
+    ['incomplete YouTube label', 'utm_source=youtube', 'google-cpc'],
+    ['different YouTube medium', 'utm_source=youtube&utm_medium=organic', 'google-cpc'],
+  ]) {
+    test(`multi source: ${name} with ${clickId}`, async t => {
+      const pageUrl = `https://renuehome.com/shower-options?angle=tub&${utms}&${clickId}=fixture-click`;
+      const { calls } = await multiSubmit(t, { input: { pageUrl } });
+      assert.equal(calls.length, 2);
+      for (const { payload } of calls) {
+        assert.equal(payload.click.subid1, expected);
+        assert.equal(payload.click.domain_url, pageUrl);
+        assert.equal(payload.click.subid2, clickId === 'gclid' ? 'fixture-click' : '');
+      }
+    });
+  }
+}
+for (const [name, pageUrl, referrer, expected] of [
+  ['YouTube without click ID', 'https://renuehome.com/shower-options?utm_source=youtube&utm_medium=paid_video', '', 'youtube-paid-video'],
+  ['case-normalized YouTube pair', 'https://renuehome.com/shower-options?utm_source=YouTube&utm_medium=PAID_VIDEO&gclid=fixture', '', 'youtube-paid-video'],
+  ['Search without click ID', 'https://renuehome.com/shower-options?utm_source=google&utm_medium=cpc', '', 'google-cpc'],
+  ['Bing click ID retains precedence', 'https://renuehome.com/shower-options?utm_source=youtube&utm_medium=paid_video&msclkid=fixture', '', 'bing-cpc'],
+  ['Facebook click ID retains precedence', 'https://renuehome.com/shower-options?utm_source=youtube&utm_medium=paid_video&fbclid=fixture', '', 'facebook-cpc'],
+  ['unlabeled Google referrer', 'https://renuehome.com/shower-options', 'https://www.google.com/', 'google-organic'],
+  ['unlabeled direct traffic', 'https://renuehome.com/shower-options', '', 'direct'],
+  ['missing page URL', '', '', 'direct'],
+  ['malformed page URL', 'not a valid URL', '', 'renuehome'],
+]) {
+  test(`source fallback: ${name}`, async t => {
+    const { calls } = await multiSubmit(t, { input: { pageUrl, referrer } });
+    assert.equal(calls.length, 2);
+    assert.ok(calls.every(({ payload }) => payload.click.subid1 === expected));
+  });
+}
+test('direct route uses the same YouTube source label and preserves its gclid', async t => {
+  const pageUrl = 'https://renuehome.com/shower-options?utm_source=youtube&utm_medium=paid_video&gclid=fixture-click';
+  const { posts } = await submit(t, accepted, { input: { pageUrl } });
+  assert.equal(posts.length, 1);
+  assert.equal(posts[0].get('subid1'), 'youtube-paid-video');
+  assert.equal(posts[0].get('subid2'), 'fixture-click');
+  assert.equal(posts[0].get('domain_url'), pageUrl);
+});
+test('explicit source environment override is unchanged', async t => {
+  const pageUrl = 'https://renuehome.com/shower-options?utm_source=youtube&utm_medium=paid_video&gclid=fixture-click';
+  const { calls } = await multiSubmit(t, { input: { pageUrl }, env: { TWYNE_SUBID1: 'configured-source' } });
+  assert.ok(calls.every(({ payload }) => payload.click.subid1 === 'configured-source'));
+});
 for (const [name, options, status, count] of [
   ['post network failure', { handler: async url => { if (url.endsWith('/ping')) return new Response(JSON.stringify(pingAccepted)); throw new Error('private upstream failure'); } }, 'error', 2],
   ['ping network failure', { handler: async () => { throw new Error('private upstream failure'); } }, 'error', 1],
