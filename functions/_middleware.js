@@ -1,6 +1,5 @@
 // Cloudflare Pages edge middleware. Injects into every HTML page:
-// 1. Legacy Google Tag Manager (GTM-TPBNQW4L), except on /shower-options.
-//    The new variant uses funnel.js native GA4/Ads events and Retreaver DNI only.
+// 1. Google Tag Manager (GTM-TT3XG4NP).
 // 2. The Pinterest domain-verify meta tag (always) — for claiming renuehome.com.
 // 3. The visitor's US state (from Cloudflare edge geo) so funnel.js can personalize the
 //    hero. Relevance only — no fabricated "state program/rebate" claims. Falls back
@@ -12,13 +11,8 @@ export async function onRequest(context) {
   const ct = response.headers.get("content-type") || "";
   if (!ct.includes("text/html")) return response;
 
-  // Keep one measurement path on the isolated variant. The legacy container also
-  // sends generate_lead and swaps phone numbers; the native funnel already owns both.
-  const pathname = new URL(context.request.url).pathname.replace(/\/$/, "");
-  const nativeTrackingOnly = pathname === "/shower-options" || pathname === "/shower-options.html";
-
   // Google Tag Manager — loader goes at the TOP of <head> per Google's install spec.
-  const GTM_ID = "GTM-TPBNQW4L";
+  const GTM_ID = "GTM-TT3XG4NP";
   const gtmHead =
     "<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','" +
     GTM_ID +
@@ -44,13 +38,13 @@ export async function onRequest(context) {
   return new HTMLRewriter()
     .on("head", {
       element(el) {
-        if (!nativeTrackingOnly) el.prepend(gtmHead, { html: true });
+        el.prepend(gtmHead, { html: true });
         el.append(snippet, { html: true });
       },
     })
     .on("body", {
       element(el) {
-        if (!nativeTrackingOnly) el.prepend(gtmBody, { html: true });
+        el.prepend(gtmBody, { html: true });
       },
     })
     .transform(response);
