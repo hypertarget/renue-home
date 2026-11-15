@@ -798,5 +798,35 @@
     "caption": "let's bust a common one. people assume getting quotes costs something. it doesn't. comparing quotes from local pros on renuehome.com is free, with no obligation to hire anyone.\n\nthat's the whole idea. 🏡",
     "alt": "Myth, getting quotes costs money. Truth, comparing quotes is free.",
     "status": "pending"
+  },
+  {
+    "id": "myth-comparing-80",
+    "bank_id": "myth-comparing",
+    "layout": "myth",
+    "image_url": "https://renuehome.com/assets/social-posts/myth-comparing-80.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/myth-comparing-80-pin.png",
+    "caption": "the \"i'll get around to it\" home project, meet the 2 minute version.\n\nthe myth is that comparing contractors is a pain. the reality is one short form on renuehome.com and local pros reach out to you. you compare on your own time.\n\nno obligation, ever.",
+    "alt": "Myth, comparing home pros is a hassle. Truth, one short form and pros reach out.",
+    "status": "pending"
+  },
+  {
+    "id": "stat-bath-81",
+    "bank_id": "stat-bath",
+    "layout": "stat",
+    "image_url": "https://renuehome.com/assets/social-posts/stat-bath-81.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/stat-bath-81-pin.png",
+    "caption": "a midrange bathroom remodel recoups about 80% at resale (2025 Cost vs. Value Report). so you get a fresh bathroom now and most of it back later.\n\ncompare free quotes from local pros at renuehome.com.\n\n#bathroomremodel #homevalue",
+    "alt": "A midrange bathroom remodel recoups about 80 percent at resale.",
+    "status": "pending"
+  },
+  {
+    "id": "drafty-windows-82",
+    "bank_id": "drafty-windows",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/drafty-windows-82.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/drafty-windows-82-pin.png",
+    "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com",
+    "alt": "Drafty windows are heating the whole street.",
+    "status": "pending"
   }
 ]
