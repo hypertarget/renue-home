@@ -1,6 +1,8 @@
 /* Renue Home — shared engine: header/footer/sticky injection + config-driven quiz. */
 /* canonical version: includes Google Ads form + call conversions, EC, Twyne/Jornaya cert wiring. Do not overwrite from a stale clone. */
-/* 2026-09-29: sessionLength (quiz start -> submit, seconds) + consentText = the exact on-page consent paragraph (PX #555 needs both).
+/* 2026-10-07: caller_zip -> Retreaver DNI (typed quiz ZIP, else Cloudflare edge postal code) so the campaign's
+   "Zip Code Entry (Unless Already Present)" prompt is skipped for web callers; zip_source:form|edge tag for routing/reports.
+   2026-09-29: sessionLength (quiz start -> submit, seconds) + consentText = the exact on-page consent paragraph (PX #555 needs both).
    2026-09-25: funnel telemetry (quiz_step_N, quiz_submit_attempt, lead_result_<status>) for GA4 drop-off reads.
    2026-09-22 CRO pass: LP mode (logo-only header, legal-only footer), persistent call bar that hides only while typing,
    Ads conversion requires non-test acceptance, a returned positive payout and a transaction ID. */
@@ -51,6 +53,42 @@
   // contact step only renders at the end — TrustedForm needs the field to exist early
   // so its SDK can populate it. These live on <body> and survive step re-renders).
   var _geo = {}; // city/state looked up from ZIP (zippopotam.us), merged into the lead at submit.
+
+  /* ===== Caller ZIP -> Retreaver (skips the keypad zip IVR) =====
+     The Retreaver campaign plays "Zip Code Entry (Unless Already Present)" and hangs up after 4 misses.
+     Oct 2026 audit: 0 of 18 real US web callers since Jul 17 completed that prompt; the two who did became the
+     only paid calls. Retreaver skips the prompt when the call already carries a zip geo tag, and a DNI number
+     tagged caller_zip hands that geo to the call. So every zip we learn on the page is pushed onto the
+     visitor's number BEFORE they tap Call. Sources, in trust order:
+       form - the 5 digits typed in the quiz (authoritative; replaces anything earlier, kept for the session)
+       edge - Cloudflare IP-geo postal code (window.RENUE_GEO_ZIP from functions/_middleware.js). Approximate,
+              used only until the visitor types one. Set window.RENUE_DNI_EDGE_ZIP=false to turn it off.
+     Calls also carry zip_source:form|edge so Retreaver routing rules and reports can tell the two apart. */
+  var EDGE_ZIP_TO_DNI = (window.RENUE_DNI_EDGE_ZIP !== false);
+  var ZIP_KEY = "rnh_zip";
+  var _zip = { value:"", source:"" };
+  function validZip(z){ z=String(z||"").trim(); return /^\d{5}$/.test(z) ? z : ""; }
+  function storedZip(){ try{ return validZip(sessionStorage.getItem(ZIP_KEY)); }catch(e){ return ""; } }
+  function edgeZip(){ return EDGE_ZIP_TO_DNI ? validZip(window.RENUE_GEO_ZIP) : ""; }
+  function zipTags(){ var t={}; if(_zip.value){ t.caller_zip=_zip.value; t.zip_source=_zip.source; } return t; }
+  // Push the current zip onto the assigned DNI number. replace_tags swaps the earlier caller_zip (edge -> form)
+  // instead of stacking a second one. Fire-and-forget; the static fallback number is untouched.
+  function pushZipToDNI(){
+    var num=window.retreaver_number, t=zipTags();
+    if(!num || !t.caller_zip) return;
+    try{
+      if(typeof num.replace_tags==="function") num.replace_tags(t);
+      else if(typeof num.add_tags==="function") num.add_tags(t);
+    }catch(e){}
+  }
+  function setCallerZip(zip, source){
+    var z=validZip(zip); if(!z) return;
+    if(_zip.source==="form" && source!=="form") return; // a typed zip always beats edge geo
+    if(_zip.value===z && _zip.source===source) return;
+    _zip={ value:z, source:source };
+    if(source==="form"){ try{ sessionStorage.setItem(ZIP_KEY, z); }catch(e){} }
+    pushZipToDNI();
+  }
 
   // Hidden cert fields, present from page load (the quiz is an SPA and the contact step renders
   // last — TrustedForm + Jornaya need the fields to exist early so their SDKs can populate them).
@@ -171,12 +209,19 @@
           var v=qp(k); if(v) tags[k]=v;
         });
         if(!tags.subid) tags.subid="renuehome";
+        // Seed the request with the best zip already known (typed earlier this session > edge geo) so a
+        // visitor who taps Call before the ZIP step still skips the keypad prompt.
+        var seedForm=storedZip(), seedEdge=edgeZip();
+        if(seedForm) _zip={ value:seedForm, source:"form" }; else if(seedEdge) _zip={ value:seedEdge, source:"edge" };
+        Object.assign(tags, zipTags());
+        var sentZip = tags.caller_zip || "";
         var campOpts={ campaign_key:RTVR_CAMPAIGN };
         if(RTVR_PUBLISHER) campOpts.publisher_id=RTVR_PUBLISHER; // runtime publisher attribution
         var campaign=new Retreaver.Campaign(campOpts);
         campaign.request_number(tags, function(number){
           _dni={ n:number.get("number"), f:number.get("formatted_number") };
           window.retreaver_number=number;
+          if(_zip.value && _zip.value!==sentZip) pushZipToDNI(); // zip typed while the number request was in flight
           applyDNI(document);
           // Re-apply to CTAs the engine injects later (quiz "Call now" buttons, results screen).
           // Disconnect during our own writes so we don't loop on them.
@@ -525,7 +570,7 @@
       card.querySelector("[data-multinext]").onclick=function(){ var nd={}; nd[step.id]=chosen.join(", "); next(nd); };
     }
     if(step.type==="zip"){
-      card.querySelector("[data-zip]").onclick=function(){ var el=document.getElementById("f_zip"); var v=(el.value||"").trim(); if(!/^\d{5}$/.test(v)){ el.classList.add("bad"); return errEl("Please enter a valid 5-digit ZIP code."); } lookupZip(v); next({zip:v}); };
+      card.querySelector("[data-zip]").onclick=function(){ var el=document.getElementById("f_zip"); var v=(el.value||"").trim(); if(!/^\d{5}$/.test(v)){ el.classList.add("bad"); return errEl("Please enter a valid 5-digit ZIP code."); } lookupZip(v); setCallerZip(v,"form"); next({zip:v}); };
     }
     if(step.type==="address"){
       card.querySelector("[data-addr]").onclick=function(){ var el=document.getElementById("f_addr"); var v=(el.value||"").trim(); if(v.length<5){ el.classList.add("bad"); return errEl("Please enter your project address."); } next({address:v}); };
