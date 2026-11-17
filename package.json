@@ -11,7 +11,7 @@
     "serve": "node serve.mjs",
     "build:seo": "node build-sitemap.mjs && node validate-seo.mjs",
     "test:seo": "node --test seo.test.mjs && node validate-seo.mjs",
-    "test:leads": "node --test lead-outcome.test.mjs"
+    "test:leads": "node --test lead-outcome.test.mjs lead-track.test.mjs"
   },
   "devDependencies": {
     "playwright": "^1.60.0"

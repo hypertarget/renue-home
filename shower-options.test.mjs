@@ -56,7 +56,7 @@ test('angle attribution is queued before shared funnel startup without fabricati
     assert.deepEqual(state.commands, [['set', { page_variant: 'shower_options_v2', page_angle: angle }]]);
   }
   const sources = [...html.matchAll(/<script defer src="([^"?]+)(?:\?[^"]*)?"/g)].map(match => match[1]);
-  assert.deepEqual(sources, ['/verticals.js', '/assets/shower-options/shower-options.js', '/funnel.js']);
+  assert.deepEqual(sources, ['/verticals.js', '/assets/shower-options/shower-options.js', '/funnel.js', '/assets/lead-track.js']);
 });
 
 test('unsupported and inherited property names fall back safely without reflection', () => {
