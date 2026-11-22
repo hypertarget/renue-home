@@ -828,5 +828,35 @@
     "caption": "if you can feel the draft, you're paying for it every single month ❄️➡️💸\n\nsee what new windows would cost in your area. free quotes, zero pressure. renuehome.com",
     "alt": "Drafty windows are heating the whole street.",
     "status": "pending"
+  },
+  {
+    "id": "small-fixes-83",
+    "bank_id": "small-fixes",
+    "layout": "marker",
+    "image_url": "https://renuehome.com/assets/social-posts/small-fixes-83.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/small-fixes-83-pin.png",
+    "caption": "the cheapest home repair is the one you catch early. that little leak or soft spot only gets pricier the longer it waits.\n\nget a free quote from a local pro before it grows. renuehome.com",
+    "alt": "Small fixes now beat big repairs later.",
+    "status": "pending"
+  },
+  {
+    "id": "red-flags-84",
+    "bank_id": "red-flags",
+    "layout": "checklist",
+    "image_url": "https://renuehome.com/assets/social-posts/red-flags-84.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/red-flags-84-pin.png",
+    "caption": "trust your gut, but also trust this list 🚩 walk away if you see\n\n✔ cash only with a big deposit\n✔ no written quote\n✔ pressure to sign today\n✔ no license number\n\ncompare vetted local pros the calm way at renuehome.com.",
+    "alt": "Contractor red flags checklist.",
+    "status": "pending"
+  },
+  {
+    "id": "tip-deposit-85",
+    "bank_id": "tip-deposit",
+    "layout": "note",
+    "image_url": "https://renuehome.com/assets/social-posts/tip-deposit-85.png",
+    "pin_image_url": "https://renuehome.com/assets/social-posts/tip-deposit-85-pin.png",
+    "caption": "rule of thumb worth saving. a reasonable deposit is normal. paying for the whole job before it starts is not. 🚩\n\ncompare quotes from local pros at renuehome.com and pay as the work gets done.",
+    "alt": "Tip, never pay 100 percent up front.",
+    "status": "pending"
   }
 ]
